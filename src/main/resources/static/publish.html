@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发布任务 - 潘多拉工作日志管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        body { align-items: flex-start; }
+        .layout { width: 100%; max-width: 1100px; margin: 32px auto; padding: 0 40px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand .logo { width: 48px; height: 48px; margin: 0; }
+        .brand strong { font-size: 20px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, var(--color-peach), var(--color-primary-2)); border: 2px solid #fff; box-shadow: 0 3px 10px rgba(255,138,0,0.25); }
+        .panel { background: #fff; border-radius: 14px; padding: 18px; }
+        .nav-links { display:flex; gap:10px; }
+        .nav-links a { padding:8px 12px; border-radius:10px; background:#fff7ef; border:1px solid #ffd3a1; color:#a55b00; text-decoration:none; }
+        .nav-links a:hover { background:#ffe9d2; }
+        .form { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .form .full { grid-column: span 2; }
+        .form-item { display:flex; flex-direction: column; gap:6px; }
+        .form-item label { color:#7a5a33; font-size:15px; }
+        .form-item input, .form-item textarea, .form-item select { padding:12px 14px; border:1px solid #ffd3a1; border-radius:10px; background:#fff; }
+        .form-item textarea { min-height: 120px; resize: vertical; }
+        .actions { display:flex; justify-content:center; gap:12px; margin-top: 8px; }
+        .btn-sm { padding:10px 14px; border-radius:10px; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color:#fff; border:none; cursor:pointer; }
+        .btn-secondary { padding:10px 14px; border-radius:10px; border:1px solid #ffd3a1; background:#fff; color:#a55b00; cursor:pointer; }
+        .tips { color:#7a5a33; font-size: 13px; margin-top: 10px; text-align:center; }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="topbar">
+            <div class="brand">
+                <div class="logo">P</div>
+                <strong>发布任务</strong>
+            </div>
+            <div style="display:flex; align-items:center; gap:16px;">
+                <nav class="nav-links">
+                    <a href="dashboard.html">工作日志</a>
+                    <a href="users.html">用户管理</a>
+                    <a href="tasks.html">任务展示</a>
+                    <a href="calendar.html">日程表</a>
+                    <a href="profile.html">个人信息</a>
+                </nav>
+                <div class="profile" onclick="location.href='profile.html'" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <span id="currentUserName">用户</span>
+                    <div class="avatar"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h3 style="text-align:center;">新增任务</h3>
+            <form id="publishForm" class="form">
+                <div class="form-item">
+                    <label>任务编号</label>
+                    <input id="pf_id" placeholder="例如 T-1001">
+                </div>
+                <div class="form-item">
+                    <label>任务名称</label>
+                    <input id="pf_name" placeholder="任务标题">
+                </div>
+                <div class="form-item">
+                    <label>开始日期</label>
+                    <input id="pf_start" type="date">
+                </div>
+                <div class="form-item">
+                    <label>结束日期</label>
+                    <input id="pf_end" type="date">
+                </div>
+                <div class="form-item">
+                    <label>负责人</label>
+                    <input id="pf_owner" placeholder="谁负责">
+                </div>
+                <div class="form-item full">
+                    <label>摘要</label>
+                    <input id="pf_summary" placeholder="一句话概括">
+                </div>
+                <div class="form-item full">
+                    <label>详情</label>
+                    <textarea id="pf_details" placeholder="更详细的描述"></textarea>
+                </div>
+                <div class="actions full">
+                    <button type="button" class="btn-sm" id="btnPublish">发布</button>
+                    <button type="button" class="btn-secondary" id="btnReset">重置</button>
+                </div>
+            </form>
+            <div class="tips">提示：发布成功的任务将保存在本地（localStorage），任务列表会自动合并显示。</div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/publish.js"></script>
+</body>
+</html>
+
+

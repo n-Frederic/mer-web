@@ -1,0 +1,114 @@
+[
+  {
+    "id": "T-001",
+    "name": "周报整理与提交",
+    "startDate": "2025-09-15",
+    "endDate": "2025-09-18",
+    "summary": "收集成员周报并统一格式提交",
+    "details": "汇总各成员产出，统一模板，上传至项目盘并发送邮件通知。",
+    "publisher": "Alice",
+    "owner": "Bob",
+    "progress": 80
+  },
+  {
+    "id": "T-002",
+    "name": "登录界面动效优化",
+    "startDate": "2025-09-16",
+    "endDate": "2025-09-20",
+    "summary": "切换动画和平滑过渡",
+    "details": "替换为渐隐动画，调整输入框聚焦样式，统一配色变量。",
+    "publisher": "Carol",
+    "owner": "Alice",
+    "progress": 60
+  },
+  {
+    "id": "T-003",
+    "name": "任务列表接口定义",
+    "startDate": "2025-09-17",
+    "endDate": "2025-09-21",
+    "summary": "定义 /api/tasks 列表与筛选参数",
+    "details": "约定筛选字段：id、name、owner、dateRange；返回分页数据结构。",
+    "publisher": "Bob",
+    "owner": "Carol",
+    "progress": 35
+  },
+  {
+    "id": "T-004",
+    "name": "邮件验证码服务联调",
+    "startDate": "2025-09-18",
+    "endDate": "2025-09-22",
+    "summary": "注册验证码发送与校验",
+    "details": "后端开通邮件服务，前端接入发送与倒计时控件。",
+    "publisher": "Alice",
+    "owner": "David",
+    "progress": 20
+  },
+  {
+    "id": "T-005",
+    "name": "仪表盘左右分栏布局",
+    "startDate": "2025-09-18",
+    "endDate": "2025-09-19",
+    "summary": "侧边导航与内容区",
+    "details": "替换顶部页签为侧边导航，支持锚点导航与响应式。",
+    "publisher": "David",
+    "owner": "Alice",
+    "progress": 100
+  },
+  {
+    "id": "T-006",
+    "name": "主题变量抽取",
+    "startDate": "2025-09-15",
+    "endDate": "2025-09-17",
+    "summary": "颜色与全局样式集中管理",
+    "details": "新增 theme.css，抽取主色、链接色、logo 背景等变量。",
+    "publisher": "Carol",
+    "owner": "Bob",
+    "progress": 100
+  },
+  {
+    "id": "T-007",
+    "name": "安全配置放行静态资源",
+    "startDate": "2025-09-18",
+    "endDate": "2025-09-18",
+    "summary": "禁用默认登录页，放行 /index.html /login.html",
+    "details": "自定义 SecurityFilterChain，permitAll 静态路径。",
+    "publisher": "Bob",
+    "owner": "David",
+    "progress": 100
+  },
+  {
+    "id": "T-008",
+    "name": "任务筛选交互设计",
+    "startDate": "2025-09-19",
+    "endDate": "2025-09-21",
+    "summary": "按编号/负责人/名称/日期筛选",
+    "details": "输入框快速过滤，日期区间筛选，重置按钮。",
+    "publisher": "Alice",
+    "owner": "Carol",
+    "progress": 10
+  },
+  {
+    "id": "T-009",
+    "name": "进度条组件样式",
+    "startDate": "2025-09-17",
+    "endDate": "2025-09-19",
+    "summary": "统一进度条外观",
+    "details": "卡片内展示百分比，颜色随主题。",
+    "publisher": "David",
+    "owner": "Bob",
+    "progress": 75
+  },
+  {
+    "id": "T-010",
+    "name": "登录成功跳转仪表盘",
+    "startDate": "2025-09-18",
+    "endDate": "2025-09-18",
+    "summary": "本地模拟登录跳转",
+    "details": "localStorage 存用户信息，跳转 dashboard.html。",
+    "publisher": "Carol",
+    "owner": "Alice",
+    "progress": 100
+  }
+]
+
+

@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仪表盘 - 潘多拉工作日志管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        body { align-items: flex-start; justify-content: flex-start; }
+        .layout { width: 100%; max-width: 1680px; margin: 32px auto; padding: 0 40px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .brand { display: flex; align-items: center; gap: 12px; }
+        .brand .logo { width: 48px; height: 48px; margin: 0; }
+        .brand strong { font-size: 20px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; letter-spacing: .5px; }
+        .profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, var(--color-peach), var(--color-primary-2)); border: 2px solid #fff; box-shadow: 0 3px 10px rgba(255,138,0,0.25); }
+        .shell { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+        .sidebar { background: rgba(255,255,255,0.9); border-radius: 14px; padding: 16px; box-shadow: 0 10px 26px rgba(0,0,0,0.06); position: sticky; top: 24px; }
+        .nav-title { font-weight: 700; color: #a55b00; margin-bottom: 12px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
+        .tabs { display: flex; flex-direction: column; gap: 10px; }
+        .tab { padding: 12px 14px; border-radius: 12px; background: #fff7ef; border: 1px solid #ffd3a1; cursor: pointer; text-decoration: none; color: #a55b00; font-size: 15px; }
+        .tab.active { background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color: #fff; border-color: transparent; }
+        .content { min-height: 720px; }
+        .card { margin-bottom: 16px; }
+        .section { display: none; }
+        .section.active { display: block; }
+        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; }
+        th, td { padding: 14px 16px; border-bottom: 1px solid #eee; text-align: left; font-size: 15px; }
+        th { background: #fff7ef; color: #a55b00; font-size: 16px; }
+        .actions button { margin-right: 8px; padding: 6px 10px; border-radius: 6px; border: 1px solid #ffd3a1; background: #fff; cursor: pointer; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 1100px) { .grid { grid-template-columns: 1fr; } .shell { grid-template-columns: 1fr; } }
+        .calendar { background: #fff; border-radius: 14px; padding: 16px; }
+        .calendar .row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
+        .calendar .cell { background: #fff7ef; border: 1px dashed #ffd3a1; min-height: 72px; border-radius: 8px; padding: 6px; font-size: 12px; color: #a55b00; }
+        .calendar .today { background: #ffe8cf; border-color: #ffbe78; }
+        .panel { background: #fff; border-radius: 14px; padding: 18px; }
+        .panel h3 { margin-bottom: 12px; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 22px; }
+        .btn-sm { padding: 6px 10px; border-radius: 8px; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color: #fff; border: none; cursor: pointer; }
+        .link { color: var(--color-link); cursor: pointer; }
+        .card-header h2 { font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
+
+        /* tasks */
+        .btn-outline { padding: 10px 14px; border-radius: 10px; background: #fff; border: 1px solid #ffd3a1; cursor: pointer; }
+        .task-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 16px 0 6px; flex-wrap: wrap; }
+        .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .toolbar-left select, .toolbar-left input { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
+        .sorts { display: flex; gap: 10px; align-items: center; }
+        .sorts select, .sorts .page-size { padding: 10px 12px; border: 1px solid #ddd; border-radius: 10px; background: #fff; }
+        .pagination { display: flex; align-items: center; gap: 8px; }
+        .pagination .btn { padding: 8px 12px; border-radius: 10px; border: 1px solid #ffd3a1; background: #fff; color: #a55b00; cursor: pointer; }
+        .pagination .btn:disabled { opacity: .5; cursor: not-allowed; }
+        .pagination .page-info { color: #7a5a33; font-size: 13px; white-space: nowrap; }
+        .result-info { color: #7a5a33; font-size: 13px; white-space: nowrap; }
+        /* bottom toolbar layout */
+        #task-toolbar-bottom { justify-content: center; }
+        #task-toolbar-bottom .toolbar-left { display: none; }
+        #task-toolbar-bottom .toolbar-right { flex-direction: column; align-items: center; gap: 6px; }
+        #task-toolbar-bottom .result-info { text-align: center; }
+        .task-grid { display: grid; grid-template-columns: repeat(3, minmax(320px, 1fr)); gap: 20px; }
+        @media (max-width: 1400px) { .task-grid { grid-template-columns: repeat(2, minmax(320px, 1fr)); } }
+        @media (max-width: 900px) { .task-grid { grid-template-columns: 1fr; } }
+        .task-card { background: #fff; border: 1px solid #ffd3a1; border-radius: 14px; padding: 14px; position: relative; }
+        .task-id { position: absolute; left: 10px; top: 10px; font-weight: 700; color: #a55b00; background: #fff7ef; border: 1px solid #ffd3a1; border-radius: 8px; padding: 2px 8px; font-size: 12px; }
+        .task-title { margin-left: 0; margin-top: 24px; font-weight: 700; font-size: 16px; color: #333; }
+        .task-meta { display: flex; flex-wrap: wrap; gap: 12px; margin: 8px 0 6px; color: #7a5a33; font-size: 13px; }
+        .task-summary { color: #555; margin-bottom: 6px; }
+        .task-details { color: #666; font-size: 13px; }
+        .progress { height: 10px; background: #fff1e3; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+        .progress-inner { height: 100%; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); width: 0%; transition: width .3s ease; }
+        .progress-text { text-align: right; font-size: 12px; color: #a55b00; margin-top: 4px; }
+        .task-card .card-actions { margin-top: 10px; display: flex; justify-content: flex-end; }
+        .task-card .btn-detail { padding: 8px 12px; border-radius: 10px; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color: #fff; text-decoration: none; }
+
+        /* profile form */
+        .profile-hero { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; text-align: center; }
+        .profile-avatar { width: 72px; height: 72px; }
+        .profile-title { font-size: 22px; line-height: 1.2; }
+        .profile-subtitle { color: #7a5a33; font-size: 13px; margin-top: 2px; }
+        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; justify-content: center; }
+        .chip { padding: 4px 10px; border-radius: 999px; background: #fff7ef; border: 1px solid #ffd3a1; color: #a55b00; font-size: 12px; }
+        .chip:empty { display: none; }
+        .profile-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 900px; margin: 0 auto; }
+        .profile-form .full { grid-column: span 2; }
+        .form-item { display: flex; flex-direction: column; gap: 6px; }
+        .form-item label { color: #7a5a33; font-size: 15px; }
+        .form-item input, .form-item select, .form-item textarea { padding: 12px 14px; border: 1px solid #ffd3a1; border-radius: 12px; background: #fff; }
+        .form-item textarea { min-height: 110px; resize: vertical; }
+        .form-actions { display: flex; gap: 10px; margin-top: 6px; justify-content: center; }
+        .btn-secondary { padding: 10px 14px; border-radius: 10px; border: 1px solid #ffd3a1; background: #fff; color: #a55b00; cursor: pointer; }
+        .btn-warning { padding: 10px 14px; border-radius: 10px; background: linear-gradient(to right, #ff9a3c, #ffb06b); color: #fff; border: none; cursor: pointer; }
+        .btn-danger { padding: 10px 14px; border-radius: 10px; background: linear-gradient(to right, #ff6a00, #ff8a00); color: #fff; border: none; cursor: pointer; }
+        .logout-row { margin-top: 10px; display: flex; justify-content: center; }
+        .buttons-row { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+        .row-center { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+        .profile-bio { color: #7a5a33; font-size: 13px; margin-top: 6px; }
+        .profile-grid { grid-template-columns: 1fr; }
+        /* journal */
+        .journal-form { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .journal-form .full { grid-column: span 2; }
+        .journal-form .form-item { display: flex; flex-direction: column; gap: 6px; }
+        .journal-form input, .journal-form textarea { padding: 10px 12px; border: 1px solid #ffd3a1; border-radius: 10px; background: #fff; }
+        .journal-form textarea { min-height: 140px; resize: vertical; }
+        .journal-actions { display: flex; gap: 10px; margin-top: 8px; }
+        .btn-wide { padding: 12px 20px; font-size: 15px; }
+        .entries { margin-top: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 14px; }
+        @media (max-width: 1400px){ .entries { grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); } }
+        @media (max-width: 900px){ .entries { grid-template-columns: 1fr; } }
+        @media (max-width: 480px){ 
+            .entries { gap: 8px; }
+            .entry { padding: 8px; min-height: 180px; }
+        }
+        .entry { 
+            background:#fff; 
+            border:1px solid #ffd3a1; 
+            border-radius:12px; 
+            padding:12px; 
+            display: flex;
+            flex-direction: column;
+            height: auto;
+            min-height: 200px;
+            max-height: 400px;
+            overflow: hidden;
+        }
+        .entry h4 { 
+            margin:0 0 6px 0; 
+            color:#a55b00; 
+            font-size:16px; 
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+            line-height: 1.4;
+        }
+        .entry .meta { 
+            color:#7a5a33; 
+            font-size:12px; 
+            margin-bottom:6px; 
+            word-wrap: break-word;
+            flex-shrink: 0;
+        }
+        .entry-content {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            word-break: break-word;
+            hyphens: auto;
+            overflow: hidden;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 8;
+            -webkit-box-orient: vertical;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+        }
+        .entry-content.expanded {
+            -webkit-line-clamp: unset;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .entry-actions {
+            flex-shrink: 0;
+            margin-top: auto;
+        }
+        .content-toggle {
+            color: var(--color-primary);
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: underline;
+            margin-bottom: 8px;
+            display: none;
+        }
+        
+        /* 模态框样式 */
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: #fff;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 14px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: modalShow 0.3s ease;
+        }
+        @keyframes modalShow {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #ffd3a1;
+            background: linear-gradient(135deg, #fff7ef, #ffe9d2);
+            border-radius: 14px 14px 0 0;
+        }
+        .modal-header h3 {
+            margin: 0;
+            color: #a55b00;
+            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+        }
+        .modal-close {
+            font-size: 28px;
+            font-weight: bold;
+            color: #a55b00;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #ff8a00;
+        }
+        .modal-body {
+            padding: 24px;
+        }
+        
+        /* 编辑按钮样式优化 */
+        .entry-actions .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+        }
+        .entry-actions .btn-outline {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            background: #fff;
+            color: #ff6a00;
+            border: 1px solid #ff6a00;
+        }
+        .entry-actions .btn-outline:hover {
+            background: #fff5f0;
+        }
+        .entry-actions .btn-info {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 6px;
+            background: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #64b5f6;
+        }
+        .entry-actions .btn-info:hover {
+            background: #bbdefb;
+        }
+        
+        /* 修改历史相关样式 */
+        .modification-info {
+            transition: color 0.2s;
+        }
+        .modification-info:hover {
+            color: #ff6a00 !important;
+        }
+        
+        .history-timeline {
+            position: relative;
+            padding-left: 20px;
+        }
+        .history-timeline::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ffd3a1;
+        }
+        .history-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #fff7ef;
+            border: 1px solid #ffd3a1;
+            border-radius: 8px;
+        }
+        .history-item::before {
+            content: '';
+            position: absolute;
+            left: -14px;
+            top: 16px;
+            width: 8px;
+            height: 8px;
+            background: #ff8a00;
+            border-radius: 50%;
+            border: 2px solid #fff;
+        }
+        .history-time {
+            font-size: 12px;
+            color: #a55b00;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+        .history-changes {
+            font-size: 13px;
+            color: #666;
+        }
+        .history-change-item {
+            margin-bottom: 6px;
+            padding: 4px 8px;
+            background: #fff;
+            border-radius: 4px;
+            border-left: 3px solid #ffd3a1;
+        }
+        .history-change-label {
+            font-weight: bold;
+            color: #7a5a33;
+        }
+        .loading {
+            text-align: center;
+            color: #a55b00;
+            padding: 20px;
+        }
+        
+        /* 美化滚动条 */
+        .entry-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        .entry-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        .entry-content::-webkit-scrollbar-thumb {
+            background: #ffd3a1;
+            border-radius: 3px;
+        }
+        .entry-content::-webkit-scrollbar-thumb:hover {
+            background: #ffbe78;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <div class="topbar">
+            <div class="brand">
+                <div class="logo">P</div>
+                <strong>潘多拉 工作日志管理系统</strong>
+            </div>
+            <div id="profileShortcut" class="profile" title="查看个人信息">
+                <span id="currentUserName">用户</span>
+                <div class="avatar"></div>
+            </div>
+        </div>
+
+        <div class="shell">
+            <aside class="sidebar">
+                <div class="nav-title">导航</div>
+                <div class="tabs">
+                    <a class="tab" href="publish.html">发布任务</a>
+                    <a class="tab" href="users.html">用户管理</a>
+                    <a class="tab" href="tasks.html">任务展示</a>
+                    <a class="tab" href="calendar.html">日程表</a>
+                    <a class="tab" href="profile.html">个人信息</a>
+                </div>
+            </aside>
+            <main class="content">
+                <div class="panel">
+                    <h3>个人工作日志</h3>
+                    <form id="journalForm" class="journal-form">
+                        <div class="form-item full">
+                            <label>标题</label>
+                            <input id="jl_title" placeholder="请输入日志标题">
+                        </div>
+                        <div class="form-item">
+                            <label>日期</label>
+                            <input id="jl_date" type="date">
+                        </div>
+                        <div class="form-item">
+                            <label>摘要</label>
+                            <input id="jl_summary" placeholder="一句话概括">
+                        </div>
+                        <div class="form-item full">
+                            <label>内容</label>
+                            <textarea id="jl_content" placeholder="记录今天的工作、问题与思考..."></textarea>
+                        </div>
+                        <div class="journal-actions full" style="justify-content:center;">
+                            <button type="button" class="btn-sm btn-wide" id="jl_save">保存</button>
+                            <button type="button" class="btn-secondary btn-wide" id="jl_clear">清空</button>
+                        </div>
+                    </form>
+                    
+                    <div style="margin-top: 24px;">
+                        <h4 style="color: #a55b00; margin-bottom: 16px; border-bottom: 2px solid #ffd3a1; padding-bottom: 8px;">过往日志</h4>
+                        <div class="entries" id="jl_entries"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- 编辑日志模态框 -->
+    <div id="editJournalModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑工作日志</h3>
+                <span class="modal-close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="editJournalForm" class="journal-form">
+                    <input type="hidden" id="edit_jl_id">
+                    <div class="form-item full">
+                        <label>标题</label>
+                        <input id="edit_jl_title" placeholder="请输入日志标题">
+                    </div>
+                    <div class="form-item">
+                        <label>日期</label>
+                        <input id="edit_jl_date" type="date">
+                    </div>
+                    <div class="form-item">
+                        <label>摘要</label>
+                        <input id="edit_jl_summary" placeholder="一句话概括">
+                    </div>
+                    <div class="form-item full">
+                        <label>内容</label>
+                        <textarea id="edit_jl_content" placeholder="记录今天的工作、问题与思考..."></textarea>
+                    </div>
+                    <div class="journal-actions full" style="justify-content:center;">
+                        <button type="button" class="btn-sm btn-wide" id="edit_jl_save">保存修改</button>
+                        <button type="button" class="btn-secondary btn-wide" onclick="closeEditModal()">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改历史模态框 -->
+    <div id="historyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改历史</h3>
+                <span class="modal-close" onclick="closeHistoryModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="historyContent">
+                    <div class="loading">加载中...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script id="mockTasks" type="application/json">
+    [
+      {"id":"T-001","name":"周报整理与提交","startDate":"2025-09-15","endDate":"2025-09-18","summary":"收集成员周报并统一格式提交","details":"汇总各成员产出，统一模板，上传至项目盘并发送邮件通知。","publisher":"Alice","owner":"Bob","progress":80},
+      {"id":"T-002","name":"登录界面动效优化","startDate":"2025-09-16","endDate":"2025-09-20","summary":"切换动画和平滑过渡","details":"替换为渐隐动画，调整输入框聚焦样式，统一配色变量。","publisher":"Carol","owner":"Alice","progress":60},
+      {"id":"T-003","name":"任务列表接口定义","startDate":"2025-09-17","endDate":"2025-09-21","summary":"定义 /api/tasks 列表与筛选参数","details":"约定筛选字段：id、name、owner、dateRange；返回分页数据结构。","publisher":"Bob","owner":"Carol","progress":35},
+      {"id":"T-004","name":"邮件验证码服务联调","startDate":"2025-09-18","endDate":"2025-09-22","summary":"注册验证码发送与校验","details":"后端开通邮件服务，前端接入发送与倒计时控件。","publisher":"Alice","owner":"David","progress":20},
+      {"id":"T-005","name":"仪表盘左右分栏布局","startDate":"2025-09-18","endDate":"2025-09-19","summary":"侧边导航与内容区","details":"替换顶部页签为侧边导航，支持锚点导航与响应式。","publisher":"David","owner":"Alice","progress":100},
+      {"id":"T-006","name":"主题变量抽取","startDate":"2025-09-15","endDate":"2025-09-17","summary":"颜色与全局样式集中管理","details":"新增 theme.css，抽取主色、链接色、logo 背景等变量。","publisher":"Carol","owner":"Bob","progress":100},
+      {"id":"T-007","name":"安全配置放行静态资源","startDate":"2025-09-18","endDate":"2025-09-18","summary":"禁用默认登录页，放行 /index.html /login.html","details":"自定义 SecurityFilterChain，permitAll 静态路径。","publisher":"Bob","owner":"David","progress":100},
+      {"id":"T-008","name":"任务筛选交互设计","startDate":"2025-09-19","endDate":"2025-09-21","summary":"按编号/负责人/名称/日期筛选","details":"输入框快速过滤，日期区间筛选，重置按钮。","publisher":"Alice","owner":"Carol","progress":10},
+      {"id":"T-009","name":"进度条组件样式","startDate":"2025-09-17","endDate":"2025-09-19","summary":"统一进度条外观","details":"卡片内展示百分比，颜色随主题。","publisher":"David","owner":"Bob","progress":75},
+      {"id":"T-010","name":"登录成功跳转仪表盘","startDate":"2025-09-18","endDate":"2025-09-18","summary":"本地模拟登录跳转","details":"localStorage 存用户信息，跳转 dashboard.html。","publisher":"Carol","owner":"Alice","progress":100}
+    ]
+    </script>
+
+    <script src="js/common.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        // 读取模拟登录用户（用戶名設置已在 common.js 中處理）
+        let currentUser = { name: '用户', email: '' };
+        try {
+            const raw = localStorage.getItem('currentUser');
+            if (raw) currentUser = JSON.parse(raw);
+        } catch(e) {}
+        // 設置 profile 顯示（僅用於 profile section）
+        try {
+            document.getElementById('p_name').textContent = currentUser.name || '用户';
+            document.getElementById('p_email').textContent = currentUser.email || '';
+        } catch(e) {}
+
+        // 顶部标签切换
+        const tabs = document.querySelectorAll('.tab');
+        const sections = document.querySelectorAll('.section');
+
+        function activateTab(id) {
+            let target = ['users','tasks','calendar','profile'].includes(id) ? id : 'users';
+            tabs.forEach(t => t.classList.remove('active'));
+            sections.forEach(s => s.classList.remove('active'));
+            const tabEl = document.querySelector(`.tab[data-tab="${target}"]`);
+            if (tabEl) tabEl.classList.add('active');
+            const secEl = document.getElementById(target);
+            if (secEl) secEl.classList.add('active');
+        }
+
+        function syncFromHash() {
+            const hash = location.hash ? location.hash.substring(1) : 'users';
+            activateTab(hash);
+        }
+
+        window.addEventListener('hashchange', syncFromHash);
+        // 初始根据 hash 激活
+        syncFromHash();
+
+
+        // 个人工作日志（支持真实后端）
+        async function loadEntries(){
+            try {
+                if (window.API && typeof window.API.getJournalEntries === 'function') {
+                    const resp = await window.API.getJournalEntries();
+                    return resp.entries || [];
+                }
+                // 回退到本地存储
+                return JSON.parse(localStorage.getItem('journalEntries')||'[]');
+            } catch(e) { 
+                return []; 
+            }
+        }
+        
+        function saveEntries(list){ 
+            try{ localStorage.setItem('journalEntries', JSON.stringify(list)); }catch(e){} 
+        }
+        
+        async function renderEntries(){
+            var box=document.getElementById('jl_entries'); 
+            if(!box) return;
+            
+            try {
+                var list = await loadEntries();
+                if(!list.length){ 
+                    box.innerHTML='<div class="panel">暂无日志，写一条记录吧~</div>'; 
+                    return; 
+                }
+                
+                // 按时间排序（最新在前）
+                list.sort(function(a, b) {
+                    var aTime = new Date(a.createdAt || a.date || a.ts || 0).getTime();
+                    var bTime = new Date(b.createdAt || b.date || b.ts || 0).getTime();
+                    return bTime - aTime;
+                });
+                
+                box.innerHTML = list.map(function(e, index){
+                    var displayDate = e.date || (e.createdAt ? e.createdAt.split('T')[0] : '');
+                    var entryId = e.id || ('entry-' + index);
+                    var content = e.content || '';
+                    var summary = e.summary || '';
+                    
+                    // 处理标题长度
+                    var title = e.title || '未命名';
+                    var displayTitle = title.length > 30 ? title.substring(0, 30) + '...' : title;
+                    
+                    // 处理摘要长度
+                    var displaySummary = summary.length > 60 ? summary.substring(0, 60) + '...' : summary;
+                    
+                    // 处理内容长度
+                    var truncatedContent = content.length > 200 ? content.substring(0, 200) + '...' : content;
+                    var needsToggle = content.length > 200;
+                    
+                    // 判断是否被修改过
+                    var createdAt = e.createdAt || e.ts;
+                    var updatedAt = e.updatedAt;
+                    var isModified = updatedAt && updatedAt !== createdAt;
+                    var modificationInfo = '';
+                    
+                    if (isModified) {
+                        var updatedTime = formatTimeAgo(updatedAt);
+                        modificationInfo = '<div class="meta modification-info" title="点击查看修改历史" onclick="showModificationHistory(\''+ entryId +'\')" style="cursor: pointer; color: #ff8a00;"><i class="fas fa-edit"></i> 已修改 · '+ updatedTime +'</div>';
+                    }
+                    
+                    return '<div class="entry" data-entry-id="'+ entryId +'">\
+                        <h4 title="'+ escapeHtml(title) +'">'+ escapeHtml(displayTitle) +'</h4>\
+                        <div class="meta">'+ displayDate +'</div>\
+                        '+ (summary ? '<div class="meta" title="'+ escapeHtml(summary) +'">摘要：'+ escapeHtml(displaySummary) +'</div>' : '') +'\
+                        '+ modificationInfo +'\
+                        <div class="entry-content" data-full-content="'+ escapeHtml(content) +'">'+ escapeHtml(truncatedContent) +'</div>\
+                        '+ (needsToggle ? '<div class="content-toggle" onclick="toggleContent(this)" style="display: block;">展开全文</div>' : '') +'\
+                        <div class="entry-actions" style="margin-top: 8px; display: flex; gap: 8px;">\
+                            <button class="btn-sm" onclick="editJournalEntry(\''+ entryId +'\')">编辑</button>\
+                            <button class="btn-outline" onclick="deleteJournalEntry(\''+ entryId +'\')">删除</button>\
+                            '+ (isModified ? '<button class="btn-info" onclick="showModificationHistory(\''+ entryId +'\')">历史</button>' : '') +'\
+                        </div>\
+                    </div>';
+                }).join('');
+            } catch(error) {
+                console.error('载入日志失败:', error);
+                box.innerHTML='<div class="panel">载入日志失败</div>';
+            }
+        }
+        
+        document.getElementById('jl_save')?.addEventListener('click', async function(){
+            var title=document.getElementById('jl_title').value.trim();
+            var date=document.getElementById('jl_date').value;
+            var summary=document.getElementById('jl_summary').value.trim();
+            var content=document.getElementById('jl_content').value.trim();
+            
+            if (!title && !content) {
+                alert('请至少填写标题或内容');
+                return;
+            }
+            
+            var entry = {
+                title: title,
+                date: date,
+                summary: summary,
+                content: content
+            };
+            
+            try {
+                if (window.API && typeof window.API.createJournalEntry === 'function') {
+                    await window.API.createJournalEntry(entry);
+                } else {
+                    // 回退到本地存储
+                    var list = await loadEntries();
+                    list.unshift(Object.assign(entry, {ts: Date.now()}));
+                    saveEntries(list);
+                }
+                
+                // 清空表單
+                document.getElementById('jl_title').value='';
+                document.getElementById('jl_date').value='';
+                document.getElementById('jl_summary').value='';
+                document.getElementById('jl_content').value='';
+                
+                // 重新載入並渲染
+                await renderEntries();
+                alert('已保存');
+                
+            } catch(error) {
+                console.error('保存日志失败:', error);
+                alert('保存失败，请重试');
+            }
+        });
+        
+        document.getElementById('jl_clear')?.addEventListener('click', function(){
+            document.getElementById('jl_title').value='';
+            document.getElementById('jl_date').value='';
+            document.getElementById('jl_summary').value='';
+            document.getElementById('jl_content').value='';
+        });
+        
+        // HTML转义函数，防止XSS攻击
+        function escapeHtml(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 时间格式化函数
+        function formatTimeAgo(timeStr) {
+            if (!timeStr) return '';
+            try {
+                var time = new Date(timeStr);
+                var now = new Date();
+                var diff = now.getTime() - time.getTime();
+                var minutes = Math.floor(diff / (1000 * 60));
+                var hours = Math.floor(diff / (1000 * 60 * 60));
+                var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                
+                if (minutes < 1) return '刚刚';
+                if (minutes < 60) return minutes + '分钟前';
+                if (hours < 24) return hours + '小时前';
+                if (days < 7) return days + '天前';
+                
+                // 超过一周显示具体日期
+                return time.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch(e) {
+                return timeStr;
+            }
+        }
+        
+        // 格式化完整时间
+        function formatFullTime(timeStr) {
+            if (!timeStr) return '';
+            try {
+                var time = new Date(timeStr);
+                return time.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            } catch(e) {
+                return timeStr;
+            }
+        }
+        
+        // 切换内容展开/收起
+        window.toggleContent = function(toggleBtn) {
+            var contentDiv = toggleBtn.previousElementSibling;
+            var fullContent = contentDiv.getAttribute('data-full-content');
+            var isExpanded = contentDiv.classList.contains('expanded');
+            
+            if (isExpanded) {
+                // 收起
+                var truncatedContent = fullContent.length > 200 ? fullContent.substring(0, 200) + '...' : fullContent;
+                contentDiv.innerHTML = escapeHtml(truncatedContent);
+                contentDiv.classList.remove('expanded');
+                toggleBtn.textContent = '展开全文';
+            } else {
+                // 展开
+                contentDiv.innerHTML = escapeHtml(fullContent);
+                contentDiv.classList.add('expanded');
+                toggleBtn.textContent = '收起';
+            }
+        };
+        
+        // 页面加载时渲染日志
+        renderEntries();
+        
+        // 全局变量存储当前编辑的日志条目
+        window.__currentEditingEntry = null;
+        
+        // 编辑日志条目
+        window.editJournalEntry = async function(entryId) {
+            try {
+                const list = await loadEntries();
+                const entry = list.find(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
+                
+                if (!entry) {
+                    alert('未找到该日志条目');
+                    return;
+                }
+                
+                // 保存当前编辑的条目
+                window.__currentEditingEntry = entry;
+                
+                // 填充编辑表单
+                document.getElementById('edit_jl_id').value = entryId;
+                document.getElementById('edit_jl_title').value = entry.title || '';
+                document.getElementById('edit_jl_date').value = entry.date || '';
+                document.getElementById('edit_jl_summary').value = entry.summary || '';
+                document.getElementById('edit_jl_content').value = entry.content || '';
+                
+                // 显示模态框
+                document.getElementById('editJournalModal').style.display = 'block';
+                
+                // 聚焦到标题输入框
+                setTimeout(() => {
+                    document.getElementById('edit_jl_title').focus();
+                }, 100);
+                
+            } catch(error) {
+                console.error('加载日志条目失败:', error);
+                alert('加载日志条目失败');
+            }
+        };
+        
+        // 关闭编辑模态框
+        window.closeEditModal = function() {
+            document.getElementById('editJournalModal').style.display = 'none';
+            window.__currentEditingEntry = null;
+        };
+        
+        // 删除日志条目
+        window.deleteJournalEntry = async function(entryId) {
+            if (!confirm('确定要删除这条日志吗？删除后无法恢复。')) {
+                return;
+            }
+            
+            try {
+                if (window.API && typeof window.API.deleteJournalEntry === 'function') {
+                    await window.API.deleteJournalEntry(entryId);
+                } else {
+                    // 本地存储删除
+                    const list = await loadEntries();
+                    const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
+                    if (index > -1) {
+                        list.splice(index, 1);
+                        saveEntries(list);
+                    }
+                }
+                
+                // 重新渲染日志列表
+                await renderEntries();
+                alert('删除成功');
+                
+            } catch(error) {
+                console.error('删除日志失败:', error);
+                alert('删除失败，请重试');
+            }
+        };
+        
+        // 保存编辑的日志
+        document.getElementById('edit_jl_save')?.addEventListener('click', async function() {
+            const entryId = document.getElementById('edit_jl_id').value;
+            const title = document.getElementById('edit_jl_title').value.trim();
+            const date = document.getElementById('edit_jl_date').value;
+            const summary = document.getElementById('edit_jl_summary').value.trim();
+            const content = document.getElementById('edit_jl_content').value.trim();
+            
+            if (!title && !content) {
+                alert('请至少填写标题或内容');
+                return;
+            }
+            
+            const updatedEntry = {
+                title: title,
+                date: date,
+                summary: summary,
+                content: content
+            };
+            
+            try {
+                if (window.API && typeof window.API.updateJournalEntry === 'function') {
+                    await window.API.updateJournalEntry(entryId, updatedEntry);
+                } else {
+                    // 本地存储更新
+                    const list = await loadEntries();
+                    const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
+                    if (index > -1) {
+                        // 保留原有的时间戳信息，只更新内容
+                        list[index] = Object.assign(list[index], updatedEntry, {
+                            updatedAt: new Date().toISOString()
+                        });
+                        saveEntries(list);
+                    }
+                }
+                
+                // 关闭模态框
+                closeEditModal();
+                
+                // 重新渲染日志列表
+                await renderEntries();
+                alert('修改成功');
+                
+            } catch(error) {
+                console.error('保存修改失败:', error);
+                alert('保存失败，请重试');
+            }
+        });
+        
+        // 点击模态框外部关闭
+        document.getElementById('editJournalModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+        
+        // 按ESC键关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('editJournalModal').style.display !== 'none') {
+                    closeEditModal();
+                }
+                if (document.getElementById('historyModal').style.display !== 'none') {
+                    closeHistoryModal();
+                }
+            }
+        });
+        
+        // 显示修改历史
+        window.showModificationHistory = async function(entryId) {
+            try {
+                document.getElementById('historyModal').style.display = 'block';
+                document.getElementById('historyContent').innerHTML = '<div class="loading">加载中...</div>';
+                
+                // 模拟获取修改历史记录
+                const historyRecords = await getJournalHistory(entryId);
+                
+                if (!historyRecords || historyRecords.length === 0) {
+                    document.getElementById('historyContent').innerHTML = '<div class="loading">暂无修改历史</div>';
+                    return;
+                }
+                
+                // 构建历史记录
+                var historyHtml = '<div class="history-timeline">';
+                
+                // 按时间倒序显示历史记录
+                historyRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                
+                historyRecords.forEach((record, index) => {
+                    historyHtml += '<div class="history-item">';
+                    historyHtml += '<div class="history-time">';
+                    historyHtml += '<i class="fas fa-clock"></i> ';
+                    historyHtml += formatFullTime(record.timestamp);
+                    if (record.author) {
+                        historyHtml += ' <span class="history-author">(' + escapeHtml(record.author) + ')</span>';
+                    }
+                    historyHtml += '</div>';
+                    
+                    // 显示修改后的完整日志内容
+                    historyHtml += '<div class="history-content">';
+                    
+                    if (record.snapshot) {
+                        // 显示完整的日志快照
+                        historyHtml += '<div class="journal-snapshot">';
+                        historyHtml += '<div class="snapshot-title">标题：' + escapeHtml(record.snapshot.title || '无标题') + '</div>';
+                        if (record.snapshot.summary) {
+                            historyHtml += '<div class="snapshot-summary">摘要：' + escapeHtml(record.snapshot.summary) + '</div>';
+                        }
+                        historyHtml += '<div class="snapshot-content">内容：<div class="content-text">' + escapeHtml(record.snapshot.content || '') + '</div></div>';
+                        historyHtml += '</div>';
+                    } else {
+                        // 兼容旧格式（如果没有snapshot字段）
+                        historyHtml += '<div class="journal-snapshot">';
+                        historyHtml += '<div class="snapshot-description">记录创建或修改</div>';
+                        historyHtml += '</div>';
+                    }
+                    
+                    historyHtml += '</div>';
+                    historyHtml += '</div>';
+                });
+                
+                // 结束历史记录
+                if (entry.history && Array.isArray(entry.history)) {
+                    entry.history.reverse().forEach(function(historyItem, index) {
+                        historyHtml += '<div class="history-item">';
+                        historyHtml += '<div class="history-time">修改 #' + (entry.history.length - index) + ' · ' + formatFullTime(historyItem.timestamp) + '</div>';
+                        historyHtml += '<div class="history-changes">';
+                        
+                        if (historyItem.changes) {
+                            Object.keys(historyItem.changes).forEach(function(field) {
+                                var change = historyItem.changes[field];
+                                historyHtml += '<div class="history-change-item">';
+                                historyHtml += '<div class="history-change-label">修改了' + getFieldDisplayName(field) + '：</div>';
+                                historyHtml += '<div style="margin-top: 4px;"><span style="color: #d32f2f;">- ' + escapeHtml(change.old || '') + '</span></div>';
+                                historyHtml += '<div><span style="color: #388e3c;">+ ' + escapeHtml(change.new || '') + '</span></div>';
+                                historyHtml += '</div>';
+                            });
+                        }
+                        
+                        historyHtml += '</div>';
+                        historyHtml += '</div>';
+                    });
+                }
+                
+                historyHtml += '</div>';
+                
+                // 如果没有修改历史，显示提示
+                if (!entry.updatedAt || entry.updatedAt === entry.createdAt) {
+                    historyHtml = '<div class="loading">该日志尚未被修改过</div>';
+                }
+                
+                document.getElementById('historyContent').innerHTML = historyHtml;
+                
+            } catch(error) {
+                console.error('加载修改历史失败:', error);
+                document.getElementById('historyContent').innerHTML = '<div class="loading">加载失败</div>';
+            }
+        };
+        
+        // 关闭历史模态框
+        window.closeHistoryModal = function() {
+            document.getElementById('historyModal').style.display = 'none';
+        };
+        
+        // 获取字段显示名称
+        function getFieldDisplayName(field) {
+            var fieldNames = {
+                'title': '标题',
+                'summary': '摘要', 
+                'content': '内容',
+                'date': '日期'
+            };
+            return fieldNames[field] || field;
+        }
+        
+        
+        // 模拟获取日志修改历史记录
+        async function getJournalHistory(entryId) {
+            // 检查是否使用真实API
+            if (window.API && typeof window.API.getJournalHistory === 'function') {
+                try {
+                    return await window.API.getJournalHistory(entryId);
+                } catch (error) {
+                    console.error('获取修改历史失败:', error);
+                }
+            }
+            
+            // 使用模拟数据
+            return getMockJournalHistory(entryId);
+        }
+        
+        // 生成模拟修改历史数据
+        function getMockJournalHistory(entryId) {
+            const now = Date.now();
+            const currentUser = getCurrentUser();
+            
+            // 根据entryId生成不同的模拟历史记录
+            const seed = entryId.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            const random = new Date(seed).getTime() / 1000000;
+            
+            const historyRecords = [];
+            
+            // 基础日志信息
+            const baseTitle = `工作日志 ${entryId}`;
+            const baseSummary = `这是${entryId}的工作总结`;
+            const baseContent = `今天完成了${entryId}相关的工作任务，包括需求分析、代码编写和测试。工作进展顺利，按计划完成了既定目标。`;
+            const currentDate = new Date().toISOString().split('T')[0];
+            
+            // 创建记录
+            const createTime = now - (random % 7) * 24 * 60 * 60 * 1000; // 最近7天内创建
+            historyRecords.push({
+                id: `${entryId}_create`,
+                timestamp: createTime,
+                author: currentUser.name || '张三',
+                authorId: currentUser.employeeId || 'EMP240901',
+                snapshot: {
+                    title: baseTitle,
+                    summary: baseSummary,
+                    content: baseContent,
+                    date: currentDate
+                }
+            });
+            
+            // 随机生成1-3次修改记录
+            const updateCount = Math.floor(random % 3) + 1;
+            
+            for (let i = 0; i < updateCount; i++) {
+                const updateTime = createTime + (i + 1) * (random % 2 + 1) * 60 * 60 * 1000; // 每次修改间隔1-3小时
+                
+                // 生成修改后的完整内容
+                const versionTitle = `${baseTitle} - 第${i + 2}版`;
+                const versionSummary = `${baseSummary} - 更新版本${i + 2}，添加了新的工作内容`;
+                const versionContent = `${baseContent}第${i + 2}次修改：添加了更多详细信息和工作进展。包含了新的任务完成情况、遇到的问题以及解决方案。工作效率有所提升，团队协作更加顺畅。完成了额外的功能开发和优化工作。`;
+                
+                const authors = [currentUser.name || '张三', '李四', '王五'];
+                const authorIds = [currentUser.employeeId || 'EMP240901', 'EMP240902', 'EMP240903'];
+                const authorIndex = i % authors.length;
+                
+                historyRecords.push({
+                    id: `${entryId}_update_${i + 1}`,
+                    timestamp: updateTime,
+                    author: authors[authorIndex],
+                    authorId: authorIds[authorIndex],
+                    snapshot: {
+                        title: versionTitle,
+                        summary: versionSummary,
+                        content: versionContent,
+                        date: currentDate
+                    }
+                });
+            }
+            
+            return historyRecords;
+        }
+        
+        function getCurrentUser() {
+            try {
+                return JSON.parse(localStorage.getItem('currentUser') || '{}');
+            } catch (e) {
+                return { name: '当前用户' };
+            }
+        }
+        
+        // 点击历史模态框外部关闭
+        document.getElementById('historyModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeHistoryModal();
+            }
+        });
+
+        // 虚拟任务
+        async function loadTasks() {
+            if (window.API && typeof window.API.listTasks==='function'){
+                const resp = await window.API.listTasks();
+                window.__allTasks = resp.list || [];
+                renderTasks(window.__allTasks);
+                return;
+            }
+            // fallback
+            try{
+                const res = await fetch('data/tasks.json',{cache:'no-cache'});
+                const list = await res.json();
+                window.__allTasks=list;
+                renderTasks(list);
+            }catch(e){
+                const text = document.getElementById('mockTasks')?.textContent || '[]';
+                try{ window.__allTasks = JSON.parse(text); }catch(ex){ window.__allTasks=[]; }
+                renderTasks(window.__allTasks);
+            }
+        }
+
+        function matchKeyword(val, kw) {
+            if (!kw) return true;
+            return String(val || '').toLowerCase().includes(String(kw).toLowerCase());
+        }
+
+        function withinRange(dateStr, startStr, endStr) {
+            if (!startStr && !endStr) return true;
+            const d = new Date(dateStr).getTime();
+            if (startStr) {
+                const s = new Date(startStr).getTime();
+                if (isFinite(s) && d < s) return false;
+            }
+            if (endStr) {
+                const e = new Date(endStr).getTime();
+                if (isFinite(e) && d > e) return false;
+            }
+            return true;
+        }
+
+        function filterTasks() {
+            const field = document.getElementById('f_field').value;
+            const val = document.getElementById('f_value').value.trim();
+            const start = document.getElementById('f_start').value;
+            const end = document.getElementById('f_end').value;
+            const list = (window.__allTasks || []).filter(t => {
+                if (field === 'date') {
+                    return withinRange(t.startDate, start, end) || withinRange(t.endDate, start, end);
+                }
+                if (field === 'id') return matchKeyword(t.id, val);
+                if (field === 'name') return matchKeyword(t.name, val);
+                if (field === 'owner') return matchKeyword(t.owner, val);
+                if (field === 'publisher') return matchKeyword(t.publisher, val);
+                return true;
+            });
+            window.__lastList = list;
+            renderTasks(list);
+        }
+
+        function resetFilters() {
+            document.getElementById('f_id').value = '';
+            document.getElementById('f_name').value = '';
+            document.getElementById('f_owner').value = '';
+            document.getElementById('f_publisher').value = '';
+            document.getElementById('f_start').value = '';
+            document.getElementById('f_end').value = '';
+            renderTasks(window.__allTasks || []);
+        }
+
+        // 排序+分页后渲染
+        function renderTasks(tasks) {
+            const grid = document.getElementById('taskGrid');
+            const infoTop = document.getElementById('resultInfo');
+            const pageInfoTop = document.getElementById('pageInfo');
+            const infoBottom = document.getElementById('resultInfoBottom');
+            const pageInfoBottom = document.getElementById('pageInfoBottom');
+            const pageSize = parseInt(document.getElementById('pageSize').value || '6', 10);
+            const field = document.getElementById('sortField').value;
+            const order = document.getElementById('sortOrder').value;
+
+            let list = tasks.slice();
+            list.sort((a, b) => {
+                let va = a[field];
+                let vb = b[field];
+                if (field === 'startDate' || field === 'endDate') {
+                    va = new Date(va).getTime();
+                    vb = new Date(vb).getTime();
+                }
+                if (field === 'progress') {
+                    va = Number(va);
+                    vb = Number(vb);
+                }
+                if (va < vb) return order === 'asc' ? -1 : 1;
+                if (va > vb) return order === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            const total = list.length;
+            const totalPages = Math.max(1, Math.ceil(total / pageSize));
+            window.__page = Math.min(window.__page || 1, totalPages);
+            const startIdx = (window.__page - 1) * pageSize;
+            const pageList = list.slice(startIdx, startIdx + pageSize);
+
+            const summary = `共 ${total} 条记录，当前第 ${window.__page}/${totalPages} 页`;
+            if (infoTop) infoTop.textContent = '';
+            if (pageInfoTop) pageInfoTop.textContent = `${window.__page} / ${totalPages}`;
+            if (infoBottom) infoBottom.textContent = summary;
+            if (pageInfoBottom) pageInfoBottom.textContent = `${window.__page} / ${totalPages}`;
+            const prevTop = document.getElementById('prevPage');
+            const nextTop = document.getElementById('nextPage');
+            const prevBottom = document.getElementById('prevPageBottom');
+            const nextBottom = document.getElementById('nextPageBottom');
+            if (prevTop) prevTop.disabled = window.__page <= 1;
+            if (nextTop) nextTop.disabled = window.__page >= totalPages;
+            if (prevBottom) prevBottom.disabled = window.__page <= 1;
+            if (nextBottom) nextBottom.disabled = window.__page >= totalPages;
+
+            if (!pageList || pageList.length === 0) {
+                grid.innerHTML = '<div class="panel">没有符合条件的任务</div>';
+                return;
+            }
+            grid.innerHTML = pageList.map(t => `
+                <div class="task-card">
+                    <div class="task-id">${t.id}</div>
+                    <div class="task-title">${t.name}</div>
+                    <div class="task-meta">
+                        <span>开始：${t.startDate}</span>
+                        <span>结束：${t.endDate}</span>
+                        <span>发布人：${t.publisher}</span>
+                        <span>负责人：${t.owner}</span>
+                    </div>
+                    <div class="task-summary">${t.summary}</div>
+                    <div class="task-details">${t.details}</div>
+                    <div class="progress"><div class="progress-inner" style="width:${Math.max(0, Math.min(100, t.progress))}%;"></div></div>
+                    <div class="progress-text">完成度：${Math.max(0, Math.min(100, t.progress))}%</div>
+                    <div class="card-actions">
+                        <a class="btn-detail" href="task-detail.html?id=${encodeURIComponent(t.id)}">查看详情</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 绑定事件
+        document.getElementById('btnSearch').addEventListener('click', () => { window.__page = 1; filterTasks(); });
+        document.getElementById('btnReset').addEventListener('click', () => { window.__page = 1; resetFilters(); });
+        ['f_value','f_start','f_end'].forEach(id => {
+            const el = document.getElementById(id);
+            el && el.addEventListener('keypress', (e) => { if (e.key === 'Enter') { window.__page = 1; filterTasks(); } });
+        });
+        document.getElementById('f_field').addEventListener('change', () => {
+            const field = document.getElementById('f_field').value;
+            const v = field === 'date';
+            document.getElementById('f_value').style.display = v ? 'none' : '';
+            document.getElementById('f_start').style.display = v ? '' : 'none';
+            document.getElementById('f_end').style.display = v ? '' : 'none';
+        });
+        const safeEl = (id) => document.getElementById(id);
+        safeEl('sortField') && safeEl('sortField').addEventListener('change', () => renderTasks(window.__lastList || (window.__allTasks || [])));
+        safeEl('sortOrder') && safeEl('sortOrder').addEventListener('change', () => renderTasks(window.__lastList || (window.__allTasks || [])));
+        safeEl('pageSize') && safeEl('pageSize').addEventListener('change', () => { window.__page = 1; renderTasks(window.__lastList || (window.__allTasks || [])); });
+        const goPrev = () => { if (window.__page > 1) { window.__page--; renderTasks(window.__lastList || (window.__allTasks || [])); } };
+        const goNext = () => { window.__page++; renderTasks(window.__lastList || (window.__allTasks || [])); };
+        safeEl('prevPage') && safeEl('prevPage').addEventListener('click', goPrev);
+        safeEl('nextPage') && safeEl('nextPage').addEventListener('click', goNext);
+        safeEl('prevPageBottom') && safeEl('prevPageBottom').addEventListener('click', goPrev);
+        safeEl('nextPageBottom') && safeEl('nextPageBottom').addEventListener('click', goNext);
+
+        // 初始加载
+        (async () => {
+            await loadTasks();
+            // 初始筛选一次并缓存列表
+            const list = window.__allTasks || [];
+            window.__lastList = list;
+            renderTasks(list);
+        })();
+
+        // 简易日历占位（5周 * 7天）
+        const grid = document.getElementById('calendarGrid');
+        const today = new Date().getDate();
+        const cells = Array.from({ length: 35 }).map((_, i) => {
+            const day = i + 1;
+            const isToday = day === today;
+            return `<div class="cell ${isToday ? 'today' : ''}">${day <= 30 ? day : ''}</div>`;
+        }).join('');
+        grid.innerHTML = cells;
+
+        // 个人信息表单：初始化与保存
+        function fillProfileForm() {
+            const pf = JSON.parse(localStorage.getItem('profile') || '{}');
+            document.getElementById('pf_name').value = currentUser.name || pf.name || '';
+            document.getElementById('pf_email').value = currentUser.email || pf.email || '';
+            document.getElementById('pf_gender').value = pf.gender || '';
+            document.getElementById('pf_birth').value = pf.birth || '';
+            document.getElementById('pf_age').value = pf.age || '';
+            document.getElementById('pf_company').value = pf.company || '';
+            document.getElementById('pf_bio').value = pf.bio || '';
+        }
+        function saveProfile() {
+            const pf = {
+                name: document.getElementById('pf_name').value.trim(),
+                email: document.getElementById('pf_email').value.trim(),
+                gender: document.getElementById('pf_gender').value,
+                birth: document.getElementById('pf_birth').value,
+                age: document.getElementById('pf_age').value,
+                company: document.getElementById('pf_company').value.trim(),
+                bio: document.getElementById('pf_bio').value.trim()
+            };
+            try { localStorage.setItem('profile', JSON.stringify(pf)); } catch(e) {}
+            // 同步头部与面板展示
+            if (pf.name) {
+                currentUser.name = pf.name;
+                try { localStorage.setItem('currentUser', JSON.stringify(currentUser)); } catch(e) {}
+                document.getElementById('currentUserName').textContent = pf.name;
+                document.getElementById('p_name').textContent = pf.name;
+            }
+            document.getElementById('p_email').textContent = pf.email || '';
+            document.getElementById('chip_gender').textContent = pf.gender || '';
+            document.getElementById('chip_age').textContent = pf.age ? (pf.age + '岁') : '';
+            document.getElementById('chip_company').textContent = pf.company || '';
+            alert('已保存');
+        }
+        function resetProfile() { fillProfileForm(); syncChips(); }
+        function syncChips() {
+            const pf = JSON.parse(localStorage.getItem('profile') || '{}');
+            document.getElementById('chip_gender').textContent = pf.gender || '';
+            document.getElementById('chip_age').textContent = pf.age ? (pf.age + '岁') : '';
+            document.getElementById('chip_company').textContent = pf.company || '';
+        }
+        fillProfileForm(); syncChips();
+        document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
+        document.getElementById('resetProfileBtn').addEventListener('click', resetProfile);
+        document.getElementById('deactivateBtn').addEventListener('click', () => {
+            if (confirm('确定要注销账号吗？这将清除本地保存的个人信息（模拟）')) {
+                try { localStorage.removeItem('profile'); localStorage.removeItem('currentUser'); } catch(e) {}
+                alert('账号已注销（模拟）。');
+                location.href = 'index.html';
+            }
+        });
+
+        // 退出登录
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            try { localStorage.removeItem('currentUser'); } catch(e) {}
+            location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
+

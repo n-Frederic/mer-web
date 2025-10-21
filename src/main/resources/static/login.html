@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WEB端登录 - 潘多拉工作日志管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/api.js"></script>
+</head>
+<body class="login-page">
+<div id="app" class="container">
+    <div class="card">
+        <div class="card-header">
+            <div class="logo">P</div>
+            <h2>{{ isForgotPassword ? '找回密码' : (isLogin ? '欢迎回来' : '创建账户') }}</h2>
+            <p>{{ isForgotPassword ? '重置您的登录密码' : (isLogin ? '请登录以继续使用' : '注册新账户以开始使用') }}</p>
+        </div>
+
+        <div class="card-body">
+            <div class="form-stage">
+            <transition name="soft-fade" mode="out-in">
+                <!-- 忘记密码表单 -->
+                <form v-if="isForgotPassword" key="forgot" @submit.prevent="submitForgotPassword">
+                    <!-- 第一步：输入邮箱 -->
+                    <div v-if="forgotPassword.step === 1">
+                        <div class="form-group">
+                            <label for="forgot-email">邮箱地址</label>
+                            <div class="input-group">
+                                <i class="fas fa-envelope"></i>
+                                <input type="email" id="forgot-email" v-model="forgotPassword.email" placeholder="请输入您的邮箱地址" required autocomplete="email">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn">发送验证码</button>
+                    </div>
+                    
+                    <!-- 第二步：输入验证码和新密码 -->
+                    <div v-if="forgotPassword.step === 2">
+                        <div class="form-group">
+                            <label for="forgot-code">验证码</label>
+                            <div class="verification-code">
+                                <div class="input-group">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <input type="text" id="forgot-code" v-model="forgotPassword.verificationCode" placeholder="请输入验证码" required maxlength="6">
+                                </div>
+                                <button type="button" @click="resendForgotCode" :disabled="forgotCountdown > 0">
+                                    {{ forgotCountdown > 0 ? `重新发送(${forgotCountdown}s)` : '重新发送' }}
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="forgot-new-password">新密码</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input :type="showNewPassword ? 'text' : 'password'" id="forgot-new-password" v-model="forgotPassword.newPassword" placeholder="请设置新密码（至少6位）" required minlength="6">
+                                <i :class="['fas', showNewPassword ? 'fa-eye-slash' : 'fa-eye', 'toggle-visibility']" @click="showNewPassword = !showNewPassword"></i>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="forgot-confirm-password">确认新密码</label>
+                            <div class="input-group">
+                                <i class="fas fa-lock"></i>
+                                <input :type="showConfirmNewPassword ? 'text' : 'password'" id="forgot-confirm-password" v-model="forgotPassword.confirmNewPassword" placeholder="请再次输入新密码" required>
+                                <i :class="['fas', showConfirmNewPassword ? 'fa-eye-slash' : 'fa-eye', 'toggle-visibility']" @click="showConfirmNewPassword = !showConfirmNewPassword"></i>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn">重置密码</button>
+                    </div>
+                </form>
+                
+                <!-- 登录表单 -->
+                <form v-else-if="isLogin" key="login" @submit.prevent="submitLogin">
+                    <div class="form-group">
+                        <label for="login-email">电子邮箱</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="login-email" v-model="login.email" placeholder="请输入您的邮箱" required autocomplete="off" autocapitalize="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="login-password">密码</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input :type="showLoginPassword ? 'text' : 'password'" id="login-password" v-model="login.password" placeholder="请输入您的密码" required autocomplete="new-password">
+                            <i :class="['fas', showLoginPassword ? 'fa-eye-slash' : 'fa-eye', 'toggle-visibility']" @click="showLoginPassword = !showLoginPassword"></i>
+                        </div>
+                        <a @click="showForgotPassword" class="forgot-password">忘记密码?</a>
+                    </div>
+
+                    <button type="submit" class="btn">登录</button>
+                </form>
+
+                <form v-else key="register" @submit.prevent="submitRegister">
+                    <div class="form-group">
+                        <label for="register-name">姓名</label>
+                        <div class="input-group">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="register-name" v-model="register.name" placeholder="请输入您的姓名" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-email">电子邮箱</label>
+                        <div class="input-group">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="register-email" v-model="register.email" placeholder="请输入您的邮箱" required autocomplete="off" autocapitalize="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="verification-code">验证码</label>
+                        <div class="verification-code">
+                            <div class="input-group">
+                                <i class="fas fa-shield-alt"></i>
+                                <input type="text" id="verification-code" v-model="register.verificationCode" placeholder="请输入验证码" required autocomplete="one-time-code">
+                            </div>
+                            <button type="button" @click="sendVerificationCode" :disabled="countdown > 0">
+                                {{ countdown > 0 ? `重新发送(${countdown}s)` : '获取验证码' }}
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-password">密码</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input :type="showRegisterPassword ? 'text' : 'password'" id="register-password" v-model="register.password" placeholder="请设置密码（至少6位）" required minlength="6" autocomplete="new-password">
+                            <i :class="['fas', showRegisterPassword ? 'fa-eye-slash' : 'fa-eye', 'toggle-visibility']" @click="showRegisterPassword = !showRegisterPassword"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="register-confirm">确认密码</label>
+                        <div class="input-group">
+                            <i class="fas fa-lock"></i>
+                            <input :type="showRegisterConfirm ? 'text' : 'password'" id="register-confirm" v-model="register.confirmPassword" placeholder="请再次输入密码" required autocomplete="new-password">
+                            <i :class="['fas', showRegisterConfirm ? 'fa-eye-slash' : 'fa-eye', 'toggle-visibility']" @click="showRegisterConfirm = !showRegisterConfirm"></i>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn">注册</button>
+                </form>
+            </transition>
+            </div>
+
+            <div class="switch-form">
+                <span v-if="!isForgotPassword">
+                    {{ isLogin ? '还没有账户？' : '已有账户？' }}
+                    <a @click="toggleForm">{{ isLogin ? '立即注册' : '立即登录' }}</a>
+                </span>
+                <span v-else>
+                    <a @click="backToLogin">返回登录</a>
+                </span>
+            </div>
+
+            <div class="form-footer">
+                <p>© BJTU软件学院实训 潘多拉</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            isLogin: true,
+            isForgotPassword: false,
+            countdown: 0,
+            forgotCountdown: 0,
+            showLoginPassword: false,
+            showRegisterPassword: false,
+            showRegisterConfirm: false,
+            showNewPassword: false,
+            showConfirmNewPassword: false,
+            login: {
+                email: '',
+                password: ''
+            },
+            register: {
+                name: '',
+                email: '',
+                password: '',
+                confirmPassword: '',
+                verificationCode: ''
+            },
+            forgotPassword: {
+                email: '',
+                verificationCode: '',
+                newPassword: '',
+                confirmNewPassword: '',
+                step: 1  // 1: 输入邮箱, 2: 输入验证码和新密码
+            }
+        },
+        methods: {
+            // 生成员工编号
+            generateEmployeeId() {
+                const date = new Date();
+                const year = date.getFullYear().toString().slice(-2);
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const randomNum = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+                return `EMP${year}${month}${randomNum}`;
+            },
+            toggleForm() {
+                this.isLogin = !this.isLogin;
+                this.isForgotPassword = false;
+                this.resetForgotPasswordForm();
+            },
+            showForgotPassword() {
+                this.isForgotPassword = true;
+                this.isLogin = false;
+                this.resetForgotPasswordForm();
+            },
+            backToLogin() {
+                this.isForgotPassword = false;
+                this.isLogin = true;
+                this.resetForgotPasswordForm();
+            },
+            resetForgotPasswordForm() {
+                this.forgotPassword = {
+                    email: '',
+                    verificationCode: '',
+                    newPassword: '',
+                    confirmNewPassword: '',
+                    step: 1
+                };
+                this.forgotCountdown = 0;
+            },
+            // 真实登录：调用后端API进行用户认证
+            async submitLogin() {
+                // 基本验证
+                if (!this.login.email || !this.login.password) {
+                    alert('请输入邮箱和密码');
+                    return;
+                }
+                
+                // 邮箱格式验证
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.login.email)) {
+                    alert('请输入有效的邮箱地址');
+                    return;
+                }
+                
+                try {
+                    console.log('尝试登录:', { email: this.login.email });
+                    
+                    // 调试信息：检查API配置
+                    console.log('API配置检查:', {
+                        'window.APP': window.APP,
+                        'apiBase': window.APP ? window.APP.apiBase : 'undefined',
+                        'useApi': window.APP ? window.APP.useApi : 'undefined',
+                        'currentURL': window.location.href,
+                        'protocol': window.location.protocol
+                    });
+                    
+                    // 检查访问方式
+                    if (window.location.protocol === 'file:') {
+                        alert('⚠️ 错误的访问方式！\n\n请通过HTTP服务器访问，而不是直接打开HTML文件。\n\n正确的访问地址：http://localhost:8001/login.html');
+                        return;
+                    }
+                    
+                    // 检查是否正确访问了代理服务器
+                    if (!window.location.href.includes('8001')) {
+                        alert('⚠️ 请通过代理服务器访问！\n\n正确的访问地址：http://localhost:8001/login.html\n当前地址：' + window.location.href);
+                        return;
+                    }
+                    
+                    // 调用真实API进行登录
+                    const result = await window.API.login({
+                        email: this.login.email,
+                        password: this.login.password
+                    });
+                    
+                    console.log('登录结果:', result);
+                    
+                    if (result && result.token && result.user) {
+                        // 登录成功
+                        console.log('登录成功，用户信息:', result.user);
+                        alert('登录成功！欢迎 ' + (result.user.name || '用户'));
+                        
+                        // 跳转到仪表盘
+                        location.href = 'dashboard.html';
+                    } else {
+                        // 登录失败，但API没有返回明确错误
+                        console.error('登录返回异常数据:', result);
+                        alert('登录失败：服务器返回异常数据');
+                    }
+                    
+                } catch (error) {
+                    console.error('登录失败:', error);
+                    
+                    // 处理具体的错误类型
+                    if (error.message.includes('USER_NOT_FOUND')) {
+                        alert('登录失败：用户不存在');
+                    } else if (error.message.includes('INVALID_PASSWORD')) {
+                        alert('登录失败：密码错误');
+                    } else if (error.message.includes('HTTP 401') || error.message.includes('HTTP 403')) {
+                        alert('登录失败：邮箱或密码错误');
+                    } else {
+                        alert('登录失败：' + (error.message || '网络错误，请稍后重试'));
+                    }
+                }
+            },
+            // 模拟注册：校验两次密码一致性，然后直接视为注册并登录成功
+            submitRegister() {
+                if (this.register.password !== this.register.confirmPassword) {
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+                const name = this.register.name || '新用户';
+                const employeeId = this.generateEmployeeId();
+                const currentUser = { name, email: this.register.email || '', employeeId };
+                try { localStorage.setItem('currentUser', JSON.stringify(currentUser)); } catch(e) {}
+                location.href = 'dashboard.html';
+            },
+            // 忘记密码处理
+            submitForgotPassword() {
+                if (this.forgotPassword.step === 1) {
+                    // 第一步：发送验证码
+                    this.sendForgotPasswordCode();
+                } else {
+                    // 第二步：重置密码
+                    this.resetPassword();
+                }
+            },
+            sendForgotPasswordCode() {
+                if (!this.forgotPassword.email) {
+                    alert('请输入邮箱地址');
+                    return;
+                }
+                
+                // 使用API发送验证码
+                if (window.API && typeof window.API.sendForgotPasswordCode === 'function') {
+                    window.API.sendForgotPasswordCode(this.forgotPassword.email)
+                        .then((result) => {
+                            alert(result.message || '验证码已发送到您的邮箱，请查收');
+                            this.forgotPassword.step = 2;
+                            this.startForgotCountdown(60);
+                        })
+                        .catch((error) => {
+                            alert('发送失败：' + (error.message || '请稍后重试'));
+                        });
+                } else {
+                    // fallback：模拟发送验证码
+                    alert('验证码已发送到您的邮箱，请查收');
+                    this.forgotPassword.step = 2;
+                    this.startForgotCountdown(60);
+                }
+            },
+            resendForgotCode() {
+                if (this.forgotCountdown > 0) return;
+                
+                // 重新发送验证码
+                this.sendForgotPasswordCode();
+            },
+            startForgotCountdown(seconds) {
+                this.forgotCountdown = seconds;
+                const timer = setInterval(() => {
+                    this.forgotCountdown--;
+                    if (this.forgotCountdown <= 0) {
+                        clearInterval(timer);
+                    }
+                }, 1000);
+            },
+            resetPassword() {
+                // 验证输入
+                if (!this.forgotPassword.verificationCode) {
+                    alert('请输入验证码');
+                    return;
+                }
+                if (!this.forgotPassword.newPassword) {
+                    alert('请输入新密码');
+                    return;
+                }
+                if (this.forgotPassword.newPassword.length < 6) {
+                    alert('密码长度至少6位');
+                    return;
+                }
+                if (this.forgotPassword.newPassword !== this.forgotPassword.confirmNewPassword) {
+                    alert('两次输入的密码不一致');
+                    return;
+                }
+                
+                // 使用API重置密码
+                if (window.API && typeof window.API.resetPassword === 'function') {
+                    window.API.resetPassword(
+                        this.forgotPassword.email,
+                        this.forgotPassword.verificationCode,
+                        this.forgotPassword.newPassword
+                    ).then((result) => {
+                        alert(result.message || '密码重置成功！请使用新密码登录');
+                        this.backToLogin();
+                    }).catch((error) => {
+                        alert('重置失败：' + (error.message || '请检查验证码是否正确'));
+                    });
+                } else {
+                    // fallback：模拟密码重置
+                    alert('密码重置成功！请使用新密码登录');
+                    this.backToLogin();
+                }
+            },
+            sendVerificationCode() {
+                if (!this.register.email) {
+                    alert('请输入邮箱地址');
+                    return;
+                }
+                console.log('发送验证码到:', this.register.email);
+                this.countdown = 60;
+                const timer = setInterval(() => {
+                    this.countdown--;
+                    if (this.countdown <= 0) {
+                        clearInterval(timer);
+                    }
+                }, 1000);
+                alert('验证码已发送到您的邮箱（模拟）');
+            }
+        }
+    });
+</script>
+</body>
+</html>

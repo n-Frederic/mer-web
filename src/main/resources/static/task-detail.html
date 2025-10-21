@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务详情 - 潘多拉工作日志管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/theme.css">
+    <style>
+        body { align-items: flex-start; }
+        .wrap { width: 96%; max-width: 960px; margin: 32px auto; }
+		.header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .title { display: flex; align-items: baseline; gap: 10px; }
+        .title h1 { font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
+        .badge { padding: 4px 10px; border-radius: 999px; background: #fff7ef; border: 1px solid #ffd3a1; color: #a55b00; }
+        .panel { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 10px 24px rgba(0,0,0,.06); }
+        .meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; color: #7a5a33; margin: 10px 0; }
+        @media (max-width: 760px) { .meta { grid-template-columns: 1fr; } }
+        .progress { height: 12px; background: #fff1e3; border-radius: 999px; overflow: hidden; }
+        .progress-inner { height: 100%; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); width: 0%; }
+        .back { display: inline-block; margin-bottom: 12px; padding: 8px 12px; border-radius: 10px; border: 1px solid #ffd3a1; background: #fff; color: #a55b00; text-decoration: none; }
+		.nav { display: flex; gap: 10px; }
+		.nav .btn { padding: 8px 12px; border-radius: 10px; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color: #fff; text-decoration: none; }
+		.nav .btn.disabled { opacity: .5; pointer-events: none; }
+    </style>
+    <script src="js/common.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        function qs(name){ const u=new URL(location.href); return u.searchParams.get(name); }
+        function loadLocal(){
+            try { return JSON.parse(localStorage.getItem('publishedTasks')||'[]'); } catch(e){ return []; }
+        }
+        
+        // 设置导航功能
+        async function setupNavigation(currentTaskId) {
+            const prevBtn = document.getElementById('prevTask');
+            const nextBtn = document.getElementById('nextTask');
+            
+            try {
+                const currentId = parseInt(currentTaskId);
+                
+                // 检查上一个任务
+                await checkAndSetNavButton(prevBtn, currentId - 1, '上一条');
+                
+                // 检查下一个任务
+                await checkAndSetNavButton(nextBtn, currentId + 1, '下一条');
+                
+            } catch (error) {
+                console.error('设置导航失败:', error);
+                // 出错时禁用所有导航按钮
+                disableNavButton(prevBtn);
+                disableNavButton(nextBtn);
+            }
+        }
+        
+        // 检查并设置导航按钮状态
+        async function checkAndSetNavButton(button, taskId, buttonName) {
+            try {
+                // 对于上一条按钮，如果ID小于1则直接禁用
+                if (buttonName === '上一条' && taskId < 1) {
+                    disableNavButton(button);
+                    return;
+                }
+                
+                console.log(`检查${buttonName}任务 ID: ${taskId}`);
+                const task = await window.API.getTask(taskId);
+                
+                if (task === null || task === undefined) {
+                    // 任务不存在，禁用按钮
+                    console.log(`${buttonName}任务不存在，禁用按钮`);
+                    disableNavButton(button);
+                } else {
+                    // 检查任务数据的有效性
+                    const taskData = task.task || task;
+                    if (taskData && (taskData.taskId || taskData.task_id || taskData.title)) {
+                        // 任务存在且有效，启用按钮
+                        console.log(`${buttonName}任务存在，启用按钮`);
+                        enableNavButton(button, taskId);
+                    } else {
+                        // 任务数据无效，禁用按钮
+                        console.log(`${buttonName}任务数据无效，禁用按钮`);
+                        disableNavButton(button);
+                    }
+                }
+            } catch (error) {
+                console.error(`检查${buttonName}任务失败:`, error);
+                disableNavButton(button);
+            }
+        }
+        
+        // 启用导航按钮
+        function enableNavButton(button, taskId) {
+            button.href = 'task-detail.html?id=' + taskId;
+            button.classList.remove('disabled');
+        }
+        
+        // 禁用导航按钮
+        function disableNavButton(button) {
+            button.href = '#';
+            button.classList.add('disabled');
+        }
+        async function load(){
+            const id = qs('id');
+            if (!id) {
+                document.getElementById('root').innerHTML = '<div class="panel">缺少任务ID参数</div>';
+                return;
+            }
+            
+            try {
+                // 使用API获取任务详情
+                if (!window.API) {
+                    throw new Error('API未加载');
+                }
+                
+                const taskData = await window.API.getTask(id);
+                
+                if (!taskData) {
+                    document.getElementById('root').innerHTML = '<div class="panel">未找到任务</div>';
+                    return;
+                }
+                
+                // 处理API响应格式 - 可能是直接的task数据，也可能包含在response.task中
+                const task = taskData.task || taskData;
+                
+                if (!task) {
+                    document.getElementById('root').innerHTML = '<div class="panel">任务数据格式错误</div>';
+                    return;
+                }
+                
+                // 填充任务详情
+                document.getElementById('taskId').textContent = task.taskId || task.task_id || 'T-' + id;
+                document.getElementById('taskName').textContent = task.title || '未知任务';
+                document.getElementById('publisher').textContent = task.creator ? task.creator.name : (task.creatorName || '未知');
+                document.getElementById('owner').textContent = task.creator ? task.creator.name : (task.creatorName || '未知'); // 暂时使用创建者作为负责人
+                
+                // 格式化日期
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '未设置';
+                    try {
+                        const date = new Date(dateStr);
+                        return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+                    } catch (e) {
+                        return dateStr;
+                    }
+                };
+                
+                document.getElementById('start').textContent = formatDate(task.startAt || task.start_at);
+                document.getElementById('end').textContent = formatDate(task.dueAt || task.due_at);
+                document.getElementById('summary').textContent = task.description || '无描述';
+                document.getElementById('details').textContent = task.description || '无详细描述';
+                
+                // 根据状态设置进度条（简单映射）
+                let progress = 0;
+                if (task.status === 'Completed') progress = 100;
+                else if (task.status === 'InProgress') progress = 50;
+                else if (task.status === 'Pending') progress = 10;
+                
+                document.getElementById('progressInner').style.width = progress + '%';
+
+                // 设置上一条/下一条导航功能
+                await setupNavigation(task.taskId || task.task_id || id);
+                
+            } catch (error) {
+                console.error('加载任务详情失败:', error);
+                document.getElementById('root').innerHTML = '<div class="panel">加载任务详情失败: ' + error.message + '</div>';
+            }
+        }
+        window.addEventListener('DOMContentLoaded', load);
+    </script>
+</head>
+<body>
+    <div class="wrap">
+        <a class="back" href="tasks.html">← 返回任务列表</a>
+        <div id="root" class="panel">
+			<div class="header">
+                <div class="title">
+                    <h1 id="taskName">任务名称</h1>
+                    <span class="badge" id="taskId">T-XXX</span>
+                </div>
+				<div class="nav">
+					<a id="prevTask" class="btn disabled" href="#">上一条</a>
+					<a id="nextTask" class="btn disabled" href="#">下一条</a>
+				</div>
+            </div>
+            <div class="meta">
+                <div>发布人：<strong id="publisher"></strong></div>
+                <div>负责人：<strong id="owner"></strong></div>
+                <div>开始日期：<strong id="start"></strong></div>
+                <div>结束日期：<strong id="end"></strong></div>
+            </div>
+            <div style="margin:10px 0; color:#555;">概括：<span id="summary"></span></div>
+            <div style="margin:10px 0; color:#555;">详情：<span id="details"></span></div>
+            <div class="progress"><div id="progressInner" class="progress-inner"></div></div>
+        </div>
+    </div>
+</body>
+</html>
+
