@@ -60,7 +60,8 @@ public class ApiProxyController {
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String role_id,
-            @RequestParam(required = false) String team_id) {
+            @RequestParam(required = false) String team_id,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
         try {
             String url = backendUrl + "/user?page=" + page + "&pageSize=" + pageSize;
             if (keyword != null && !keyword.isEmpty()) {
@@ -73,8 +74,21 @@ public class ApiProxyController {
                 url += "&team_id=" + team_id;
             }
             
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
             // 后端返回的是用户数组，使用Object[]接收
-            ResponseEntity<Object[]> response = restTemplate.getForEntity(url, Object[].class);
+            ResponseEntity<Object[]> response = restTemplate.exchange(
+                url, 
+                HttpMethod.GET, 
+                request, 
+                Object[].class
+            );
             return ResponseEntity.ok(response.getBody());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -83,11 +97,22 @@ public class ApiProxyController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getUserById(@PathVariable Long userId) {
+    public ResponseEntity<?> getUserById(@PathVariable Long userId,
+                                        @RequestHeader(value = "Authorization", required = false) String authorization) {
         try {
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
             // 后端返回的是用户对象，使用Object接收
-            ResponseEntity<Object> response = restTemplate.getForEntity(
+            ResponseEntity<Object> response = restTemplate.exchange(
                 backendUrl + "/user/" + userId, 
+                HttpMethod.GET,
+                request,
                 Object.class
             );
             
@@ -98,13 +123,86 @@ public class ApiProxyController {
         }
     }
 
+    @PostMapping("/user")
+    public ResponseEntity<?> createUser(@RequestBody Map<String, Object> userData, 
+                                       @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(userData, headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                backendUrl + "/user", 
+                request, 
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "message", "创建用户失败: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "创建用户失败: " + e.getMessage()));
+        }
+    }
+
+    @PutMapping("/user/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable Long userId, 
+                                       @RequestBody Map<String, Object> userData,
+                                       @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(userData, headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                backendUrl + "/user/" + userId,
+                HttpMethod.PUT,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "message", "更新用户失败: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "更新用户失败: " + e.getMessage()));
+        }
+    }
+
     @GetMapping("/tasks/personal")
     public ResponseEntity<?> getPersonalTasks(
             @RequestParam String userId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
         try {
             String url = backendUrl + "/tasks/personal?userId=" + userId + 
                         "&page=" + page + "&pageSize=" + pageSize;
@@ -115,7 +213,20 @@ public class ApiProxyController {
                 url += "&priority=" + priority;
             }
             
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url, 
+                HttpMethod.GET, 
+                request, 
+                Map.class
+            );
             return ResponseEntity.ok(response.getBody());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -128,7 +239,8 @@ public class ApiProxyController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String priority,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int pageSize) {
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
         try {
             String url = backendUrl + "/tasks/all?page=" + page + "&pageSize=" + pageSize;
             if (status != null && !status.isEmpty()) {
@@ -138,7 +250,20 @@ public class ApiProxyController {
                 url += "&priority=" + priority;
             }
             
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url, 
+                HttpMethod.GET, 
+                request, 
+                Map.class
+            );
             return ResponseEntity.ok(response.getBody());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -147,10 +272,21 @@ public class ApiProxyController {
     }
     
     @GetMapping("/tasks/{taskId}")
-    public ResponseEntity<?> getTaskById(@PathVariable Long taskId) {
+    public ResponseEntity<?> getTaskById(@PathVariable Long taskId,
+                                        @RequestHeader(value = "Authorization", required = false) String authorization) {
         try {
-            ResponseEntity<Map> response = restTemplate.getForEntity(
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
                 backendUrl + "/tasks/" + taskId, 
+                HttpMethod.GET,
+                request,
                 Map.class
             );
             
@@ -200,6 +336,73 @@ public class ApiProxyController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", true, "message", "重置密码失败: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/user/profile")
+    public ResponseEntity<?> getProfile(@RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                backendUrl + "/user/profile", 
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "error", "Unauthorized"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "error", "Internal Server Error"));
+        }
+    }
+
+    @PostMapping("/user/logout")
+    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, String>> request = new HttpEntity<>(Map.of(), headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                backendUrl + "/user/logout", 
+                request, 
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "message", "退出登录失败: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "退出登录失败: " + e.getMessage()));
         }
     }
 }

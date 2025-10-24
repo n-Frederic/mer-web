@@ -72,9 +72,9 @@
                     console.log(`${buttonName}任务不存在，禁用按钮`);
                     disableNavButton(button);
                 } else {
-                    // 检查任务数据的有效性
+                    // 检查任务数据的有效性（使用标准化后的字段名）
                     const taskData = task.task || task;
-                    if (taskData && (taskData.taskId || taskData.task_id || taskData.title)) {
+                    if (taskData && (taskData.id || taskData.taskId || taskData.task_id || taskData.title)) {
                         // 任务存在且有效，启用按钮
                         console.log(`${buttonName}任务存在，启用按钮`);
                         enableNavButton(button, taskId);
@@ -129,8 +129,8 @@
                     return;
                 }
                 
-                // 填充任务详情
-                document.getElementById('taskId').textContent = task.taskId || task.task_id || 'T-' + id;
+                // 填充任务详情（使用标准化后的字段名）
+                document.getElementById('taskId').textContent = task.id || task.taskId || task.task_id || 'T-' + id;
                 document.getElementById('taskName').textContent = task.title || '未知任务';
                 document.getElementById('publisher').textContent = task.creator ? task.creator.name : (task.creatorName || '未知');
                 document.getElementById('owner').textContent = task.creator ? task.creator.name : (task.creatorName || '未知'); // 暂时使用创建者作为负责人

@@ -88,6 +88,10 @@
                     <input id="pf_email" type="email" placeholder="请输入邮箱">
                 </div>
                 <div class="form-item">
+                    <label>手机号</label>
+                    <input id="pf_phone" type="tel" placeholder="请输入手机号">
+                </div>
+                <div class="form-item">
                     <label>性别</label>
                     <select id="pf_gender">
                         <option value="">保密</option>
@@ -126,10 +130,80 @@
     </div>
 
     <script src="js/common.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/profile.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function(){ 
+        document.addEventListener('DOMContentLoaded', async function(){ 
+            // 从真实API加载个人资料
+            try {
+                if(window.API && typeof window.API.getProfile === 'function'){
+                    console.log('🔄 从API加载个人资料...');
+                    var profileData = await window.API.getProfile();
+                    console.log('✅ API返回的个人资料:', profileData);
+                    
+                    if(profileData && (profileData.user_id || profileData.name)) {
+                        // 填充表单（使用正确的ID）
+                        console.log('开始填充表单，数据:', profileData);
+                        
+                        document.getElementById('pf_name').value = profileData.name || '';
+                        document.getElementById('pf_email').value = profileData.email || '';
+                        
+                        var phoneField = document.getElementById('pf_phone');
+                        if(phoneField) phoneField.value = profileData.phone || '';
+                        
+                        // 性别字段 - 处理可能的值
+                        var genderField = document.getElementById('pf_gender');
+                        if(genderField && profileData.gender) {
+                            genderField.value = profileData.gender;
+                        }
+                        
+                        // 日期字段 - 转换格式 "2025-10-25T06:36:31" -> "2025-10-25"
+                        var birthField = document.getElementById('pf_birth');
+                        if(birthField) {
+                            var birthDate = profileData.birthday || profileData.birth_date;
+                            if(birthDate) {
+                                // 提取日期部分（YYYY-MM-DD）
+                                var dateOnly = birthDate.split('T')[0];
+                                birthField.value = dateOnly;
+                                console.log('生日字段设置为:', dateOnly);
+                            }
+                        }
+                        
+                        // 年龄字段
+                        var ageField = document.getElementById('pf_age');
+                        if(ageField && profileData.age) {
+                            ageField.value = profileData.age;
+                        }
+                        
+                        // 工作单位字段
+                        var companyField = document.getElementById('pf_company');
+                        if(companyField) {
+                            companyField.value = profileData.company || profileData.team || '';
+                        }
+                        
+                        // 个人简介字段
+                        var bioField = document.getElementById('pf_bio');
+                        if(bioField) {
+                            bioField.value = profileData.bio || '';
+                        }
+                        
+                        // 保存到localStorage作为缓存
+                        localStorage.setItem('profile', JSON.stringify(profileData));
+                        console.log('✅ 个人资料加载成功，所有字段已填充');
+                    } else {
+                        console.warn('⚠️ API返回数据格式异常，使用缓存数据');
+                        ProfilePage.fill();
+                    }
+                } else {
+                    console.warn('⚠️ API不可用，使用缓存数据');
+                    ProfilePage.fill();
+                }
+            } catch(e) {
+                console.error('❌ 从API加载个人资料失败:', e);
+                // 降级到本地缓存
             ProfilePage.fill(); 
+            }
+            
             ProfilePage.bindLogout();
             
             // 綁定保存按鈕

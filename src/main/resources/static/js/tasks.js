@@ -38,20 +38,24 @@
                 
             // 转换后端数据格式以适配前端显示
             var tasks = (resp.list || []).map(function(task) {
+                // 现在api.js已经标准化了数据，我们可以直接使用标准化后的字段
                 return {
-                        id: task.task_id || task.taskId || task.id || 'N/A',
-                        name: task.title || task.name || '未命名任务',
+                    id: task.id || task.taskId || 'N/A',
+                    name: task.title || task.name || '未命名任务',
                     summary: task.description || '',
                     details: task.description || '',
-                        startDate: task.startAt ? formatDate(task.startAt) : '',
-                        endDate: task.dueAt ? formatDate(task.dueAt) : '',
-                        publisher: task.creator ? (task.creator.name || '未知') : '未知',
-                        owner: task.creator ? (task.creator.name || '未知') : '未知',
+                    startDate: task.startAt ? formatDate(task.startAt) : '',
+                    endDate: task.dueAt ? formatDate(task.dueAt) : '',
+                    publisher: task.creator ? (task.creator.name || '未知') : '未知',
+                    owner: task.creator ? (task.creator.name || '未知') : '未知',
                     priority: task.priority || 'Medium',
                     status: task.status || 'Published',
-                        progress: Math.floor(Math.random() * 100), // 临时随机进度
+                    // 根据任务状态计算进度
+                    progress: calculateProgress(task.status),
                     createdAt: task.createdAt || new Date().toISOString(),
-                    updatedAt: task.updatedAt || new Date().toISOString()
+                    updatedAt: task.updatedAt || new Date().toISOString(),
+                    // 保留原始数据以备后用
+                    _original: task
                 };
             });
                 console.log('转换后的任务数据:', tasks);
@@ -76,6 +80,20 @@
             return date.toISOString().split('T')[0];
         } catch (e) {
             return '';
+        }
+    }
+
+    // 根据任务状态计算进度
+    function calculateProgress(status) {
+        if (!status) return 0;
+        switch (status.toLowerCase()) {
+            case 'published': return 0;
+            case 'assigned': return 10;
+            case 'inprogress': return 50;
+            case 'reported': return 80;
+            case 'completed': return 100;
+            case 'closed': return 100;
+            default: return 0;
         }
     }
 
