@@ -16,6 +16,8 @@
         .brand .logo { width: 48px; height: 48px; margin: 0; }
         .brand strong { font-size: 20px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
         .avatar { width: 72px; height: 72px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, var(--color-peach), var(--color-primary-2)); border: 2px solid #fff; box-shadow: 0 3px 10px rgba(255,138,0,0.25); }
+        .avatar:hover .avatar-overlay { opacity: 1 !important; }
+        .avatar.has-image { background-size: cover; background-position: center; }
         .panel { background: #fff; border-radius: 14px; padding: 18px; }
         .nav-links { display:flex; gap:10px; }
         .nav-links a { padding:8px 12px; border-radius:10px; background:#fff7ef; border:1px solid #ffd3a1; color:#a55b00; text-decoration:none; }
@@ -65,9 +67,14 @@
         <div class="panel">
             <div class="profile-hero">
                 <div class="profile-avatar-container">
-                    <div class="avatar profile-avatar"></div>
+                    <div class="avatar profile-avatar" id="profileAvatar" style="position: relative; cursor: pointer;" title="点击更换头像">
+                        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+                        <div class="avatar-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; text-align: center; padding: 4px; font-size: 11px; border-radius: 0 0 50% 50%; opacity: 0; transition: opacity 0.3s;">
+                            <i class="fas fa-camera"></i> 更换
+                        </div>
+                    </div>
                     <div class="profile-info">
-                        <div class="profile-title"><strong id="p_name">姓名</strong></div>
+                        <div class="profile-title"><strong id="p_username">用户名</strong></div>
                         <div id="p_employeeId" class="profile-subtitle">员工编号</div>
                         <div id="p_email" class="profile-subtitle">邮箱</div>
                         <div id="p_company" class="profile-subtitle">工作单位</div>
@@ -169,11 +176,7 @@
                             }
                         }
                         
-                        // 年龄字段
-                        var ageField = document.getElementById('pf_age');
-                        if(ageField && profileData.age) {
-                            ageField.value = profileData.age;
-                        }
+                        // 年龄字段已在上面通过出生日期自动计算并填充
                         
                         // 工作单位字段
                         var companyField = document.getElementById('pf_company');
@@ -187,9 +190,71 @@
                             bioField.value = profileData.bio || '';
                         }
                         
+                        // 🔧 关键修复：更新头像下方的显示元素
+                        // 头像下方显示username（不是name）
+                        var pUsernameElem = document.getElementById('p_username');
+                        if(pUsernameElem) pUsernameElem.textContent = profileData.username || '用户名';
+                        
+                        var pEmailElem = document.getElementById('p_email');
+                        if(pEmailElem) pEmailElem.textContent = profileData.email || '';
+                        
+                        var pEmployeeIdElem = document.getElementById('p_employeeId');
+                        if(pEmployeeIdElem) pEmployeeIdElem.textContent = profileData.employeeId || profileData.employee_id || '';
+                        
+                        var pCompanyElem = document.getElementById('p_company');
+                        if(pCompanyElem) pCompanyElem.textContent = profileData.company || profileData.team || '无';
+                        
+                        // 🔧 自动计算年龄并更新chips显示
+                        var chipGender = document.getElementById('chip_gender');
+                        if(chipGender) chipGender.textContent = profileData.gender || '';
+                        
+                        // 根据出生日期自动计算年龄
+                        var calculatedAge = null;
+                        var birthDate = profileData.birthday || profileData.birth_date;
+                        if(birthDate) {
+                            var birth = new Date(birthDate);
+                            var today = new Date();
+                            calculatedAge = today.getFullYear() - birth.getFullYear();
+                            var monthDiff = today.getMonth() - birth.getMonth();
+                            if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                                calculatedAge--;
+                            }
+                            console.log('计算年龄: 出生日期=' + birthDate + ', 年龄=' + calculatedAge);
+                        }
+                        
+                        var chipAge = document.getElementById('chip_age');
+                        if(chipAge && calculatedAge !== null && calculatedAge >= 0) {
+                            chipAge.textContent = calculatedAge + '岁';
+                        }
+                        
+                        // 自动填充年龄到表单
+                        var ageField = document.getElementById('pf_age');
+                        if(ageField && calculatedAge !== null && calculatedAge >= 0) {
+                            ageField.value = calculatedAge;
+                        }
+                        
+                        // 🔧 更新顶部导航栏的用户名显示
+                        var currentUserNameElem = document.getElementById('currentUserName');
+                        if(currentUserNameElem) currentUserNameElem.textContent = profileData.name || '用户';
+                        
+                        // 🔧 同步更新currentUser到localStorage（确保其他页面也能获取到最新用户信息）
+                        try {
+                            var currentUser = {
+                                name: profileData.name || '',
+                                email: profileData.email || '',
+                                employeeId: profileData.employeeId || profileData.employee_id || '',
+                                user_id: profileData.user_id || profileData.id || '',
+                                id: profileData.user_id || profileData.id || ''
+                            };
+                            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                            console.log('✅ currentUser已同步更新:', currentUser);
+                        } catch(e) {
+                            console.warn('⚠️ currentUser更新失败:', e);
+                        }
+                        
                         // 保存到localStorage作为缓存
                         localStorage.setItem('profile', JSON.stringify(profileData));
-                        console.log('✅ 个人资料加载成功，所有字段已填充');
+                        console.log('✅ 个人资料加载成功，所有字段已填充（包括显示元素）');
                     } else {
                         console.warn('⚠️ API返回数据格式异常，使用缓存数据');
                         ProfilePage.fill();
@@ -220,6 +285,60 @@
                 resetBtn.addEventListener('click', function() {
                     ProfilePage.reset();
                 });
+            }
+            
+            // 🎨 换头像功能
+            var profileAvatar = document.getElementById('profileAvatar');
+            var avatarInput = document.getElementById('avatarInput');
+            
+            if (profileAvatar && avatarInput) {
+                // 点击头像触发文件选择
+                profileAvatar.addEventListener('click', function() {
+                    avatarInput.click();
+                });
+                
+                // 文件选择后预览图片
+                avatarInput.addEventListener('change', function(e) {
+                    var file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        var reader = new FileReader();
+                        reader.onload = function(event) {
+                            var imageUrl = event.target.result;
+                            
+                            // 更新所有头像显示
+                            profileAvatar.style.backgroundImage = 'url(' + imageUrl + ')';
+                            profileAvatar.style.backgroundSize = 'cover';
+                            profileAvatar.style.backgroundPosition = 'center';
+                            profileAvatar.classList.add('has-image');
+                            
+                            // 保存到localStorage（实际项目中应该上传到服务器）
+                            try {
+                                localStorage.setItem('userAvatar', imageUrl);
+                                console.log('✅ 头像已更新（保存到本地）');
+                                alert('头像已更新！\n（注：当前为演示模式，实际项目中会上传到服务器）');
+                            } catch(e) {
+                                console.error('保存头像失败:', e);
+                                alert('头像文件过大，请选择较小的图片');
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        alert('请选择有效的图片文件');
+                    }
+                });
+                
+                // 页面加载时恢复头像
+                try {
+                    var savedAvatar = localStorage.getItem('userAvatar');
+                    if (savedAvatar) {
+                        profileAvatar.style.backgroundImage = 'url(' + savedAvatar + ')';
+                        profileAvatar.style.backgroundSize = 'cover';
+                        profileAvatar.style.backgroundPosition = 'center';
+                        profileAvatar.classList.add('has-image');
+                    }
+                } catch(e) {
+                    console.warn('恢复头像失败:', e);
+                }
             }
         });
     </script>

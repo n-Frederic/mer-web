@@ -405,4 +405,84 @@ public class ApiProxyController {
                     .body(Map.of("ok", false, "message", "退出登录失败: " + e.getMessage()));
         }
     }
+
+    // ==================== 个人日志相关API ====================
+    
+    /**
+     * 获取个人日志列表
+     * GET /api/journals/
+     */
+    @GetMapping("/journals/")
+    public ResponseEntity<?> getJournals(
+            @RequestParam(required = false) String date,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "9") int pageSize,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            // 不传递date参数，让后端查询所有日期的日志
+            String url = backendUrl + "/journals/?page=" + page + "&pageSize=" + pageSize;
+            // if (date != null && !date.isEmpty()) {
+            //     url += "&date=" + date;
+            // }
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url, 
+                HttpMethod.GET, 
+                request, 
+                Map.class
+            );
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", true, "message", "获取日志列表失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 创建工作日志
+     * POST /api/journals/
+     */
+    @PostMapping("/journals/")
+    public ResponseEntity<?> createJournal(
+            @RequestBody Map<String, Object> journalData,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(journalData, headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                backendUrl + "/journals/", 
+                request, 
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "message", "创建日志失败: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "创建日志失败: " + e.getMessage()));
+        }
+    }
 }

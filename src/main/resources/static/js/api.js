@@ -1333,6 +1333,106 @@
       } catch(e) {
         console.error('设置认证信息失败:', e);
       }
+    },
+
+    // ==================== 个人日志相关API ====================
+    
+    // 获取个人日志列表
+    getJournals: function(params) {
+      params = params || {};
+      var url = base + '/api/journals/';
+      var queryParams = [];
+
+      // 注意：不要传递date参数，让后端查询所有日期的日志
+      // if (params.date) queryParams.push('date=' + encodeURIComponent(params.date));
+      if (params.page) queryParams.push('page=' + params.page);
+      if (params.pageSize) queryParams.push('pageSize=' + params.pageSize);
+
+      if (queryParams.length > 0) {
+        url += '?' + queryParams.join('&');
+      }
+
+      console.log('🔄 获取个人日志列表:', url);
+
+      return http('GET', url).then(function(res) {
+        console.log('✅ 日志列表API响应:', res);
+
+        // 标准化日志数据
+        var list = (res.list || res || []).map(function(log) {
+          return {
+            id: log.id || log.logId || log.log_id,
+            title: log.title,
+            date: log.date,
+            summary: log.summary,
+            content: log.content,
+            authorId: log.authorId || log.author_id,
+            authorName: log.authorName || log.author_name,
+            authorEmail: log.authorEmail || log.author_email,
+            createdAt: log.createdAt || log.created_at,
+            updatedAt: log.updatedAt || log.updated_at
+          };
+        });
+
+        return {
+          list: list,
+          total: res.total || list.length,
+          page: res.page || params.page || 1,
+          pageSize: res.pageSize || params.pageSize || 9
+        };
+      }).catch(function(error) {
+        console.error('❌ 获取日志列表失败:', error);
+        throw error;
+      });
+    },
+
+    // 创建日志
+    createJournal: function(journalData) {
+      console.log('🔄 创建日志:', journalData);
+      return http('POST', base + '/api/journals/', journalData).then(function(res) {
+        console.log('✅ 日志创建成功:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('❌ 创建日志失败:', error);
+        throw error;
+      });
+    },
+
+    // 获取单个日志详情
+    getJournal: function(journalId) {
+      var url = base + '/api/journals/' + encodeURIComponent(journalId);
+      console.log('🔄 获取日志详情:', url);
+      
+      return http('GET', url).then(function(res) {
+        console.log('✅ 日志详情:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('❌ 获取日志详情失败:', error);
+        throw error;
+      });
+    },
+
+    // 更新日志
+    updateJournal: function(journalId, journalData) {
+      console.log('🔄 更新日志:', journalId, journalData);
+      return http('PUT', base + '/api/journals/' + encodeURIComponent(journalId), journalData).then(function(res) {
+        console.log('✅ 日志更新成功:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('❌ 更新日志失败:', error);
+        throw error;
+      });
+    },
+
+    // 删除日志
+    deleteJournal: function(journalId) {
+      console.log('🔄 删除日志:', journalId);
+      return http('DELETE', base + '/api/journals/' + encodeURIComponent(journalId)).then(function(res) {
+        console.log('✅ 日志删除成功');
+        return { ok: true };
+      }).catch(function(error) {
+        console.error('❌ 删除日志失败:', error);
+        throw error;
+      });
     }
   };
 })();

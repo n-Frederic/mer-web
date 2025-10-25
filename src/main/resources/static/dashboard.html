@@ -508,14 +508,18 @@
         // 个人工作日志（支持真实后端）
         async function loadEntries(){
             try {
-                if (window.API && typeof window.API.getJournalEntries === 'function') {
-                    const resp = await window.API.getJournalEntries();
-                    return resp.entries || [];
+                if (window.API && typeof window.API.getJournals === 'function') {
+                    console.log('🔄 使用真实API获取日志列表');
+                    const resp = await window.API.getJournals({ page: 1, pageSize: 100 });
+                    console.log('✅ 获取日志成功:', resp);
+                    return resp.list || [];
                 }
                 // 回退到本地存储
+                console.log('⚠️ API不可用，使用本地存储');
                 return JSON.parse(localStorage.getItem('journalEntries')||'[]');
             } catch(e) { 
-                return []; 
+                console.error('❌ 加载日志失败:', e);
+                return JSON.parse(localStorage.getItem('journalEntries')||'[]');
             }
         }
         
@@ -608,10 +612,13 @@
             };
             
             try {
-                if (window.API && typeof window.API.createJournalEntry === 'function') {
-                    await window.API.createJournalEntry(entry);
+                if (window.API && typeof window.API.createJournal === 'function') {
+                    console.log('🔄 使用真实API创建日志');
+                    await window.API.createJournal(entry);
+                    console.log('✅ 日志创建成功');
                 } else {
                     // 回退到本地存储
+                    console.log('⚠️ API不可用，使用本地存储');
                     var list = await loadEntries();
                     list.unshift(Object.assign(entry, {ts: Date.now()}));
                     saveEntries(list);
@@ -769,10 +776,13 @@
             }
             
             try {
-                if (window.API && typeof window.API.deleteJournalEntry === 'function') {
-                    await window.API.deleteJournalEntry(entryId);
+                if (window.API && typeof window.API.deleteJournal === 'function') {
+                    console.log('🔄 使用真实API删除日志');
+                    await window.API.deleteJournal(entryId);
+                    console.log('✅ 日志删除成功');
                 } else {
                     // 本地存储删除
+                    console.log('⚠️ API不可用，使用本地存储');
                     const list = await loadEntries();
                     const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
                     if (index > -1) {
@@ -812,10 +822,13 @@
             };
             
             try {
-                if (window.API && typeof window.API.updateJournalEntry === 'function') {
-                    await window.API.updateJournalEntry(entryId, updatedEntry);
+                if (window.API && typeof window.API.updateJournal === 'function') {
+                    console.log('🔄 使用真实API更新日志');
+                    await window.API.updateJournal(entryId, updatedEntry);
+                    console.log('✅ 日志更新成功');
                 } else {
                     // 本地存储更新
+                    console.log('⚠️ API不可用，使用本地存储');
                     const list = await loadEntries();
                     const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
                     if (index > -1) {
