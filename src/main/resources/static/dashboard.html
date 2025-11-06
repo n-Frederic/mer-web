@@ -371,24 +371,52 @@
                     <h3>个人工作日志</h3>
                     <form id="journalForm" class="journal-form">
                         <div class="form-item full">
-                            <label>标题</label>
-                            <input id="jl_title" placeholder="请输入日志标题">
+                            <label>标题 <span style="color: red;">*</span></label>
+                            <input id="jl_title" placeholder="请输入日志标题，如：今日工作总结" required>
                         </div>
-                        <div class="form-item">
-                            <label>日期</label>
-                            <input id="jl_date" type="date">
-                        </div>
-                        <div class="form-item">
-                            <label>摘要</label>
-                            <input id="jl_summary" placeholder="一句话概括">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                            <div class="form-item">
+                                <label>日期 <span style="color: red;">*</span></label>
+                                <input id="jl_logDate" type="date" required>
+                            </div>
+                            <div class="form-item">
+                                <label>类型 <span style="color: red;">*</span></label>
+                                <select id="jl_viewType" required>
+                                    <option value="Day">日报</option>
+                                    <option value="Week">周报</option>
+                                    <option value="Month">月报</option>
+                                </select>
+                            </div>
+                            <div class="form-item">
+                                <label>心情</label>
+                                <select id="jl_mood">
+                                    <option value="">无</option>
+                                    <option value="Happy">😊 开心</option>
+                                    <option value="Productive">💪 高效</option>
+                                    <option value="Focused">🎯 专注</option>
+                                    <option value="Satisfied">✨ 满意</option>
+                                    <option value="Accomplished">🏆 成就感</option>
+                                    <option value="Neutral">😐 平静</option>
+                                    <option value="Tired">😴 疲惫</option>
+                                    <option value="Frustrated">😤 受挫</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="form-item full">
-                            <label>内容</label>
-                            <textarea id="jl_content" placeholder="记录今天的工作、问题与思考..."></textarea>
+                            <label>摘要</label>
+                            <input id="jl_summary" placeholder="一句话概括本次日志内容（可选）">
+                        </div>
+                        <div class="form-item full">
+                            <label>内容 <span style="color: red;">*</span></label>
+                            <textarea id="jl_content" placeholder="详细记录今天的工作内容、遇到的问题、解决方案和心得体会..." style="min-height: 150px;" required></textarea>
+                        </div>
+                        <div class="form-item full">
+                            <label>关联任务ID</label>
+                            <input id="jl_taskId" type="number" placeholder="输入关联的任务ID（可选）" min="1">
                         </div>
                         <div class="journal-actions full" style="justify-content:center;">
-                            <button type="button" class="btn-sm btn-wide" id="jl_save">保存</button>
-                            <button type="button" class="btn-secondary btn-wide" id="jl_clear">清空</button>
+                            <button type="button" class="btn-sm btn-wide" id="jl_save">💾 保存</button>
+                            <button type="button" class="btn-secondary btn-wide" id="jl_clear">🗑️ 清空</button>
                         </div>
                     </form>
                     
@@ -412,24 +440,52 @@
                 <form id="editJournalForm" class="journal-form">
                     <input type="hidden" id="edit_jl_id">
                     <div class="form-item full">
-                        <label>标题</label>
-                        <input id="edit_jl_title" placeholder="请输入日志标题">
+                        <label>标题 <span style="color: red;">*</span></label>
+                        <input id="edit_jl_title" placeholder="请输入日志标题" required>
                     </div>
-                    <div class="form-item">
-                        <label>日期</label>
-                        <input id="edit_jl_date" type="date">
-                    </div>
-                    <div class="form-item">
-                        <label>摘要</label>
-                        <input id="edit_jl_summary" placeholder="一句话概括">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+                        <div class="form-item">
+                            <label>日期 <span style="color: red;">*</span></label>
+                            <input id="edit_jl_logDate" type="date" required>
+                        </div>
+                        <div class="form-item">
+                            <label>类型 <span style="color: red;">*</span></label>
+                            <select id="edit_jl_viewType" required>
+                                <option value="Day">日报</option>
+                                <option value="Week">周报</option>
+                                <option value="Month">月报</option>
+                            </select>
+                        </div>
+                        <div class="form-item">
+                            <label>心情</label>
+                            <select id="edit_jl_mood">
+                                <option value="">无</option>
+                                <option value="Happy">😊 开心</option>
+                                <option value="Productive">💪 高效</option>
+                                <option value="Focused">🎯 专注</option>
+                                <option value="Satisfied">✨ 满意</option>
+                                <option value="Accomplished">🏆 成就感</option>
+                                <option value="Neutral">😐 平静</option>
+                                <option value="Tired">😴 疲惫</option>
+                                <option value="Frustrated">😤 受挫</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="form-item full">
-                        <label>内容</label>
-                        <textarea id="edit_jl_content" placeholder="记录今天的工作、问题与思考..."></textarea>
+                        <label>摘要</label>
+                        <input id="edit_jl_summary" placeholder="一句话概括本次日志内容（可选）">
+                    </div>
+                    <div class="form-item full">
+                        <label>内容 <span style="color: red;">*</span></label>
+                        <textarea id="edit_jl_content" placeholder="详细记录工作内容..." style="min-height: 150px;" required></textarea>
+                    </div>
+                    <div class="form-item full">
+                        <label>关联任务ID</label>
+                        <input id="edit_jl_taskId" type="number" placeholder="输入关联的任务ID（可选）" min="1">
                     </div>
                     <div class="journal-actions full" style="justify-content:center;">
-                        <button type="button" class="btn-sm btn-wide" id="edit_jl_save">保存修改</button>
-                        <button type="button" class="btn-secondary btn-wide" onclick="closeEditModal()">取消</button>
+                        <button type="button" class="btn-sm btn-wide" id="edit_jl_save">💾 保存修改</button>
+                        <button type="button" class="btn-secondary btn-wide" onclick="closeEditModal()">❌ 取消</button>
                     </div>
                 </form>
             </div>
@@ -546,44 +602,60 @@
                 });
                 
                 box.innerHTML = list.map(function(e, index){
-                    var displayDate = e.date || (e.createdAt ? e.createdAt.split('T')[0] : '');
                     var entryId = e.id || ('entry-' + index);
+                    
+                    // 提取所有字段
+                    var title = e.title || '未命名';
                     var content = e.content || '';
                     var summary = e.summary || '';
+                    var authorName = e.authorName || '未知';
+                    var authorEmail = e.authorEmail || '';
+                    var authorId = e.authorId || '';
+                    var taskId = e.taskId || '';
+                    var createdAt = e.createdAt || '';
+                    var updatedAt = e.updatedAt || '';
+                    var date = e.date || (createdAt ? createdAt.split('T')[0] : '');
+                    
+                    // 格式化时间
+                    var displayCreatedAt = createdAt ? formatTimeAgo(createdAt) : '';
+                    var displayUpdatedAt = updatedAt ? formatTimeAgo(updatedAt) : '';
                     
                     // 处理标题长度
-                    var title = e.title || '未命名';
-                    var displayTitle = title.length > 30 ? title.substring(0, 30) + '...' : title;
+                    var displayTitle = title.length > 40 ? title.substring(0, 40) + '...' : title;
                     
                     // 处理摘要长度
-                    var displaySummary = summary.length > 60 ? summary.substring(0, 60) + '...' : summary;
+                    var displaySummary = summary ? (summary.length > 80 ? summary.substring(0, 80) + '...' : summary) : '';
                     
                     // 处理内容长度
-                    var truncatedContent = content.length > 200 ? content.substring(0, 200) + '...' : content;
-                    var needsToggle = content.length > 200;
+                    var truncatedContent = content.length > 300 ? content.substring(0, 300) + '...' : content;
+                    var needsToggle = content.length > 300;
                     
                     // 判断是否被修改过
-                    var createdAt = e.createdAt || e.ts;
-                    var updatedAt = e.updatedAt;
                     var isModified = updatedAt && updatedAt !== createdAt;
-                    var modificationInfo = '';
                     
-                    if (isModified) {
-                        var updatedTime = formatTimeAgo(updatedAt);
-                        modificationInfo = '<div class="meta modification-info" title="点击查看修改历史" onclick="showModificationHistory(\''+ entryId +'\')" style="cursor: pointer; color: #ff8a00;"><i class="fas fa-edit"></i> 已修改 · '+ updatedTime +'</div>';
-                    }
-                    
-                    return '<div class="entry" data-entry-id="'+ entryId +'">\
-                        <h4 title="'+ escapeHtml(title) +'">'+ escapeHtml(displayTitle) +'</h4>\
-                        <div class="meta">'+ displayDate +'</div>\
-                        '+ (summary ? '<div class="meta" title="'+ escapeHtml(summary) +'">摘要：'+ escapeHtml(displaySummary) +'</div>' : '') +'\
-                        '+ modificationInfo +'\
-                        <div class="entry-content" data-full-content="'+ escapeHtml(content) +'">'+ escapeHtml(truncatedContent) +'</div>\
-                        '+ (needsToggle ? '<div class="content-toggle" onclick="toggleContent(this)" style="display: block;">展开全文</div>' : '') +'\
-                        <div class="entry-actions" style="margin-top: 8px; display: flex; gap: 8px;">\
-                            <button class="btn-sm" onclick="editJournalEntry(\''+ entryId +'\')">编辑</button>\
-                            <button class="btn-outline" onclick="deleteJournalEntry(\''+ entryId +'\')">删除</button>\
-                            '+ (isModified ? '<button class="btn-info" onclick="showModificationHistory(\''+ entryId +'\')">历史</button>' : '') +'\
+                    return '<div class="entry" data-entry-id="'+ entryId +'" style="border-left: 3px solid #ffa500; padding: 16px; margin-bottom: 16px; background: #fffaf0; border-radius: 8px;">\
+                        <h4 style="color: #d2691e; margin-bottom: 8px;" title="'+ escapeHtml(title) +'">'+ escapeHtml(displayTitle) +'</h4>\
+                        \
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin-bottom: 12px; font-size: 13px; color: #666;">\
+                            <div><i class="fas fa-calendar" style="color: #ff8c00; margin-right: 4px;"></i><strong>创建时间:</strong> '+ displayCreatedAt +'</div>\
+                            '+ (isModified ? '<div><i class="fas fa-edit" style="color: #ff6347; margin-right: 4px;"></i><strong>更新时间:</strong> '+ displayUpdatedAt +'</div>' : '') +'\
+                            <div><i class="fas fa-user" style="color: #4682b4; margin-right: 4px;"></i><strong>作者:</strong> '+ escapeHtml(authorName) +'</div>\
+                            '+ (authorEmail ? '<div><i class="fas fa-envelope" style="color: #32cd32; margin-right: 4px;"></i><strong>邮箱:</strong> '+ escapeHtml(authorEmail) +'</div>' : '') +'\
+                            '+ (taskId ? '<div><i class="fas fa-tasks" style="color: #9370db; margin-right: 4px;"></i><strong>关联任务ID:</strong> '+ escapeHtml(taskId) +'</div>' : '') +'\
+                            <div><i class="fas fa-id-badge" style="color: #ff69b4; margin-right: 4px;"></i><strong>日志ID:</strong> '+ escapeHtml(entryId) +'</div>\
+                        </div>\
+                        \
+                        '+ (displaySummary ? '<div style="background: #fff8dc; padding: 10px; border-radius: 6px; margin-bottom: 12px; border-left: 3px solid #ffa500;"><strong style="color: #d2691e;">📝 摘要:</strong> '+ escapeHtml(displaySummary) +'</div>' : '') +'\
+                        \
+                        <div class="entry-content" data-full-content="'+ escapeHtml(content) +'" style="background: white; padding: 12px; border-radius: 6px; line-height: 1.6; color: #333;">\
+                            <strong style="color: #d2691e;">📄 内容:</strong><br/>'+ escapeHtml(truncatedContent) +'\
+                        </div>\
+                        '+ (needsToggle ? '<div class="content-toggle" onclick="toggleContent(this)" style="display: block; text-align: center; color: #ff8c00; cursor: pointer; margin-top: 8px;">▼ 展开全文</div>' : '') +'\
+                        \
+                        <div class="entry-actions" style="margin-top: 12px; display: flex; gap: 8px; justify-content: flex-end;">\
+                            <button class="btn-sm" onclick="editJournalEntry(\''+ entryId +'\')" style="background: #4682b4;">✏️ 编辑</button>\
+                            <button class="btn-outline" onclick="deleteJournalEntry(\''+ entryId +'\')" style="border-color: #dc143c; color: #dc143c;">🗑️ 删除</button>\
+                            '+ (isModified ? '<button class="btn-info" onclick="showModificationHistory(\''+ entryId +'\')" style="background: #9370db;">📜 历史</button>' : '') +'\
                         </div>\
                     </div>';
                 }).join('');
@@ -594,58 +666,113 @@
         }
         
         document.getElementById('jl_save')?.addEventListener('click', async function(){
-            var title=document.getElementById('jl_title').value.trim();
-            var date=document.getElementById('jl_date').value;
-            var summary=document.getElementById('jl_summary').value.trim();
-            var content=document.getElementById('jl_content').value.trim();
+            // 获取所有表单字段
+            var title = document.getElementById('jl_title').value.trim();
+            var content = document.getElementById('jl_content').value.trim();
+            var logDate = document.getElementById('jl_logDate').value;
+            var viewType = document.getElementById('jl_viewType').value;
+            var mood = document.getElementById('jl_mood').value;
+            var summary = document.getElementById('jl_summary').value.trim();
+            var taskId = document.getElementById('jl_taskId').value;
             
-            if (!title && !content) {
-                alert('请至少填写标题或内容');
+            // 必填项校验
+            if (!title) {
+                alert('请填写日志标题');
+                return;
+            }
+            if (!content) {
+                alert('请填写日志内容');
+                return;
+            }
+            if (!logDate) {
+                alert('请选择日志日期');
+                return;
+            }
+            if (!viewType) {
+                alert('请选择日志类型');
                 return;
             }
             
+            // 按照后端接口格式构建请求体
             var entry = {
                 title: title,
-                date: date,
-                summary: summary,
-                content: content
+                content: content,
+                logDate: logDate,
+                viewType: viewType,
+                mood: mood || null,
+                summary: summary || null,
+                taskId: taskId ? parseInt(taskId) : null
             };
+            
+            console.log('📝 准备提交日志:', entry);
             
             try {
                 if (window.API && typeof window.API.createJournal === 'function') {
                     console.log('🔄 使用真实API创建日志');
-                    await window.API.createJournal(entry);
-                    console.log('✅ 日志创建成功');
+                    var result = await window.API.createJournal(entry);
+                    console.log('✅ 日志创建成功:', result);
+                    
+                    // 检查返回格式：{ "ok": true, "id": "J-001" }
+                    if (result && result.ok && result.id) {
+                        alert('✅ 日志保存成功！\n日志ID: ' + result.id);
+                    } else {
+                        alert('✅ 日志保存成功！');
+                    }
                 } else {
                     // 回退到本地存储
                     console.log('⚠️ API不可用，使用本地存储');
                     var list = await loadEntries();
-                    list.unshift(Object.assign(entry, {ts: Date.now()}));
+                    list.unshift(Object.assign(entry, {
+                        ts: Date.now(), 
+                        id: 'J-' + Date.now(),
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    }));
                     saveEntries(list);
+                    alert('✅ 日志保存成功（本地）！');
                 }
                 
                 // 清空表單
-                document.getElementById('jl_title').value='';
-                document.getElementById('jl_date').value='';
-                document.getElementById('jl_summary').value='';
-                document.getElementById('jl_content').value='';
+                document.getElementById('jl_title').value = '';
+                document.getElementById('jl_content').value = '';
+                document.getElementById('jl_logDate').value = '';
+                document.getElementById('jl_viewType').value = 'Day';
+                document.getElementById('jl_mood').value = '';
+                document.getElementById('jl_summary').value = '';
+                document.getElementById('jl_taskId').value = '';
                 
                 // 重新載入並渲染
                 await renderEntries();
-                alert('已保存');
                 
             } catch(error) {
-                console.error('保存日志失败:', error);
-                alert('保存失败，请重试');
+                console.error('❌ 保存日志失败:', error);
+                alert('❌ 保存失败：' + (error.message || '请检查网络连接后重试'));
             }
         });
         
         document.getElementById('jl_clear')?.addEventListener('click', function(){
-            document.getElementById('jl_title').value='';
-            document.getElementById('jl_date').value='';
-            document.getElementById('jl_summary').value='';
-            document.getElementById('jl_content').value='';
+            if (confirm('确定要清空所有输入内容吗？')) {
+                document.getElementById('jl_title').value = '';
+                document.getElementById('jl_content').value = '';
+                document.getElementById('jl_logDate').value = '';
+                document.getElementById('jl_viewType').value = 'Day';
+                document.getElementById('jl_mood').value = '';
+                document.getElementById('jl_summary').value = '';
+                document.getElementById('jl_taskId').value = '';
+            }
         });
+        
+        // 初始化：设置默认日期为今天
+        (function initJournalForm() {
+            var today = new Date();
+            var dateStr = today.getFullYear() + '-' + 
+                         String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                         String(today.getDate()).padStart(2, '0');
+            var dateInput = document.getElementById('jl_logDate');
+            if (dateInput && !dateInput.value) {
+                dateInput.value = dateStr;
+            }
+        })();
         
         // HTML转义函数，防止XSS攻击
         function escapeHtml(text) {
@@ -742,12 +869,15 @@
                 // 保存当前编辑的条目
                 window.__currentEditingEntry = entry;
                 
-                // 填充编辑表单
+                // 填充编辑表单 - 支持新字段
                 document.getElementById('edit_jl_id').value = entryId;
                 document.getElementById('edit_jl_title').value = entry.title || '';
-                document.getElementById('edit_jl_date').value = entry.date || '';
+                document.getElementById('edit_jl_logDate').value = entry.logDate || entry.date || '';
+                document.getElementById('edit_jl_viewType').value = entry.viewType || 'Day';
+                document.getElementById('edit_jl_mood').value = entry.mood || '';
                 document.getElementById('edit_jl_summary').value = entry.summary || '';
                 document.getElementById('edit_jl_content').value = entry.content || '';
+                document.getElementById('edit_jl_taskId').value = entry.taskId || '';
                 
                 // 显示模态框
                 document.getElementById('editJournalModal').style.display = 'block';
@@ -804,22 +934,46 @@
         // 保存编辑的日志
         document.getElementById('edit_jl_save')?.addEventListener('click', async function() {
             const entryId = document.getElementById('edit_jl_id').value;
-            const title = document.getElementById('edit_jl_title').value.trim();
-            const date = document.getElementById('edit_jl_date').value;
-            const summary = document.getElementById('edit_jl_summary').value.trim();
-            const content = document.getElementById('edit_jl_content').value.trim();
             
-            if (!title && !content) {
-                alert('请至少填写标题或内容');
+            // 获取所有表单字段
+            const title = document.getElementById('edit_jl_title').value.trim();
+            const content = document.getElementById('edit_jl_content').value.trim();
+            const logDate = document.getElementById('edit_jl_logDate').value;
+            const viewType = document.getElementById('edit_jl_viewType').value;
+            const mood = document.getElementById('edit_jl_mood').value;
+            const summary = document.getElementById('edit_jl_summary').value.trim();
+            const taskId = document.getElementById('edit_jl_taskId').value;
+            
+            // 必填项校验
+            if (!title) {
+                alert('请填写日志标题');
+                return;
+            }
+            if (!content) {
+                alert('请填写日志内容');
+                return;
+            }
+            if (!logDate) {
+                alert('请选择日志日期');
+                return;
+            }
+            if (!viewType) {
+                alert('请选择日志类型');
                 return;
             }
             
+            // 按照后端接口格式构建更新数据
             const updatedEntry = {
                 title: title,
-                date: date,
-                summary: summary,
-                content: content
+                content: content,
+                logDate: logDate,
+                viewType: viewType,
+                mood: mood || null,
+                summary: summary || null,
+                taskId: taskId ? parseInt(taskId) : null
             };
+            
+            console.log('📝 准备更新日志:', updatedEntry);
             
             try {
                 if (window.API && typeof window.API.updateJournal === 'function') {
@@ -845,11 +999,11 @@
                 
                 // 重新渲染日志列表
                 await renderEntries();
-                alert('修改成功');
+                alert('✅ 修改成功！');
                 
             } catch(error) {
-                console.error('保存修改失败:', error);
-                alert('保存失败，请重试');
+                console.error('❌ 保存修改失败:', error);
+                alert('❌ 保存失败：' + (error.message || '请稍后重试'));
             }
         });
         

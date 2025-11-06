@@ -151,11 +151,14 @@
             </div>
 
             <div class="switch-form">
+                <!-- 注释掉注册按钮 -->
+                <!--
                 <span v-if="!isForgotPassword">
                     {{ isLogin ? '还没有账户？' : '已有账户？' }}
                     <a @click="toggleForm">{{ isLogin ? '立即注册' : '立即登录' }}</a>
                 </span>
-                <span v-else>
+                -->
+                <span v-if="isForgotPassword">
                     <a @click="backToLogin">返回登录</a>
                 </span>
             </div>
@@ -240,17 +243,17 @@
                     alert('请输入邮箱和密码');
                     return;
                 }
-                
+
                 // 邮箱格式验证
                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if (!emailRegex.test(this.login.email)) {
                     alert('请输入有效的邮箱地址');
                     return;
                 }
-                
+
                 try {
                     console.log('尝试登录:', { email: this.login.email });
-                    
+
                     // 调试信息：检查API配置
                     console.log('API配置检查:', {
                         'window.APP': window.APP,
@@ -259,32 +262,32 @@
                         'currentURL': window.location.href,
                         'protocol': window.location.protocol
                     });
-                    
+
                     // 检查访问方式
                     if (window.location.protocol === 'file:') {
                         alert('⚠️ 错误的访问方式！\n\n请通过HTTP服务器访问，而不是直接打开HTML文件。\n\n正确的访问地址：http://localhost:8001/login.html');
                         return;
                     }
-                    
+
                     // 检查是否正确访问了代理服务器
                     if (!window.location.href.includes('8001')) {
                         alert('⚠️ 请通过代理服务器访问！\n\n正确的访问地址：http://localhost:8001/login.html\n当前地址：' + window.location.href);
                         return;
                     }
-                    
+
                     // 调用真实API进行登录
                     const result = await window.API.login({
                         email: this.login.email,
                         password: this.login.password
                     });
-                    
+
                     console.log('登录结果:', result);
-                    
+
                     if (result && result.token && result.user) {
                         // 登录成功
                         console.log('登录成功，用户信息:', result.user);
                         alert('登录成功！欢迎 ' + (result.user.name || '用户'));
-                        
+
                         // 跳转到仪表盘
                         location.href = 'dashboard.html';
                     } else {
@@ -292,10 +295,10 @@
                         console.error('登录返回异常数据:', result);
                         alert('登录失败：服务器返回异常数据');
                     }
-                    
+
                 } catch (error) {
                     console.error('登录失败:', error);
-                    
+
                     // 处理具体的错误类型
                     if (error.message.includes('USER_NOT_FOUND')) {
                         alert('登录失败：用户不存在');
@@ -335,7 +338,7 @@
                     alert('请输入邮箱地址');
                     return;
                 }
-                
+
                 // 使用API发送验证码
                 if (window.API && typeof window.API.sendForgotPasswordCode === 'function') {
                     window.API.sendForgotPasswordCode(this.forgotPassword.email)
@@ -356,7 +359,7 @@
             },
             resendForgotCode() {
                 if (this.forgotCountdown > 0) return;
-                
+
                 // 重新发送验证码
                 this.sendForgotPasswordCode();
             },
@@ -387,7 +390,7 @@
                     alert('两次输入的密码不一致');
                     return;
                 }
-                
+
                 // 使用API重置密码
                 if (window.API && typeof window.API.resetPassword === 'function') {
                     window.API.resetPassword(
@@ -419,7 +422,7 @@
                         clearInterval(timer);
                     }
                 }, 1000);
-                alert('验证码已发送到您的邮箱（模拟）');
+                alert('验证码已发送到您的邮箱');
             }
         }
     });

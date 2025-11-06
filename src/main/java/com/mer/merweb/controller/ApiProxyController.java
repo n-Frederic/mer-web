@@ -326,8 +326,9 @@ public class ApiProxyController {
             
             HttpEntity<Map<String, String>> request = new HttpEntity<>(requestData, headers);
             
+            // 后端接口路径不带末尾斜杠
             ResponseEntity<Map> response = restTemplate.postForEntity(
-                backendUrl + "/forgot-password/reset/", 
+                backendUrl + "/forgot-password/reset",
                 request, 
                 Map.class
             );

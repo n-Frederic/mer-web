@@ -1102,7 +1102,7 @@
           message: "密码重置成功" 
         });
       }
-      return http('POST', base + '/api/forgot-password/reset/', { 
+      return http('POST', base + '/api/forgot-password/reset', { 
         email: email, 
         verificationCode: verificationCode, 
         newPassword: newPassword 
