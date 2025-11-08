@@ -335,6 +335,45 @@ public class ApiProxyController {
         }
     }
 
+    @PutMapping("/user/profile")
+    public ResponseEntity<?> updateProfile(
+            @RequestHeader(value = "Authorization", required = false) String authorization,
+            @RequestBody Map<String, Object> profileData) {
+        try {
+            // 创建请求头
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            // 创建请求实体
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(profileData, headers);
+            
+            // 发送PUT请求到后端
+            ResponseEntity<Map> response = restTemplate.exchange(
+                backendUrl + "/user/profile",
+                HttpMethod.PUT,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "error", "Update failed"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "error", "Internal Server Error"));
+        }
+    }
+
     @PostMapping("/user/logout")
     public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authorization) {
         try {

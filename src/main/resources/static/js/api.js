@@ -664,6 +664,11 @@
         
         // 标准化个人资料数据字段名
         if (profile) {
+          // 🔧 关键修复：后端返回的字段名是 "team" 而不是 "team_id"
+          console.log('🔍 原始profile.team:', profile.team);
+          console.log('🔍 原始profile.team_id:', profile.team_id);
+          console.log('🔍 原始profile.role_id:', profile.role_id);
+          
           return {
             // 统一ID字段
             id: profile.id || profile.userId || profile.user_id,
@@ -673,9 +678,10 @@
             email: profile.email,
             username: profile.username,
             phone: profile.phone,
-            // 统一角色和团队ID字段
-            teamId: profile.team_id || profile.teamId,
-            team_id: profile.team_id || profile.teamId,
+            // 🔧 关键：后端返回的字段名是 "team" 而不是 "team_id"
+            team: profile.team || profile.team_id || profile.teamId,
+            teamId: profile.team || profile.team_id || profile.teamId,
+            team_id: profile.team || profile.team_id || profile.teamId,
             roleId: profile.role_id || profile.roleId,
             role_id: profile.role_id || profile.roleId,
             gender: profile.gender,
@@ -695,7 +701,10 @@
     updateProfile: function(pf){
       // === 切换点：个人资料更新（真实/模拟） ===
       if(!featureUseApi.profile){ try{ localStorage.setItem('profile', JSON.stringify(pf)); }catch(e){} return Promise.resolve({ ok:true }); }
-      return http('PUT', base + '/api/profile/', pf).then(function(){ return { ok:true }; });
+      return http('PUT', base + '/api/user/profile', pf).then(function(res){ 
+        console.log('✅ 个人资料更新成功:', res);
+        return res || { ok:true }; 
+      });
     },
 
     // Tasks - 获取任务列表（支持真正的后端分页）

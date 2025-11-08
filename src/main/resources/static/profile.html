@@ -23,23 +23,161 @@
         .nav-links a { padding:8px 12px; border-radius:10px; background:#fff7ef; border:1px solid #ffd3a1; color:#a55b00; text-decoration:none; }
         .nav-links a:hover { background:#ffe9d2; }
         .panel h3 { margin-bottom: 12px; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 22px; text-align:center; }
-        .profile-hero { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px; text-align: center; }
-        .profile-title { font-size: 22px; line-height: 1.2; }
-        .profile-subtitle { color: #7a5a33; font-size: 13px; margin-top: 2px; }
-        .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; justify-content: center; }
-        .chip { padding: 4px 10px; border-radius: 999px; background: #fff7ef; border: 1px solid #ffd3a1; color: #a55b00; font-size: 12px; }
+        .profile-hero { 
+            background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%);
+            border-radius: 16px;
+            padding: 32px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(255, 138, 0, 0.1);
+        }
+        .profile-avatar-container { 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .profile-info { text-align: center; }
+        .profile-title { 
+            font-size: 24px;
+            line-height: 1.2;
+            font-weight: 700;
+            color: #a55b00;
+            margin-bottom: 8px;
+        }
+        .profile-subtitle { 
+            color: #7a5a33;
+            font-size: 14px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .profile-subtitle i { color: #ff8a00; font-size: 12px; }
+        .chips { 
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+            justify-content: center;
+        }
+        .chip { 
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #ff8a00 0%, #ffb06b 100%);
+            color: white;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 2px 6px rgba(255, 138, 0, 0.3);
+        }
         .chip:empty { display: none; }
-        .profile-form { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 900px; margin: 0 auto; }
+        .profile-form { 
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fafafa;
+            padding: 24px;
+            border-radius: 16px;
+        }
         .profile-form .full { grid-column: span 2; }
-        .form-item { display: flex; flex-direction: column; gap: 6px; }
-        .form-item label { color: #7a5a33; font-size: 15px; }
-        .form-item input, .form-item select, .form-item textarea { padding: 12px 14px; border: 1px solid #ffd3a1; border-radius: 12px; background: #fff; }
+        .form-item { 
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .form-item label { 
+            color: #a55b00;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .form-item label i { color: #ff8a00; font-size: 14px; }
+        .form-item input, .form-item select, .form-item textarea { 
+            padding: 14px 16px;
+            border: 2px solid #ffd3a1;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .form-item input:focus, .form-item select:focus, .form-item textarea:focus {
+            outline: none;
+            border-color: #ff8a00;
+            box-shadow: 0 0 0 3px rgba(255, 138, 0, 0.1);
+        }
         .form-item textarea { min-height: 110px; resize: vertical; }
-        .row-center { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
-        .btn-sm { padding: 10px 14px; border-radius: 10px; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color: #fff; border: none; cursor: pointer; }
-        .btn-secondary { padding: 10px 14px; border-radius: 10px; border: 1px solid #ffd3a1; background: #fff; color: #a55b00; cursor: pointer; }
-        .btn-warning { padding: 10px 14px; border-radius: 10px; background: linear-gradient(to right, #ff9a3c, #ffb06b); color: #fff; border: none; cursor: pointer; }
-        .btn-danger { padding: 10px 14px; border-radius: 10px; background: linear-gradient(to right, #ff6a00, #ff8a00); color: #fff; border: none; cursor: pointer; }
+        .row-center { 
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+        .btn-sm { 
+            padding: 12px 32px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-2));
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-sm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 138, 0, 0.4);
+        }
+        .btn-secondary { 
+            padding: 12px 32px;
+            border-radius: 12px;
+            border: 2px solid #ffd3a1;
+            background: #fff;
+            color: #a55b00;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: #fff7ef;
+            border-color: #ff8a00;
+        }
+        .btn-warning { 
+            padding: 10px 24px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff9a3c, #ffb06b);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-warning:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 154, 60, 0.3);
+        }
+        .btn-danger { 
+            padding: 10px 24px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #ff6a00, #ff8a00);
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 106, 0, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -73,11 +211,20 @@
                             <i class="fas fa-camera"></i> 更换
                         </div>
                     </div>
-                    <div class="profile-info">
+                        <div class="profile-info">
                         <div class="profile-title"><strong id="p_username">用户名</strong></div>
-                        <div id="p_employeeId" class="profile-subtitle">员工编号</div>
-                        <div id="p_email" class="profile-subtitle">邮箱</div>
-                        <div id="p_company" class="profile-subtitle">工作单位</div>
+                        <div class="profile-subtitle">
+                            <i class="fas fa-user-tag"></i>
+                            <span id="p_employeeId">角色</span>
+                        </div>
+                        <div class="profile-subtitle">
+                            <i class="fas fa-envelope"></i>
+                            <span id="p_email">邮箱</span>
+                        </div>
+                        <div class="profile-subtitle">
+                            <i class="fas fa-users"></i>
+                            <span id="p_company">团队</span>
+                        </div>
                     </div>
                 </div>
                 <div class="chips">
@@ -87,19 +234,19 @@
             </div>
             <form id="profileForm" class="profile-form">
                 <div class="form-item">
-                    <label>姓名</label>
+                    <label><i class="fas fa-id-card"></i> 姓名</label>
                     <input id="pf_name" placeholder="请输入姓名">
                 </div>
                 <div class="form-item">
-                    <label>邮箱</label>
+                    <label><i class="fas fa-envelope"></i> 邮箱</label>
                     <input id="pf_email" type="email" placeholder="请输入邮箱">
                 </div>
                 <div class="form-item">
-                    <label>手机号</label>
+                    <label><i class="fas fa-phone"></i> 手机号</label>
                     <input id="pf_phone" type="tel" placeholder="请输入手机号">
                 </div>
                 <div class="form-item">
-                    <label>性别</label>
+                    <label><i class="fas fa-venus-mars"></i> 性别</label>
                     <select id="pf_gender">
                         <option value="">保密</option>
                         <option value="男">男</option>
@@ -107,19 +254,23 @@
                     </select>
                 </div>
                 <div class="form-item">
-                    <label>出生年月</label>
+                    <label><i class="fas fa-calendar-alt"></i> 出生年月</label>
                     <input id="pf_birth" type="date">
                 </div>
                 <div class="form-item">
-                    <label>年龄</label>
-                    <input id="pf_age" type="number" min="0" max="120" placeholder="年龄">
+                    <label><i class="fas fa-birthday-cake"></i> 年龄</label>
+                    <input id="pf_age" type="number" min="0" max="120" placeholder="自动计算" readonly style="background: #f5f5f5;">
                 </div>
                 <div class="form-item">
-                    <label>工作单位</label>
-                    <input id="pf_company" placeholder="请输入工作单位">
+                    <label><i class="fas fa-users"></i> 所属团队</label>
+                    <input id="pf_team" placeholder="团队信息" readonly style="background: #f5f5f5;">
+                </div>
+                <div class="form-item">
+                    <label><i class="fas fa-user-tie"></i> 担任职位</label>
+                    <input id="pf_role" placeholder="职位信息" readonly style="background: #f5f5f5;">
                 </div>
                 <div class="form-item full">
-                    <label>个人简介</label>
+                    <label><i class="fas fa-quote-left"></i> 个人简介</label>
                     <textarea id="pf_bio" placeholder="介绍一下自己吧"></textarea>
                 </div>
                 <div class="row-center full">
@@ -140,6 +291,23 @@
     <script src="js/api.js"></script>
     <script src="js/profile.js"></script>
     <script>
+        // 五级身份映射
+        const roleMap = {
+            1: '公司首席执行官',
+            2: '部门经理',
+            3: '团队负责人',
+            4: '普通成员',
+            5: '系统管理员'
+        };
+        
+        // 性别映射
+        const genderMap = {
+            'M': '男',
+            'F': '女',
+            '男': '男',
+            '女': '女'
+        };
+        
         document.addEventListener('DOMContentLoaded', async function(){ 
             // 从真实API加载个人资料
             try {
@@ -148,26 +316,33 @@
                     var profileData = await window.API.getProfile();
                     console.log('✅ API返回的个人资料:', profileData);
                     
-                    if(profileData && (profileData.user_id || profileData.name)) {
+                    // 🔧 关键修复：后端返回的数据可能嵌套在 user 对象中
+                    var userData = profileData.user || profileData;
+                    console.log('📋 用户数据:', userData);
+                    console.log('📋 team字段:', userData.team);
+                    console.log('📋 role_id字段:', userData.role_id);
+                    
+                    if(userData && (userData.user_id || userData.name)) {
                         // 填充表单（使用正确的ID）
-                        console.log('开始填充表单，数据:', profileData);
+                        console.log('开始填充表单，数据:', userData);
                         
-                        document.getElementById('pf_name').value = profileData.name || '';
-                        document.getElementById('pf_email').value = profileData.email || '';
+                        document.getElementById('pf_name').value = userData.name || '';
+                        document.getElementById('pf_email').value = userData.email || '';
                         
                         var phoneField = document.getElementById('pf_phone');
-                        if(phoneField) phoneField.value = profileData.phone || '';
+                        if(phoneField) phoneField.value = userData.phone || '';
                         
-                        // 性别字段 - 处理可能的值
+                        // 性别字段 - 转换M/F为中文
                         var genderField = document.getElementById('pf_gender');
-                        if(genderField && profileData.gender) {
-                            genderField.value = profileData.gender;
+                        if(genderField && userData.gender) {
+                            var genderValue = genderMap[userData.gender] || userData.gender;
+                            genderField.value = genderValue;
                         }
                         
                         // 日期字段 - 转换格式 "2025-10-25T06:36:31" -> "2025-10-25"
                         var birthField = document.getElementById('pf_birth');
                         if(birthField) {
-                            var birthDate = profileData.birthday || profileData.birth_date;
+                            var birthDate = userData.birthday || userData.birth_date;
                             if(birthDate) {
                                 // 提取日期部分（YYYY-MM-DD）
                                 var dateOnly = birthDate.split('T')[0];
@@ -178,39 +353,80 @@
                         
                         // 年龄字段已在上面通过出生日期自动计算并填充
                         
-                        // 工作单位字段
-                        var companyField = document.getElementById('pf_company');
-                        if(companyField) {
-                            companyField.value = profileData.company || profileData.team || '';
+                        // 🔧 获取并显示团队名称（使用getTeamName接口）
+                        // 🔧 关键：后端返回的字段名是 "team" 而不是 "team_id"
+                        var teamDisplay = '加载中...';
+                        var teamId = userData.team || userData.team_id || userData.teamId;
+                        console.log('🔍 团队ID (userData.team):', teamId);
+                        
+                        if(teamId) {
+                            console.log('🔄 获取团队名称，teamId:', teamId);
+                            try {
+                                teamDisplay = await window.API.getTeamNameCached(teamId);
+                                console.log('✅ 团队名称:', teamDisplay);
+                            } catch(error) {
+                                console.error('❌ 获取团队名称失败:', error);
+                                teamDisplay = '未知团队';
+                            }
+                        } else {
+                            teamDisplay = '未分配团队';
+                        }
+                        
+                        // 🔧 显示角色名称（使用五级身份映射）
+                        var roleId = userData.role_id || userData.roleId;
+                        var roleDisplay = roleMap[roleId] || '未知角色';
+                        console.log('📋 角色ID:', roleId, '→ 角色名称:', roleDisplay);
+                        
+                        // 填充所属团队字段
+                        var teamField = document.getElementById('pf_team');
+                        if(teamField) {
+                            teamField.value = teamDisplay;
+                            console.log('✅ 所属团队字段已填充:', teamDisplay);
+                        } else {
+                            console.error('❌ 找不到pf_team字段');
+                        }
+                        
+                        // 填充担任职位字段
+                        var roleField = document.getElementById('pf_role');
+                        if(roleField) {
+                            roleField.value = roleDisplay;
+                            console.log('✅ 担任职位字段已填充:', roleDisplay);
+                        } else {
+                            console.error('❌ 找不到pf_role字段');
                         }
                         
                         // 个人简介字段
                         var bioField = document.getElementById('pf_bio');
                         if(bioField) {
-                            bioField.value = profileData.bio || '';
+                            bioField.value = userData.bio || '';
                         }
                         
                         // 🔧 关键修复：更新头像下方的显示元素
                         // 头像下方显示username（不是name）
                         var pUsernameElem = document.getElementById('p_username');
-                        if(pUsernameElem) pUsernameElem.textContent = profileData.username || '用户名';
+                        if(pUsernameElem) pUsernameElem.textContent = userData.username || '用户名';
                         
                         var pEmailElem = document.getElementById('p_email');
-                        if(pEmailElem) pEmailElem.textContent = profileData.email || '';
+                        if(pEmailElem) pEmailElem.textContent = userData.email || '';
                         
+                        // 显示角色信息
                         var pEmployeeIdElem = document.getElementById('p_employeeId');
-                        if(pEmployeeIdElem) pEmployeeIdElem.textContent = profileData.employeeId || profileData.employee_id || '';
+                        if(pEmployeeIdElem) pEmployeeIdElem.textContent = roleDisplay;
                         
+                        // 显示团队信息
                         var pCompanyElem = document.getElementById('p_company');
-                        if(pCompanyElem) pCompanyElem.textContent = profileData.company || profileData.team || '无';
+                        if(pCompanyElem) pCompanyElem.textContent = teamDisplay;
                         
                         // 🔧 自动计算年龄并更新chips显示
                         var chipGender = document.getElementById('chip_gender');
-                        if(chipGender) chipGender.textContent = profileData.gender || '';
+                        if(chipGender) {
+                            var genderDisplay = genderMap[userData.gender] || userData.gender || '';
+                            chipGender.textContent = genderDisplay;
+                        }
                         
                         // 根据出生日期自动计算年龄
                         var calculatedAge = null;
-                        var birthDate = profileData.birthday || profileData.birth_date;
+                        var birthDate = userData.birthday || userData.birth_date;
                         if(birthDate) {
                             var birth = new Date(birthDate);
                             var today = new Date();
@@ -235,16 +451,16 @@
                         
                         // 🔧 更新顶部导航栏的用户名显示
                         var currentUserNameElem = document.getElementById('currentUserName');
-                        if(currentUserNameElem) currentUserNameElem.textContent = profileData.name || '用户';
+                        if(currentUserNameElem) currentUserNameElem.textContent = userData.name || '用户';
                         
                         // 🔧 同步更新currentUser到localStorage（确保其他页面也能获取到最新用户信息）
                         try {
                             var currentUser = {
-                                name: profileData.name || '',
-                                email: profileData.email || '',
-                                employeeId: profileData.employeeId || profileData.employee_id || '',
-                                user_id: profileData.user_id || profileData.id || '',
-                                id: profileData.user_id || profileData.id || ''
+                                name: userData.name || '',
+                                email: userData.email || '',
+                                employeeId: userData.employeeId || userData.employee_id || '',
+                                user_id: userData.user_id || userData.id || '',
+                                id: userData.user_id || userData.id || ''
                             };
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
                             console.log('✅ currentUser已同步更新:', currentUser);
@@ -252,8 +468,14 @@
                             console.warn('⚠️ currentUser更新失败:', e);
                         }
                         
-                        // 保存到localStorage作为缓存
-                        localStorage.setItem('profile', JSON.stringify(profileData));
+                        // 保存到localStorage作为缓存（包含团队和角色的显示名称）
+                        var cacheData = Object.assign({}, userData, {
+                            teamName: teamDisplay,
+                            roleName: roleDisplay,
+                            team_id: teamId,  // 保存team_id以便后续更新使用
+                            role_id: roleId   // 保存role_id以便后续更新使用
+                        });
+                        localStorage.setItem('profile', JSON.stringify(cacheData));
                         console.log('✅ 个人资料加载成功，所有字段已填充（包括显示元素）');
                     } else {
                         console.warn('⚠️ API返回数据格式异常，使用缓存数据');
