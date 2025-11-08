@@ -30,6 +30,27 @@
         .btn-sm { padding:10px 14px; border-radius:10px; background: linear-gradient(to right, var(--color-primary), var(--color-primary-2)); color:#fff; border:none; cursor:pointer; }
         .btn-secondary { padding:10px 14px; border-radius:10px; border:1px solid #ffd3a1; background:#fff; color:#a55b00; cursor:pointer; }
         .tips { color:#7a5a33; font-size: 13px; margin-top: 10px; text-align:center; }
+        
+        /* 用户选择模态框样式 */
+        .user-modal { display:none; position:fixed; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; backdrop-filter:blur(5px); }
+        .user-modal-content { position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:#fff; border-radius:16px; padding:24px; width:90%; max-width:600px; max-height:80vh; overflow-y:auto; box-shadow:0 20px 40px rgba(0,0,0,0.3); }
+        .user-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; padding-bottom:12px; border-bottom:2px solid #ffd3a1; background:linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%); margin:-24px -24px 0 -24px; padding:20px 24px; border-radius:16px 16px 0 0; }
+        .user-modal-header h3 { margin:0; color:#fff; font-size:16px; font-weight:600; }
+        .user-modal-close { cursor:pointer; color:#fff; font-size:24px; line-height:1; opacity:0.8; }
+        .user-modal-close:hover { opacity:1; }
+        .user-list { max-height:450px; overflow-y:auto; }
+        .user-item { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; margin-bottom:6px; border:1px solid #ffd3a1; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+        .user-item:hover { background:#fff7ef; border-color:#ff8a00; transform:translateX(2px); }
+        .user-item.selected { background:#ffe9d2; border-color:#ff8a00; border-width:2px; padding:11px 13px; }
+        .user-info { flex:1; }
+        .user-name { font-weight:600; color:#333; margin-bottom:6px; font-size:15px; }
+        .user-meta { font-size:12px; color:#666; line-height:1.6; }
+        .user-check { width:22px; height:22px; border:2px solid #ffd3a1; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:14px; }
+        .user-item.selected .user-check { background:#ff8a00; border-color:#ff8a00; color:#fff; }
+        .selected-users-container { margin-top:8px; }
+        .user-tag { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#ffe9d2; color:#a55b00; border-radius:8px; font-size:13px; margin:4px 4px 4px 0; }
+        .user-tag-remove { cursor:pointer; font-weight:bold; opacity:0.7; }
+        .user-tag-remove:hover { opacity:1; }
     </style>
 </head>
 <body>
@@ -57,40 +78,73 @@
         <div class="panel">
             <h3 style="text-align:center;">新增任务</h3>
             <form id="publishForm" class="form">
-                <div class="form-item">
-                    <label>任务编号</label>
-                    <input id="pf_id" placeholder="例如 T-1001">
-                </div>
-                <div class="form-item">
-                    <label>任务名称</label>
-                    <input id="pf_name" placeholder="任务标题">
-                </div>
-                <div class="form-item">
-                    <label>开始日期</label>
-                    <input id="pf_start" type="date">
-                </div>
-                <div class="form-item">
-                    <label>结束日期</label>
-                    <input id="pf_end" type="date">
-                </div>
-                <div class="form-item">
-                    <label>负责人</label>
-                    <input id="pf_owner" placeholder="谁负责">
+                <div class="form-item full">
+                    <label>任务标题 <span style="color:red;">*</span></label>
+                    <input id="pf_title" placeholder="例如：设计新的登录页面" required>
                 </div>
                 <div class="form-item full">
-                    <label>摘要</label>
-                    <input id="pf_summary" placeholder="一句话概括">
+                    <label>任务描述 <span style="color:red;">*</span></label>
+                    <textarea id="pf_description" placeholder="请输入详细的任务描述..." required></textarea>
+                </div>
+                <div class="form-item">
+                    <label>截止时间 <span style="color:red;">*</span></label>
+                    <input id="pf_dueAt" type="datetime-local" required>
+                </div>
+                <div class="form-item">
+                    <label>优先级 <span style="color:red;">*</span></label>
+                    <select id="pf_priority" required>
+                        <option value="">请选择优先级</option>
+                        <option value="Low">低</option>
+                        <option value="Medium">中</option>
+                        <option value="High">高</option>
+                        <option value="Urgent">紧急</option>
+                    </select>
                 </div>
                 <div class="form-item full">
-                    <label>详情</label>
-                    <textarea id="pf_details" placeholder="更详细的描述"></textarea>
+                    <label>标签（可选，多个标签用逗号分隔）</label>
+                    <input id="pf_tags" placeholder="例如：Q4, finance, urgent">
+                </div>
+                <div class="form-item full">
+                    <label>指派成员 <span style="color:red;">*</span></label>
+                    <button type="button" class="btn-secondary" onclick="showUserSelector()" style="width:100%; padding:12px; margin-bottom:8px;">
+                        <i class="fas fa-users"></i> 选择成员
+                    </button>
+                    <input id="pf_assigneeIds" type="hidden" required>
+                    <div id="selectedUsers" class="selected-users-container"></div>
                 </div>
                 <div class="actions full">
-                    <button type="button" class="btn-sm" id="btnPublish">发布</button>
-                    <button type="button" class="btn-secondary" id="btnReset">重置</button>
+                    <button type="submit" class="btn-sm" id="btnPublish">
+                        <i class="fas fa-paper-plane"></i> 创建任务
+                    </button>
+                    <button type="button" class="btn-secondary" id="btnReset">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
                 </div>
             </form>
-            <div class="tips">提示：发布成功的任务将保存在本地（localStorage），任务列表会自动合并显示。</div>
+            <div class="tips">
+                <i class="fas fa-info-circle"></i> 提示：任务将通过后端API创建并自动分配给指定成员
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户选择模态框 -->
+    <div id="userModal" class="user-modal">
+        <div class="user-modal-content">
+            <div class="user-modal-header">
+                <h3><i class="fas fa-user-check"></i> 选择指派成员（点击用户名进行选择）</h3>
+                <span class="user-modal-close" onclick="closeUserSelector()">&times;</span>
+            </div>
+            <div id="userList" class="user-list" style="margin-top:12px;">
+                <div style="text-align:center; padding:20px; color:#999;">
+                    <i class="fas fa-spinner fa-spin"></i> 加载中...
+                </div>
+            </div>
+            <div style="margin-top:16px; padding-top:16px; border-top:1px solid #ffd3a1; display:flex; justify-content:space-between; align-items:center;">
+                <span id="selectedCount" style="color:#666; font-size:14px;">已选择 <strong style="color:#ff8a00;">0</strong> 人</span>
+                <button type="button" class="btn-sm" onclick="confirmUserSelection()" style="padding:10px 24px;">
+                    <i class="fas fa-check"></i> 确认选择
+                </button>
+            </div>
         </div>
     </div>
 

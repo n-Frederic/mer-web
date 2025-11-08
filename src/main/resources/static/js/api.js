@@ -548,7 +548,13 @@
         function normalizeUser(user) {
           if (!user) return null;
           
-          console.log('原始用户数据:', user);
+          console.log('📝 getUserById - 原始用户数据:', user);
+          console.log('📝 team_id字段检查:', {
+            'user.team_id': user.team_id,
+            'user.teamId': user.teamId,
+            'type of team_id': typeof user.team_id,
+            'type of teamId': typeof user.teamId
+          });
           
           var normalized = {
             // 统一ID字段：从原始User实体获取user_id（这是@Id字段）
@@ -577,7 +583,11 @@
             status: user.status
           };
           
-          console.log('标准化后用户数据:', normalized);
+          console.log('✅ getUserById - 标准化后用户数据:', normalized);
+          console.log('✅ 标准化后team_id:', {
+            teamId: normalized.teamId,
+            team_id: normalized.team_id
+          });
           return normalized;
         }
         
@@ -688,7 +698,7 @@
       return http('PUT', base + '/api/profile/', pf).then(function(){ return { ok:true }; });
     },
 
-    // Tasks
+    // Tasks - 获取任务列表（支持真正的后端分页）
     listTasks: async function(params){
       // === 切换点：任务列表（真实/模拟） ===
       if(!featureUseApi.tasksList){
@@ -705,25 +715,34 @@
         }catch(e){}
         return { total: data.length, list: data };
       }
-      // 使用真实后端API - 获取所有任务
-      var q = '';
-      if(params && typeof params === 'object'){
-        var usp = new URLSearchParams();
-        Object.keys(params).forEach(function(k){
-          var v = params[k];
-          if(v === undefined || v === null || v === '') return;
-          if(Array.isArray(v)) v.forEach(function(it){ usp.append(k, it); });
-          else usp.append(k, v);
-        });
-        var s = usp.toString();
-        if(s) q = '?' + s;
+      
+      // 使用真实后端API - 单页请求（真正的后端分页）
+      var page = (params && params.page) || 1;
+      var pageSize = (params && params.pageSize) || 10;
+      
+      var queryParams = {
+        page: page,
+        pageSize: pageSize,
+        status: params && params.status,
+        priority: params && params.priority
+      };
+      
+      var usp = new URLSearchParams();
+      Object.keys(queryParams).forEach(function(k){
+        var v = queryParams[k];
+        if(v === undefined || v === null || v === '') return;
+        usp.append(k, v);
+      });
+      
+      console.log('📋 listTasks - 请求第' + page + '页，每页' + pageSize + '条');
+      var res = await http('GET', base + '/api/tasks/all?' + usp.toString());
+      
+      if (!res || !res.list) {
+        return { total: 0, list: [], page: page, pageSize: pageSize };
       }
-      var res = await http('GET', base + '/api/tasks/all' + q);
       
       // 标准化任务数据字段名 - 处理backend返回的原始Task实体
       var normalizedList = (res.list || []).map(function(task) {
-        console.log('原始任务数据:', task);
-        
         // 处理creator信息 - 从Task实体中获取
         var creatorInfo = null;
         var creatorId = null;
@@ -757,15 +776,17 @@
           updatedAt: task.updated_at || task.updatedAt
         };
         
-        console.log('标准化后任务数据:', normalized);
         return normalized;
       });
+      
+      console.log('✅ 获取到第' + page + '页' + normalizedList.length + '条任务，总共' + (res.total || 0) + '条');
       
       return { 
         total: res.total || 0, 
         list: normalizedList,
-        page: res.page || 1,
-        pageSize: res.pageSize || 10
+        page: res.page || page,
+        pageSize: res.pageSize || pageSize,
+        totalPages: res.totalPages || Math.ceil((res.total || 0) / pageSize)
       };
     },
 
@@ -929,6 +950,20 @@
       return http('POST', base + '/api/tasks/', task).then(function(res){
         var id = (res && (res.id || res.taskId || (res.data && (res.data.id || res.data.taskId)))) || (task && task.id);
         return { id: id };
+      });
+    },
+
+    // 获取公司重要事项
+    getImportantTasks: function() {
+      return http('GET', base + '/api/company-tasks/important').then(function(res) {
+        console.log('获取公司重要事项响应:', res);
+        if (res && res.tasks) {
+          return res.tasks;
+        }
+        return [];
+      }).catch(function(error) {
+        console.error('获取公司重要事项失败:', error);
+        return [];
       });
     },
 
@@ -1431,6 +1466,126 @@
         return { ok: true };
       }).catch(function(error) {
         console.error('❌ 删除日志失败:', error);
+        throw error;
+      });
+    },
+
+    // ==================== 团队管理相关API ====================
+    
+    // 获取团队名称
+    getTeamName: function(teamId) {
+      console.log('🔍 getTeamName调用，参数:', {
+        teamId: teamId,
+        type: typeof teamId,
+        value: teamId
+      });
+      
+      if (!teamId || teamId === 'undefined' || teamId === 'null') {
+        console.warn('⚠️ 无效的teamId:', teamId);
+        return Promise.resolve('未分配');
+      }
+      
+      var url = base + '/api/team/' + encodeURIComponent(teamId);
+      console.log('🔄 请求URL:', url);
+      
+      return http('GET', url).then(function(res) {
+        console.log('✅ 团队API原始响应:', res);
+        if (res && res.ok && res.team_name) {
+          console.log('✅ 返回团队名称:', res.team_name);
+          return res.team_name;
+        }
+        console.warn('⚠️ API返回数据格式不正确:', res);
+        return '未知团队';
+      }).catch(function(error) {
+        console.error('❌ 获取团队名称失败:', error);
+        return '未知团队';
+      });
+    },
+
+    // 批量获取团队名称（优化性能，缓存团队信息）
+    teamNameCache: {},
+    
+    getTeamNameCached: function(teamId) {
+      var self = this;
+      // 如果已缓存，直接返回
+      if (self.teamNameCache[teamId]) {
+        return Promise.resolve(self.teamNameCache[teamId]);
+      }
+      
+      // 否则调用API并缓存结果
+      return self.getTeamName(teamId).then(function(teamName) {
+        self.teamNameCache[teamId] = teamName;
+        return teamName;
+      });
+    },
+
+    // 清除团队缓存
+    clearTeamCache: function() {
+      this.teamNameCache = {};
+    },
+
+    // ==================== 任务管理相关API ====================
+    
+    // 创建任务
+    createTask: function(taskData) {
+      console.log('🔄 创建任务，数据:', taskData);
+      
+      // 数据验证
+      if (!taskData.title || !taskData.title.trim()) {
+        return Promise.reject(new Error('任务标题不能为空'));
+      }
+      if (!taskData.description || !taskData.description.trim()) {
+        return Promise.reject(new Error('任务描述不能为空'));
+      }
+      if (!taskData.dueAt) {
+        return Promise.reject(new Error('截止时间不能为空'));
+      }
+      if (!taskData.priority) {
+        return Promise.reject(new Error('优先级不能为空'));
+      }
+      if (!taskData.assigneeIds || taskData.assigneeIds.length === 0) {
+        return Promise.reject(new Error('至少需要指派一个成员'));
+      }
+      
+      return http('POST', base + '/api/tasks', taskData).then(function(res) {
+        console.log('✅ 任务创建成功:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('❌ 创建任务失败:', error);
+        throw error;
+      });
+    },
+
+    // 获取个人任务列表
+    getPersonalTasks: function(page, pageSize, status, priority) {
+      var url = base + '/api/tasks/personal?page=' + (page || 1) + '&pageSize=' + (pageSize || 10);
+      if (status) url += '&status=' + encodeURIComponent(status);
+      if (priority) url += '&priority=' + encodeURIComponent(priority);
+      
+      console.log('🔄 获取个人任务列表:', url);
+      
+      return http('GET', url).then(function(res) {
+        console.log('✅ 个人任务列表:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('❌ 获取个人任务失败:', error);
+        throw error;
+      });
+    },
+
+    // 获取可见任务列表（个人权限内）
+    getViewTasks: function(page, pageSize, status, priority) {
+      var url = base + '/api/tasks/myView?page=' + (page || 1) + '&pageSize=' + (pageSize || 10);
+      if (status) url += '&status=' + encodeURIComponent(status);
+      if (priority) url += '&priority=' + encodeURIComponent(priority);
+      
+      console.log('🔄 获取可见任务列表:', url);
+      
+      return http('GET', url).then(function(res) {
+        console.log('✅ 可见任务列表:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('❌ 获取可见任务失败:', error);
         throw error;
       });
     }

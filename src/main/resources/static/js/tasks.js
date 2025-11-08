@@ -1,6 +1,6 @@
-// Tasks page helpers (fetch, filter, sort, paginate, render) - 优化版本
+// Tasks page - 真正的后端分页版本
 (function(){
-    // 内部辅助函数 - 确保在模块内可用
+    // 内部辅助函数
     function matchKeyword(val, kw) {
         if (!kw) return true;
         return String(val || '').toLowerCase().includes(String(kw).toLowerCase());
@@ -29,16 +29,21 @@
         }
     }
 
-    async function fetchTasks() {
+    // 获取任务数据（真正的后端分页）
+    async function fetchTasks(page, pageSize) {
         try {
             if (window.API && typeof window.API.listTasks === 'function'){
-                console.log('正在从后端获取任务数据...');
-            var resp = await window.API.listTasks();
-                console.log('后端返回数据:', resp);
+                console.log('📋 正在从后端获取任务数据，第' + page + '页，每页' + pageSize + '条');
+                
+                var resp = await window.API.listTasks({
+                    page: page,
+                    pageSize: pageSize
+                });
+                
+                console.log('✅ 后端返回数据:', resp);
                 
             // 转换后端数据格式以适配前端显示
             var tasks = (resp.list || []).map(function(task) {
-                // 现在api.js已经标准化了数据，我们可以直接使用标准化后的字段
                 return {
                     id: task.id || task.taskId || 'N/A',
                     name: task.title || task.name || '未命名任务',
@@ -50,24 +55,43 @@
                     owner: task.creator ? (task.creator.name || '未知') : '未知',
                     priority: task.priority || 'Medium',
                     status: task.status || 'Published',
-                    // 根据任务状态计算进度
                     progress: calculateProgress(task.status),
                     createdAt: task.createdAt || new Date().toISOString(),
                     updatedAt: task.updatedAt || new Date().toISOString(),
-                    // 保留原始数据以备后用
                     _original: task
                 };
             });
-                console.log('转换后的任务数据:', tasks);
-            return tasks;
+                
+                console.log('✅ 转换后的任务数据:', tasks);
+                
+                return {
+                    list: tasks,
+                    total: resp.total || 0,
+                    page: resp.page || page,
+                    pageSize: resp.pageSize || pageSize,
+                    totalPages: resp.totalPages || Math.ceil((resp.total || 0) / pageSize)
+                };
             } else {
                 console.log('API不可用，尝试加载静态数据...');
-                return await loadStaticTasks();
+                var staticData = await loadStaticTasks();
+                return {
+                    list: staticData,
+                    total: staticData.length,
+                    page: 1,
+                    pageSize: pageSize,
+                    totalPages: 1
+                };
             }
         } catch (error) {
-            console.error('获取任务数据失败:', error);
+            console.error('❌ 获取任务数据失败:', error);
             alert('获取任务数据失败: ' + error.message);
-            return await loadStaticTasks(); // 降级到静态数据
+            return {
+                list: [],
+                total: 0,
+                page: 1,
+                pageSize: pageSize,
+                totalPages: 0
+            };
         }
     }
 
@@ -113,7 +137,6 @@
             } 
         }
         
-        // 尝试从页面内嵌数据获取
         try { 
             var mockData = JSON.parse(document.getElementById('mockTasks')?.textContent || '[]');
             console.log('使用页面内嵌数据:', mockData);
@@ -124,17 +147,8 @@
         }
     }
 
-    function loadLocalPublished(){
-        try { 
-            var local = JSON.parse(localStorage.getItem('publishedTasks')||'[]');
-            console.log('本地发布的任务:', local);
-            return local;
-        } catch(e){ 
-            return []; 
-        }
-    }
-
-    function render(list) {
+    // 渲染任务列表（不再需要前端分页）
+    function render(data) {
         var grid = document.getElementById('taskGrid');
         var pageInfoTop = document.getElementById('pageInfo');
         var pageInfoBottom = document.getElementById('pageInfoBottom');
@@ -145,42 +159,15 @@
             return;
         }
 
-        var pageSize = parseInt(document.getElementById('pageSize')?.value || '12', 10);
-        var field = document.getElementById('sortField')?.value || 'name';
-        var order = document.getElementById('sortOrder')?.value || 'asc';
-
-        var tasks = list.slice();
-        
-        // 排序
-        tasks.sort(function(a,b){
-            var va = a[field] || '';
-            var vb = b[field] || '';
-            
-            if (field === 'startDate' || field === 'endDate'){ 
-                va = new Date(va).getTime() || 0; 
-                vb = new Date(vb).getTime() || 0; 
-            }
-            if (field === 'progress'){ 
-                va = Number(va) || 0; 
-                vb = Number(vb) || 0; 
-            }
-            
-            if (va < vb) return order === 'asc' ? -1 : 1; 
-            if (va > vb) return order === 'asc' ? 1 : -1; 
-            return 0;
-        });
-
-        // 分页
-        var total = tasks.length; 
-        var totalPages = Math.max(1, Math.ceil(total / pageSize));
-        window.__page = Math.min(window.__page || 1, totalPages);
-        var startIdx = (window.__page - 1) * pageSize; 
-        var pageList = tasks.slice(startIdx, startIdx + pageSize);
+        var list = data.list || [];
+        var total = data.total || 0;
+        var page = data.page || 1;
+        var totalPages = data.totalPages || 1;
         
         // 更新页面信息
-        if (pageInfoTop) pageInfoTop.textContent = window.__page + ' / ' + totalPages;
-        if (pageInfoBottom) pageInfoBottom.textContent = window.__page + ' / ' + totalPages;
-        if (infoBottom) infoBottom.textContent = '共 ' + total + ' 条记录，当前第 ' + window.__page + '/' + totalPages + ' 页';
+        if (pageInfoTop) pageInfoTop.textContent = page + ' / ' + totalPages;
+        if (pageInfoBottom) pageInfoBottom.textContent = page + ' / ' + totalPages;
+        if (infoBottom) infoBottom.textContent = '共 ' + total + ' 条记录，当前第 ' + page + '/' + totalPages + ' 页';
         
         // 更新按钮状态
         var prevTop = document.getElementById('prevPage');
@@ -188,13 +175,20 @@
         var prevBottom = document.getElementById('prevPageBottom');
         var nextBottom = document.getElementById('nextPageBottom');
         
-        if (prevTop) prevTop.disabled = window.__page <= 1;
-        if (nextTop) nextTop.disabled = window.__page >= totalPages;
-        if (prevBottom) prevBottom.disabled = window.__page <= 1;
-        if (nextBottom) nextBottom.disabled = window.__page >= totalPages;
+        if (prevTop) prevTop.disabled = page <= 1;
+        if (nextTop) nextTop.disabled = page >= totalPages;
+        if (prevBottom) prevBottom.disabled = page <= 1;
+        if (nextBottom) nextBottom.disabled = page >= totalPages;
+
+        // 保存当前页码到全局
+        window.__currentPage = page;
+        window.__totalPages = totalPages;
 
         // 渲染任务卡片
-        grid.innerHTML = pageList.map(function(t){
+        if (list.length === 0) {
+            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">暂无任务数据</div>';
+        } else {
+            grid.innerHTML = list.map(function(t){
             return '<div class="task-card">\
                 <div class="task-id">' + escapeHtml(t.id) + '</div>\
                 <div class="task-title">' + escapeHtml(t.name) + '</div>\
@@ -211,8 +205,9 @@
                 <div class="card-actions"><a class="btn-detail" href="task-detail.html?id=' + encodeURIComponent(t.id) + '">查看详情</a></div>\
             </div>';
         }).join('');
+        }
 
-        console.log('渲染完成，显示', pageList.length, '个任务，共', total, '个任务');
+        console.log('✅ 渲染完成，显示第' + page + '页，共' + list.length + '个任务，总计' + total + '个任务');
     }
 
     // HTML转义函数
@@ -227,86 +222,41 @@
         return String(text || '').replace(/[&<>"']/g, function(m) { return map[m]; });
     }
 
-    function doFilter(all){
-        try {
-            var field = document.getElementById('f_field')?.value || '';
-            var val = (document.getElementById('f_value')?.value || '').trim();
-            var start = document.getElementById('f_start')?.value || '';
-            var end = document.getElementById('f_end')?.value || '';
-            
-            console.log('筛选条件:', { field, val, start, end });
-            
-            var filtered = all.filter(function(t){
-                if (field === 'date') {
-                    return withinRange(t.startDate, start, end) || withinRange(t.endDate, start, end);
-                }
-                if (field === 'id') return matchKeyword(t.id, val);
-                if (field === 'name') return matchKeyword(t.name, val);
-                if (field === 'owner') return matchKeyword(t.owner, val);
-                if (field === 'publisher') return matchKeyword(t.publisher, val);
-            return true;
-        });
-            
-            console.log('筛选结果:', filtered.length, '/', all.length);
-            return filtered;
-        } catch (error) {
-            console.error('筛选出错:', error);
-            return all; // 出错时返回全部数据
-        }
-    }
-
     window.TasksPage = {
         boot: async function(){
             try {
-                console.log('TasksPage 启动...');
+                console.log('📄 TasksPage 启动...');
                 
-            var all = await fetchTasks();
-                console.log('获取到任务数据:', all.length, '条');
+                // 初始化页码
+                window.__currentPage = 1;
+                window.__totalPages = 1;
                 
-                // 合并本地发布的任务
-            var local = loadLocalPublished();
-            if (Array.isArray(local) && local.length){
-                    console.log('合并本地任务:', local.length, '条');
-                var map = {};
-                    all.forEach(function(t){ map[t.id] = t; });
-                    local.forEach(function(t){ map[t.id] = t; });
-                all = Object.keys(map).map(function(k){ return map[k]; });
-                    
-                    // 本地任务排前面
-                all.sort(function(a,b){
-                        var aLocal = local.findIndex(function(x){return x.id === a.id;}) >= 0;
-                        var bLocal = local.findIndex(function(x){return x.id === b.id;}) >= 0;
-                    if (aLocal && !bLocal) return -1;
-                    if (!aLocal && bLocal) return 1;
-                    return 0;
-                });
-            }
+                // 获取页面大小选择器
+                var pageSizeSelect = document.getElementById('pageSize');
+                var pageSize = parseInt(pageSizeSelect?.value || '12', 10);
                 
-            window.__allTasks = all;
-                console.log('总任务数:', all.length);
+                // 加载第一页数据
+                var data = await fetchTasks(1, pageSize);
+                render(data);
                 
-                // 定义操作函数
-                var apply = function(){ 
-                    try {
-                        var list = doFilter(window.__allTasks || []); 
-                        window.__last = list; 
-                        render(list);
-                    } catch (error) {
-                        console.error('应用筛选时出错:', error);
-                        alert('筛选时出错: ' + error.message);
-                    }
+                // 定义翻页函数
+                var loadPage = async function(page) {
+                    var pageSize = parseInt(document.getElementById('pageSize')?.value || '12', 10);
+                    console.log('📄 加载第' + page + '页，每页' + pageSize + '条');
+                    var data = await fetchTasks(page, pageSize);
+                    render(data);
                 };
                 
                 var goPrev = function(){ 
-                    if(window.__page > 1){ 
-                        window.__page--; 
-                        render(window.__last || all); 
+                    if (window.__currentPage > 1) {
+                        loadPage(window.__currentPage - 1);
                     } 
                 };
                 
                 var goNext = function(){ 
-                    window.__page++; 
-                    render(window.__last || all); 
+                    if (window.__currentPage < window.__totalPages) {
+                        loadPage(window.__currentPage + 1);
+                    }
                 };
 
                 // 绑定事件
@@ -315,28 +265,18 @@
                 var fField = document.getElementById('f_field');
                 var sortField = document.getElementById('sortField');
                 var sortOrder = document.getElementById('sortOrder');
-                var pageSize = document.getElementById('pageSize');
 
                 if (btnSearch) {
                     btnSearch.addEventListener('click', function(){ 
-                        console.log('执行搜索');
-                        window.__page = 1; 
-                        apply(); 
+                        console.log('🔍 执行搜索（前端筛选）');
+                        alert('搜索功能待实现');
                     });
                 }
 
                 if (btnReset) {
                     btnReset.addEventListener('click', function(){ 
-                        console.log('重置搜索');
-                        window.__page = 1; 
-                        var fValue = document.getElementById('f_value');
-                        var fStart = document.getElementById('f_start');
-                        var fEnd = document.getElementById('f_end');
-                        
-                        if (fValue) fValue.value = '';
-                        if (fStart) fStart.value = '';
-                        if (fEnd) fEnd.value = '';
-                        apply(); 
+                        console.log('🔄 重置搜索');
+                        loadPage(1);
                     });
                 }
 
@@ -353,12 +293,11 @@
                     });
                 }
 
-                if (sortField) sortField.addEventListener('change', apply);
-                if (sortOrder) sortOrder.addEventListener('change', apply);
-                if (pageSize) {
-                    pageSize.addEventListener('change', function(){ 
-                        window.__page = 1; 
-                        apply(); 
+                // 页面大小变化时重新加载
+                if (pageSizeSelect) {
+                    pageSizeSelect.addEventListener('change', function(){ 
+                        console.log('📊 页面大小变化为:', pageSizeSelect.value);
+                        loadPage(1); // 重新加载第一页
                     });
                 }
 
@@ -373,12 +312,10 @@
                 if (prevPageBottom) prevPageBottom.addEventListener('click', goPrev);
                 if (nextPageBottom) nextPageBottom.addEventListener('click', goNext);
 
-                // 初始化显示
-            apply();
-                console.log('TasksPage 启动完成');
+                console.log('✅ TasksPage 启动完成');
                 
             } catch (error) {
-                console.error('TasksPage 启动失败:', error);
+                console.error('❌ TasksPage 启动失败:', error);
                 alert('页面启动失败: ' + error.message);
             }
         }

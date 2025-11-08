@@ -10,44 +10,127 @@
     <link rel="stylesheet" href="css/theme.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { align-items: flex-start; }
-        .layout { width: 100%; max-width: 1320px; margin: 32px auto; padding: 0 40px; }
-        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        body { align-items: flex-start; background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%); }
+        .layout { width: 100%; max-width: 1400px; margin: 32px auto; padding: 0 40px; }
+        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand .logo { width: 48px; height: 48px; margin: 0; }
-        .brand strong { font-size: 20px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
+        .brand strong { font-size: 22px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; color: #a55b00; }
         .avatar { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, var(--color-peach), var(--color-primary-2)); border: 2px solid #fff; box-shadow: 0 3px 10px rgba(255,138,0,0.25); }
-        .panel { background: #fff; border-radius: 14px; padding: 18px; }
-        .nav-links { display:flex; gap:10px; }
-        .nav-links a { padding:8px 12px; border-radius:10px; background:#fff7ef; border:1px solid #ffd3a1; color:#a55b00; text-decoration:none; }
-        .nav-links a:hover { background:#ffe9d2; }
-        .panel h3 { margin-bottom: 12px; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 22px; }
-        .calendar { background: #fff; border-radius: 14px; padding: 16px; }
-        .calendar .row { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 8px; }
-        .calendar .cell { background: #fff7ef; border: 1px dashed #ffd3a1; min-height: 96px; border-radius: 8px; padding: 6px; font-size: 12px; color: #a55b00; }
-        .calendar .today { background: #ffe8cf; border-color: #ffbe78; }
+        .panel { background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .nav-links { display:flex; gap:10px; flex-wrap:wrap; }
+        .nav-links a { padding:8px 14px; border-radius:10px; background:#fff7ef; border:1px solid #ffd3a1; color:#a55b00; text-decoration:none; font-weight:500; transition: all 0.3s; }
+        .nav-links a:hover { background:#ffbe78; color:#fff; transform: translateY(-2px); }
+        .panel h3 { margin: 0 0 20px 0; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 24px; border-bottom: 3px solid #ffd3a1; padding-bottom: 12px; }
         
-        /* 統計數據樣式 */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
-        .stat-card { background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-peach) 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #ffd3a1; }
-        .stat-number { font-size: 28px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px; }
-        .stat-label { font-size: 13px; color: #7a5a33; }
-        .recent-tasks { margin-top: 20px; }
-        .task-item { background: #fff; border: 1px solid #ffd3a1; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .task-info { flex: 1; }
-        .task-name { font-weight: 500; color: #333; margin-bottom: 2px; }
-        .task-meta { font-size: 12px; color: #7a5a33; }
-        .task-progress { width: 60px; text-align: right; font-size: 12px; color: var(--color-primary); font-weight: 500; }
+        /* 公司重要事项 */
+        .important-tasks { background: linear-gradient(135deg, #fff7ef 0%, #ffe8cf 100%); border: 2px solid #ffbe78; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .important-tasks h4 { color: #ff8a00; margin: 0 0 16px 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
+        .important-tasks h4 i { font-size: 20px; }
+        .important-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+        .important-item { background: #fff; border: 1px solid #ffd3a1; border-radius: 8px; padding: 12px; font-size: 14px; color: #7a5a33; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
+        .important-item:hover { border-color: #ff8a00; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255,138,0,0.2); }
+        .important-item i { color: #ff8a00; }
         
-        /* 圖表樣式 */
-        .charts-section { margin-top: 20px; }
+        /* 统计卡片 */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card { background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-peach) 100%); border-radius: 12px; padding: 20px; text-align: center; border: 2px solid #ffd3a1; transition: all 0.3s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(255,138,0,0.3); }
+        .stat-number { font-size: 36px; font-weight: 700; color: var(--color-primary); margin-bottom: 8px; }
+        .stat-label { font-size: 14px; color: #7a5a33; font-weight: 500; }
+        .stat-icon { font-size: 24px; margin-bottom: 8px; }
+        
+        /* 日历样式 */
+        .calendar-section { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
+        @media (max-width: 1100px) { .calendar-section { grid-template-columns: 1fr; } }
+        .calendar { background: #fff; border-radius: 14px; padding: 20px; border: 2px solid #ffd3a1; }
+        .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+        .calendar-header h4 { color: #a55b00; margin: 0; font-size: 18px; }
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px; }
+        .weekday { text-align: center; padding: 8px; font-weight: 600; color: #ff8a00; font-size: 13px; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .day-cell { background: #fff7ef; border: 1px solid #ffd3a1; min-height: 80px; border-radius: 8px; padding: 6px; font-size: 13px; color: #7a5a33; position: relative; cursor: pointer; transition: all 0.2s; }
+        .day-cell:hover { background: #ffe9d2; border-color: #ff8a00; transform: scale(1.05); }
+        .day-cell.today { background: linear-gradient(135deg, #ffe8cf 0%, #ffd3a1 100%); border: 2px solid #ff8a00; font-weight: 700; }
+        .day-cell.other-month { background: #f5f5f5; color: #ccc; }
+        .day-number { font-weight: 600; margin-bottom: 4px; }
+        .day-indicators { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+        .indicator { width: 6px; height: 6px; border-radius: 50%; }
+        .indicator.task { background: #ff8a00; }
+        .indicator.log { background: #4CAF50; }
+        .indicator.deadline { background: #F44336; }
+        
+        /* 侧边栏 */
+        .sidebar-section { background: #fff; border-radius: 14px; padding: 20px; border: 2px solid #ffd3a1; }
+        .sidebar-section h4 { color: #a55b00; margin: 0 0 16px 0; font-size: 16px; border-bottom: 2px solid #ffd3a1; padding-bottom: 8px; }
+        .today-summary { margin-bottom: 16px; }
+        .summary-item { display: flex; justify-content: space-between; padding: 10px; background: #fff7ef; border-radius: 8px; margin-bottom: 8px; }
+        .summary-label { color: #7a5a33; font-size: 13px; }
+        .summary-value { color: #ff8a00; font-weight: 600; font-size: 14px; }
+        
+        /* 图表 */
+        .charts-section { margin-top: 24px; }
         .charts-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 20px; }
         @media (max-width: 900px) { .charts-grid { grid-template-columns: 1fr; } }
-        .chart-container { background: #fff; border: 1px solid #ffd3a1; border-radius: 12px; padding: 16px; }
-        .chart-title { color: #a55b00; font-weight: 500; margin-bottom: 12px; text-align: center; }
-        .chart-canvas { position: relative; height: 250px; }
+        .chart-container { background: #fff; border: 2px solid #ffd3a1; border-radius: 14px; padding: 20px; }
+        .chart-title { color: #a55b00; font-weight: 600; margin-bottom: 16px; text-align: center; font-size: 16px; }
+        .chart-canvas { position: relative; height: 280px; }
+        
+        /* 任务列表 */
+        .task-list { max-height: 400px; overflow-y: auto; }
+        .task-item { background: #fff7ef; border: 1px solid #ffd3a1; border-radius: 8px; padding: 12px; margin-bottom: 8px; transition: all 0.3s; }
+        .task-item:hover { background: #ffe9d2; border-color: #ff8a00; transform: translateX(4px); }
+        .task-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+        .task-title { font-weight: 600; color: #333; font-size: 14px; }
+        .task-priority { padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+        .task-priority.high { background: #ffebee; color: #c62828; }
+        .task-priority.medium { background: #fff3e0; color: #e65100; }
+        .task-priority.low { background: #e8f5e9; color: #2e7d32; }
+        .task-meta { font-size: 12px; color: #7a5a33; }
+        .task-progress-bar { height: 6px; background: #ffd3a1; border-radius: 3px; overflow: hidden; margin-top: 6px; }
+        .task-progress-fill { height: 100%; background: linear-gradient(90deg, #ff8a00 0%, #ffbe78 100%); transition: width 0.3s; }
+        
+        /* 加载状态 */
+        .loading { text-align: center; padding: 40px; color: #7a5a33; }
+        .loading i { font-size: 32px; animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* 日期详情模态框 */
+        .day-modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); overflow: auto; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .day-modal-content { background: #fff; margin: 5% auto; padding: 0; border-radius: 16px; max-width: 800px; box-shadow: 0 8px 32px rgba(0,0,0,0.2); animation: slideDown 0.3s; }
+        @keyframes slideDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .day-modal-header { background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%); color: white; padding: 24px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .day-modal-header h2 { margin: 0; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 22px; }
+        .day-modal-close { background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; padding: 0; width: 32px; height: 32px; line-height: 28px; border-radius: 50%; transition: all 0.3s; }
+        .day-modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
+        .day-modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
+        .day-section { margin-bottom: 24px; }
+        .day-section-title { color: #a55b00; font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #ffd3a1; display: flex; align-items: center; gap: 8px; }
+        .detail-card { background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%); border: 2px solid #ffd3a1; border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: all 0.3s; }
+        .detail-card:hover { border-color: #ff8a00; box-shadow: 0 4px 12px rgba(255,138,0,0.2); transform: translateX(4px); }
+        .detail-card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
+        .detail-title { font-size: 16px; font-weight: 600; color: #333; flex: 1; }
+        .detail-badges { display: flex; gap: 8px; align-items: center; }
+        .badge { padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 500; }
+        .badge.priority-high { background: #ffebee; color: #c62828; }
+        .badge.priority-medium { background: #fff3e0; color: #e65100; }
+        .badge.priority-low { background: #e8f5e9; color: #2e7d32; }
+        .badge.status { background: #e3f2fd; color: #1565c0; }
+        .detail-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px; }
+        .info-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #7a5a33; }
+        .info-item i { color: #ff8a00; width: 16px; }
+        .detail-description { margin-top: 12px; padding-top: 12px; border-top: 1px dashed #ffd3a1; color: #555; font-size: 14px; line-height: 1.6; }
+        .progress-section { margin-top: 12px; }
+        .progress-label { font-size: 12px; color: #7a5a33; margin-bottom: 4px; }
+        .progress-bar-wrapper { height: 8px; background: #ffd3a1; border-radius: 4px; overflow: hidden; }
+        .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #ff8a00 0%, #ffbe78 100%); transition: width 0.3s; }
+        .log-card { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border: 2px solid #81c784; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+        .log-card:hover { border-color: #4caf50; box-shadow: 0 4px 12px rgba(76,175,80,0.2); }
+        .log-title { font-size: 16px; font-weight: 600; color: #2e7d32; margin-bottom: 8px; }
+        .log-meta { font-size: 13px; color: #558b2f; }
+        .empty-state { text-align: center; padding: 40px; color: #999; }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
     </style>
 </head>
 <body>
@@ -55,82 +138,153 @@
         <div class="topbar">
             <div class="brand">
                 <div class="logo">P</div>
-                <strong>日程表</strong>
+                <strong>工作日程表</strong>
             </div>
             <div style="display:flex; align-items:center; gap:16px;">
                 <nav class="nav-links">
-                    <a href="publish.html">发布任务</a>
-                    <a href="dashboard.html">工作日志</a>
-                    <a href="users.html">用户管理</a>
-                    <a href="tasks.html">任务展示</a>
-                    <a href="profile.html">个人信息</a>
+                    <a href="publish.html"><i class="fas fa-plus-circle"></i> 发布任务</a>
+                    <a href="dashboard.html"><i class="fas fa-book"></i> 工作日志</a>
+                    <a href="users.html"><i class="fas fa-users"></i> 用户管理</a>
+                    <a href="tasks.html"><i class="fas fa-tasks"></i> 任务展示</a>
+                    <a href="profile.html"><i class="fas fa-user"></i> 个人信息</a>
                 </nav>
                 <div class="profile" onclick="location.href='profile.html'" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-                <span id="currentUserName">用户</span>
-                <div class="avatar"></div>
+                    <span id="currentUserName">用户</span>
+                    <div class="avatar"></div>
                 </div>
             </div>
         </div>
 
-        <!-- 統計數據區域 -->
+        <!-- 公司重要事项 -->
         <div class="panel">
-            <h3>数据统计</h3>
+            <div class="important-tasks">
+                <h4><i class="fas fa-star"></i> 公司重要事项</h4>
+                <div id="importantTasksList" class="important-list">
+                    <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计数据 -->
+        <div class="panel">
+            <h3><i class="fas fa-chart-bar"></i> 数据统计概览</h3>
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-number" id="totalTasks">-</div>
+                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="stat-number" id="totalTasks">0</div>
                     <div class="stat-label">总任务数</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="completedTasks">-</div>
-                    <div class="stat-label">已完成</div>
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-number" id="completedTasks">0</div>
+                    <div class="stat-label">已完成任务</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="inProgressTasks">-</div>
-                    <div class="stat-label">进行中</div>
+                    <div class="stat-icon"><i class="fas fa-spinner"></i></div>
+                    <div class="stat-number" id="inProgressTasks">0</div>
+                    <div class="stat-label">进行中任务</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" id="pendingTasks">-</div>
-                    <div class="stat-label">待开始</div>
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-number" id="pendingTasks">0</div>
+                    <div class="stat-label">待开始任务</div>
                 </div>
-            </div>
-            
-            <div class="recent-tasks">
-                <h4 style="color: #a55b00; margin-bottom: 12px;">最近任务</h4>
-                <div id="recentTasksList">
-                    <div style="text-align: center; color: #7a5a33; padding: 20px;">加载中...</div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-book-open"></i></div>
+                    <div class="stat-number" id="totalLogs">0</div>
+                    <div class="stat-label">工作日志数</div>
                 </div>
-            </div>
-            
-            <!-- 圖表統計區域 -->
-            <div class="charts-section">
-                <h4 style="color: #a55b00; margin-bottom: 16px;">数据可视化</h4>
-                <div class="charts-grid">
-                    <div class="chart-container">
-                        <div class="chart-title">任务完成度分布</div>
-                        <div class="chart-canvas">
-                            <canvas id="pieChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-container">
-                        <div class="chart-title">任务进度统计</div>
-                        <div class="chart-canvas">
-                            <canvas id="barChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-                <div class="chart-container">
-                    <div class="chart-title">本周任务趋势</div>
-                    <div class="chart-canvas" style="height: 200px;">
-                        <canvas id="lineChart"></canvas>
-                    </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">团队成员数</div>
                 </div>
             </div>
         </div>
 
-        <div class="panel">
-            <h3>本月日程（示意）</h3>
+        <!-- 日历和侧边栏 -->
+        <div class="calendar-section">
             <div class="calendar">
-                <div class="row" id="calendarGrid"></div>
+                <div class="calendar-header">
+                    <h4 id="calendarTitle">本月日程</h4>
+                    <div>
+                        <button onclick="previousMonth()" style="padding:6px 12px; border:1px solid #ffd3a1; background:#fff; border-radius:6px; cursor:pointer; margin-right:8px;"><i class="fas fa-chevron-left"></i></button>
+                        <button onclick="nextMonth()" style="padding:6px 12px; border:1px solid #ffd3a1; background:#fff; border-radius:6px; cursor:pointer;"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                <div class="calendar-weekdays">
+                    <div class="weekday">周日</div>
+                    <div class="weekday">周一</div>
+                    <div class="weekday">周二</div>
+                    <div class="weekday">周三</div>
+                    <div class="weekday">周四</div>
+                    <div class="weekday">周五</div>
+                    <div class="weekday">周六</div>
+                </div>
+                <div id="calendarGrid" class="calendar-days"></div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h4><i class="fas fa-calendar-day"></i> 今日概览</h4>
+                <div class="today-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">今日任务</span>
+                        <span class="summary-value" id="todayTasks">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">今日日志</span>
+                        <span class="summary-value" id="todayLogs">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">即将到期</span>
+                        <span class="summary-value" id="upcomingDeadlines">0</span>
+                    </div>
+                </div>
+                <h4 style="margin-top:20px;"><i class="fas fa-fire"></i> 近期任务</h4>
+                <div id="recentTasksList" class="task-list">
+                    <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 图表统计 -->
+        <div class="panel charts-section">
+            <h3><i class="fas fa-chart-pie"></i> 数据可视化分析</h3>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">任务状态分布</div>
+                    <div class="chart-canvas">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">任务优先级分布</div>
+                    <div class="chart-canvas">
+                        <canvas id="priorityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">每月任务与日志趋势</div>
+                <div class="chart-canvas" style="height: 300px;">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 日期详情模态框 -->
+    <div id="dayModal" class="day-modal">
+        <div class="day-modal-content">
+            <div class="day-modal-header">
+                <h2 id="modalDateTitle">2025-11-08</h2>
+                <button class="day-modal-close" onclick="closeDayModal()">&times;</button>
+            </div>
+            <div class="day-modal-body" id="modalBody">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>加载中...</p>
+                </div>
             </div>
         </div>
     </div>
@@ -141,98 +295,549 @@
         // 设置用户名
         try { const raw=localStorage.getItem('currentUser'); const u=raw?JSON.parse(raw):{name:'用户'}; document.getElementById('currentUserName').textContent=u.name||'用户'; } catch(e){}
         
-        // 日程表渲染
-        const grid=document.getElementById('calendarGrid');
-        const today=new Date().getDate();
-        const cells=Array.from({length:35}).map((_,i)=>{ const day=i+1; const isToday=day===today; return `<div class="cell ${isToday?'today':''}">${day<=30?day:''}</div>`; }).join('');
-        grid.innerHTML=cells;
-
-        // 載入統計數據
-        async function loadStats() {
+        // 全局数据存储
+        let allTasks = [];
+        let allLogs = [];
+        let allUsers = [];
+        let currentDate = new Date();
+        let calendarData = {}; // 日期 -> {tasks, logs}
+        
+        // 图表实例
+        let pieChart, priorityChart, trendChart;
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('📅 日程表页面加载...');
+            await loadAllData();
+            initCharts();
+            renderCalendar();
+            renderStats();
+            renderTodaySummary();
+            renderRecentTasks();
+            updateCharts();
+            loadImportantTasks();
+        });
+        
+        // 加载所有数据
+        async function loadAllData() {
             try {
-                // 嘗試從後端獲取統計數據
-                if (window.API && typeof window.API.getStats === 'function') {
-                    const stats = await window.API.getStats();
-                    updateStatsDisplay(stats);
-                    return;
-                }
+                console.log('🔄 开始加载所有数据...');
                 
-                // 回退方案：從任務列表計算統計
-                const tasksResp = window.API && typeof window.API.listTasks === 'function' 
-                    ? await window.API.listTasks() 
-                    : { list: [] };
+                // 并行加载所有数据
+                const [tasksData, logsData, usersData] = await Promise.all([
+                    loadAllTasks(),
+                    loadAllLogs(),
+                    loadAllUsers()
+                ]);
                 
-                const tasks = tasksResp.list || [];
-                const stats = calculateStats(tasks);
-                updateStatsDisplay(stats);
-                updateRecentTasks(tasks.slice(0, 5));
-                updateCharts(stats, tasks);
+                allTasks = tasksData;
+                allLogs = logsData;
+                allUsers = usersData;
+                
+                console.log('✅ 数据加载完成:', {
+                    tasks: allTasks.length,
+                    logs: allLogs.length,
+                    users: allUsers.length
+                });
+                
+                // 构建日历数据
+                buildCalendarData();
                 
             } catch (error) {
-                console.error('载入统计数据失败:', error);
-                document.getElementById('recentTasksList').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">載入失敗</div>';
+                console.error('❌ 加载数据失败:', error);
             }
         }
-
-        // 計算統計數據
-        function calculateStats(tasks) {
-            const total = tasks.length;
-            const completed = tasks.filter(t => t.progress >= 100).length;
-            const inProgress = tasks.filter(t => t.progress > 0 && t.progress < 100).length;
-            const pending = tasks.filter(t => t.progress === 0).length;
+        
+        // 加载所有任务（分页循环获取）
+        async function loadAllTasks() {
+            const tasks = [];
+            let page = 1;
+            const pageSize = 10000;
             
-            return {
-                totalTasks: total,
-                completedTasks: completed,
-                inProgressTasks: inProgress,
-                pendingTasks: pending
-            };
+            try {
+                while (true) {
+                    console.log(`📋 加载任务第${page}页...`);
+                    const response = await window.API.listTasks({ page, pageSize });
+                    
+                    if (!response || !response.list || response.list.length === 0) {
+                        break;
+                    }
+                    
+                    tasks.push(...response.list);
+                    
+                    // 如果当前页数据少于pageSize，说明是最后一页
+                    if (response.list.length < pageSize) {
+                        break;
+                    }
+                    
+                    page++;
+                    
+                    // 防止无限循环
+                    if (page > 100) {
+                        console.warn('⚠️ 任务页数超过100，停止加载');
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error('加载任务失败:', error);
+            }
+            
+            return tasks;
         }
-
-        // 更新統計顯示
-        function updateStatsDisplay(stats) {
-            document.getElementById('totalTasks').textContent = stats.totalTasks || 0;
-            document.getElementById('completedTasks').textContent = stats.completedTasks || 0;
-            document.getElementById('inProgressTasks').textContent = stats.inProgressTasks || 0;
-            document.getElementById('pendingTasks').textContent = stats.pendingTasks || 0;
+        
+        // 加载所有日志
+        async function loadAllLogs() {
+            try {
+                console.log('📖 加载所有日志...');
+                const response = await window.API.getJournals({});
+                return response && response.list ? response.list : [];
+            } catch (error) {
+                console.error('加载日志失败:', error);
+                return [];
+            }
         }
-
-        // 更新最近任務
-        function updateRecentTasks(tasks) {
+        
+        // 加载所有用户（分页循环获取）
+        async function loadAllUsers() {
+            const users = [];
+            let page = 1;
+            const pageSize = 10000;
+            
+            try {
+                while (true) {
+                    console.log(`👥 加载用户第${page}页...`);
+                    const response = await window.API.listUsers({ page, pageSize });
+                    
+                    if (!response || !response.list || response.list.length === 0) {
+                        break;
+                    }
+                    
+                    users.push(...response.list);
+                    
+                    if (response.list.length < pageSize) {
+                        break;
+                    }
+                    
+                    page++;
+                    
+                    if (page > 100) {
+                        console.warn('⚠️ 用户页数超过100，停止加载');
+                        break;
+                    }
+                }
+            } catch (error) {
+                console.error('加载用户失败:', error);
+            }
+            
+            return users;
+        }
+        
+        // 构建日历数据
+        function buildCalendarData() {
+            calendarData = {};
+            
+            // 处理任务
+            allTasks.forEach(task => {
+                if (task.dueAt || task.due_at) {
+                    const dateStr = formatDateKey(task.dueAt || task.due_at);
+                    if (!calendarData[dateStr]) {
+                        calendarData[dateStr] = { tasks: [], logs: [] };
+                    }
+                    calendarData[dateStr].tasks.push(task);
+                }
+            });
+            
+            // 处理日志
+            allLogs.forEach(log => {
+                if (log.log_date || log.date) {
+                    const dateStr = formatDateKey(log.log_date || log.date);
+                    if (!calendarData[dateStr]) {
+                        calendarData[dateStr] = { tasks: [], logs: [] };
+                    }
+                    calendarData[dateStr].logs.push(log);
+                }
+            });
+            
+            console.log('📅 日历数据构建完成:', Object.keys(calendarData).length, '天有数据');
+        }
+        
+        // 格式化日期为 YYYY-MM-DD
+        function formatDateKey(dateStr) {
+            if (!dateStr) return '';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '';
+            return date.toISOString().split('T')[0];
+        }
+        
+        // 渲染日历
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // 更新标题
+            document.getElementById('calendarTitle').textContent = `${year}年${month + 1}月`;
+            
+            // 获取月份第一天和最后一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay();
+            const daysInMonth = lastDay.getDate();
+            
+            // 获取上个月的天数
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            const today = new Date();
+            const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+            const todayDate = today.getDate();
+            
+            // 填充上个月的日期
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                const cell = document.createElement('div');
+                cell.className = 'day-cell other-month';
+                cell.innerHTML = `<div class="day-number">${day}</div>`;
+                grid.appendChild(cell);
+            }
+            
+            // 填充当前月的日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'day-cell';
+                if (isCurrentMonth && day === todayDate) {
+                    cell.classList.add('today');
+                }
+                
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayData = calendarData[dateStr] || { tasks: [], logs: [] };
+                
+                let indicators = '';
+                if (dayData.tasks.length > 0) {
+                    indicators += '<div class="indicator task" title="有任务"></div>'.repeat(Math.min(dayData.tasks.length, 3));
+                }
+                if (dayData.logs.length > 0) {
+                    indicators += '<div class="indicator log" title="有日志"></div>'.repeat(Math.min(dayData.logs.length, 3));
+                }
+                
+                cell.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div class="day-indicators">${indicators}</div>
+                `;
+                
+                cell.onclick = () => showDayDetails(dateStr, dayData);
+                grid.appendChild(cell);
+            }
+            
+            // 填充下个月的日期
+            const remainingCells = 42 - (firstDayOfWeek + daysInMonth);
+            for (let day = 1; day <= remainingCells; day++) {
+                const cell = document.createElement('div');
+                cell.className = 'day-cell other-month';
+                cell.innerHTML = `<div class="day-number">${day}</div>`;
+                grid.appendChild(cell);
+            }
+        }
+        
+        // 显示某天的详情（使用精美模态框）
+        async function showDayDetails(dateStr, dayData) {
+            const modal = document.getElementById('dayModal');
+            const modalBody = document.getElementById('modalBody');
+            const modalTitle = document.getElementById('modalDateTitle');
+            
+            // 显示模态框
+            modal.style.display = 'block';
+            modalTitle.textContent = dateStr;
+            
+            // 显示加载状态
+            modalBody.innerHTML = `
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>加载中...</p>
+                </div>
+            `;
+            
+            try {
+                // 加载完整的任务详情
+                const tasksWithDetails = await Promise.all(
+                    dayData.tasks.map(async task => {
+                        try {
+                            const detail = await window.API.getTask(task.id);
+                            return detail || task;
+                        } catch (err) {
+                            console.warn(`任务${task.id}详情加载失败:`, err);
+                            return task;
+                        }
+                    })
+                );
+                
+                // 渲染详情
+                let content = '';
+                
+                // 任务部分
+                if (tasksWithDetails.length > 0) {
+                    content += `
+                        <div class="day-section">
+                            <div class="day-section-title">
+                                <i class="fas fa-tasks"></i>
+                                任务列表 (${tasksWithDetails.length})
+                            </div>
+                            ${tasksWithDetails.map(task => renderTaskDetail(task)).join('')}
+                        </div>
+                    `;
+                }
+                
+                // 日志部分
+                if (dayData.logs.length > 0) {
+                    content += `
+                        <div class="day-section">
+                            <div class="day-section-title">
+                                <i class="fas fa-book"></i>
+                                日志记录 (${dayData.logs.length})
+                            </div>
+                            ${dayData.logs.map(log => renderLogDetail(log)).join('')}
+                        </div>
+                    `;
+                }
+                
+                // 空状态
+                if (tasksWithDetails.length === 0 && dayData.logs.length === 0) {
+                    content = `
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times"></i>
+                            <p>这一天没有任务或日志</p>
+                        </div>
+                    `;
+                }
+                
+                modalBody.innerHTML = content;
+                
+            } catch (error) {
+                console.error('加载详情失败:', error);
+                modalBody.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>加载失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // 渲染任务详情卡片
+        function renderTaskDetail(task) {
+            const priorityMap = { 'high': '高', 'medium': '中', 'low': '低' };
+            const statusMap = { 'pending': '待处理', 'in_progress': '进行中', 'completed': '已完成', 'cancelled': '已取消' };
+            const priority = priorityMap[task.priority] || '未设置';
+            const status = statusMap[task.status] || '未知';
+            const progress = task.progress || 0;
+            
+            return `
+                <div class="detail-card">
+                    <div class="detail-card-header">
+                        <div class="detail-title">${task.title || task.name || '未命名任务'}</div>
+                        <div class="detail-badges">
+                            <span class="badge priority-${task.priority || 'low'}">${priority}</span>
+                            <span class="badge status">${status}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="detail-info">
+                        ${task.assignee_name ? `
+                            <div class="info-item">
+                                <i class="fas fa-user"></i>
+                                <span>负责人: ${task.assignee_name}</span>
+                            </div>
+                        ` : ''}
+                        ${task.dueAt || task.due_at ? `
+                            <div class="info-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>截止: ${formatDate(task.dueAt || task.due_at)}</span>
+                            </div>
+                        ` : ''}
+                        ${task.createdAt || task.created_at ? `
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <span>创建: ${formatDate(task.createdAt || task.created_at)}</span>
+                            </div>
+                        ` : ''}
+                        ${task.updatedAt || task.updated_at ? `
+                            <div class="info-item">
+                                <i class="fas fa-edit"></i>
+                                <span>更新: ${formatDate(task.updatedAt || task.updated_at)}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    ${task.description ? `
+                        <div class="detail-description">
+                            <strong>描述:</strong> ${task.description}
+                        </div>
+                    ` : ''}
+                    
+                    <div class="progress-section">
+                        <div class="progress-label">进度: ${progress}%</div>
+                        <div class="progress-bar-wrapper">
+                            <div class="progress-bar-inner" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // 渲染日志详情卡片
+        function renderLogDetail(log) {
+            return `
+                <div class="log-card">
+                    <div class="log-title">${log.title || '未命名日志'}</div>
+                    <div class="log-meta">
+                        ${log.authorName ? `<span><i class="fas fa-user"></i> ${log.authorName}</span> ` : ''}
+                        ${log.createdAt || log.created_at ? `<span><i class="fas fa-clock"></i> ${formatDate(log.createdAt || log.created_at)}</span>` : ''}
+                    </div>
+                    ${log.content ? `<div style="margin-top: 8px; color: #558b2f;">${log.content}</div>` : ''}
+                </div>
+            `;
+        }
+        
+        // 关闭模态框
+        function closeDayModal() {
+            document.getElementById('dayModal').style.display = 'none';
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('dayModal');
+            if (event.target === modal) {
+                closeDayModal();
+            }
+        }
+        
+        // 格式化日期
+        function formatDate(dateStr) {
+            if (!dateStr) return '未知';
+            const date = new Date(dateStr);
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            const h = String(date.getHours()).padStart(2, '0');
+            const min = String(date.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${d} ${h}:${min}`;
+        }
+        
+        // 上一个月
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            renderCalendar();
+        }
+        
+        // 下一个月
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            renderCalendar();
+        }
+        
+        // 渲染统计数据
+        function renderStats() {
+            // 任务统计
+            const totalTasks = allTasks.length;
+            const completedTasks = allTasks.filter(t => (t.progress || 0) >= 100).length;
+            const inProgressTasks = allTasks.filter(t => {
+                const p = t.progress || 0;
+                return p > 0 && p < 100;
+            }).length;
+            const pendingTasks = allTasks.filter(t => (t.progress || 0) === 0).length;
+            
+            document.getElementById('totalTasks').textContent = totalTasks;
+            document.getElementById('completedTasks').textContent = completedTasks;
+            document.getElementById('inProgressTasks').textContent = inProgressTasks;
+            document.getElementById('pendingTasks').textContent = pendingTasks;
+            document.getElementById('totalLogs').textContent = allLogs.length;
+            document.getElementById('totalUsers').textContent = allUsers.length;
+        }
+        
+        // 渲染今日概览
+        function renderTodaySummary() {
+            const today = new Date().toISOString().split('T')[0];
+            const todayData = calendarData[today] || { tasks: [], logs: [] };
+            
+            document.getElementById('todayTasks').textContent = todayData.tasks.length;
+            document.getElementById('todayLogs').textContent = todayData.logs.length;
+            
+            // 计算即将到期的任务（7天内）
+            const upcoming = allTasks.filter(task => {
+                const dueDate = task.dueAt || task.due_at;
+                if (!dueDate) return false;
+                const due = new Date(dueDate);
+                const now = new Date();
+                const diff = (due - now) / (1000 * 60 * 60 * 24);
+                return diff >= 0 && diff <= 7;
+            }).length;
+            
+            document.getElementById('upcomingDeadlines').textContent = upcoming;
+        }
+        
+        // 渲染近期任务
+        function renderRecentTasks() {
             const container = document.getElementById('recentTasksList');
             
-            if (!tasks || tasks.length === 0) {
+            if (allTasks.length === 0) {
                 container.innerHTML = '<div style="text-align: center; color: #7a5a33; padding: 20px;">暂无任务</div>';
                 return;
             }
             
-            container.innerHTML = tasks.map(task => `
-                <div class="task-item">
-                    <div class="task-info">
-                        <div class="task-name">${task.name || '未命名任务'}</div>
-                        <div class="task-meta">負責人: ${task.owner || '未指定'} | 截止: ${task.endDate || '未设定'}</div>
+            // 按更新时间排序，取最近5个
+            const recentTasks = [...allTasks]
+                .sort((a, b) => {
+                    const dateA = new Date(a.updatedAt || a.updated_at || a.createdAt || a.created_at || 0);
+                    const dateB = new Date(b.updatedAt || b.updated_at || b.createdAt || b.created_at || 0);
+                    return dateB - dateA;
+                })
+                .slice(0, 5);
+            
+            container.innerHTML = recentTasks.map(task => {
+                const priority = task.priority || 'low';
+                const priorityText = { high: '高', medium: '中', low: '低' }[priority] || '低';
+                const progress = task.progress || 0;
+                
+                return `
+                    <div class="task-item">
+                        <div class="task-header">
+                            <div class="task-title">${task.title || task.name || '未命名任务'}</div>
+                            <div class="task-priority ${priority}">${priorityText}</div>
+                        </div>
+                        <div class="task-meta">
+                            进度: ${progress}%
+                            ${task.dueAt || task.due_at ? ` | 截止: ${formatDate(task.dueAt || task.due_at)}` : ''}
+                        </div>
+                        <div class="task-progress-bar">
+                            <div class="task-progress-fill" style="width: ${progress}%"></div>
+                        </div>
                     </div>
-                    <div class="task-progress">${task.progress || 0}%</div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
-
-        // 圖表實例
-        let pieChart, barChart, lineChart;
-
-        // 初始化圖表
+        
+        // 格式化日期显示
+        function formatDate(dateStr) {
+            if (!dateStr) return '未设定';
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return '未设定';
+            return `${date.getMonth() + 1}月${date.getDate()}日`;
+        }
+        
+        // 初始化图表
         function initCharts() {
-            // 餅圖 - 任務完成度分佈
+            // 任务状态分布饼图
             const pieCtx = document.getElementById('pieChart').getContext('2d');
             pieChart = new Chart(pieCtx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: ['已完成', '进行中', '待开始'],
                     datasets: [{
                         data: [0, 0, 0],
                         backgroundColor: ['#4CAF50', '#FF9800', '#F44336'],
-                        borderColor: ['#45a049', '#e68900', '#da190b'],
-                        borderWidth: 2
+                        borderColor: ['#fff', '#fff', '#fff'],
+                        borderWidth: 3
                     }]
                 },
                 options: {
@@ -240,57 +845,60 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-
-            // 條形圖 - 任務進度統計
-            const barCtx = document.getElementById('barChart').getContext('2d');
-            barChart = new Chart(barCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['0-25%', '26-50%', '51-75%', '76-99%', '100%'],
-                    datasets: [{
-                        label: '任务数量',
-                        data: [0, 0, 0, 0, 0],
-                        backgroundColor: ['#FF6B6B', '#FFA726', '#FFEB3B', '#66BB6A', '#4CAF50'],
-                        borderColor: ['#E53935', '#FF9800', '#FBC02D', '#4CAF50', '#2E7D32'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 13 }
                             }
                         }
                     }
                 }
             });
-
-            // 折線圖 - 本週任務趨勢
-            const lineCtx = document.getElementById('lineChart').getContext('2d');
-            const weekDays = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-            lineChart = new Chart(lineCtx, {
+            
+            // 优先级分布饼图
+            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+            priorityChart = new Chart(priorityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['高优先级', '中优先级', '低优先级'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#F44336', '#FF9800', '#4CAF50'],
+                        borderColor: ['#fff', '#fff', '#fff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 13 }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 趋势折线图
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            trendChart = new Chart(trendCtx, {
                 type: 'line',
                 data: {
-                    labels: weekDays,
+                    labels: [],
                     datasets: [{
-                        label: '新建任务',
-                        data: [2, 3, 1, 4, 2, 1, 0],
+                        label: '任务数',
+                        data: [],
                         borderColor: '#FF8A00',
                         backgroundColor: 'rgba(255, 138, 0, 0.1)',
                         tension: 0.4,
                         fill: true
                     }, {
-                        label: '完成任务',
-                        data: [1, 2, 2, 3, 1, 2, 1],
+                        label: '日志数',
+                        data: [],
                         borderColor: '#4CAF50',
                         backgroundColor: 'rgba(76, 175, 80, 0.1)',
                         tension: 0.4,
@@ -303,50 +911,91 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
+                            ticks: { stepSize: 1 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 13 }
                             }
                         }
                     }
                 }
             });
         }
-
-        // 更新圖表數據
-        function updateCharts(stats, tasks) {
-            // 更新餅圖
-            pieChart.data.datasets[0].data = [
-                stats.completedTasks || 0,
-                stats.inProgressTasks || 0,
-                stats.pendingTasks || 0
-            ];
+        
+        // 更新图表数据
+        function updateCharts() {
+            // 更新状态分布饼图
+            const completed = allTasks.filter(t => (t.progress || 0) >= 100).length;
+            const inProgress = allTasks.filter(t => {
+                const p = t.progress || 0;
+                return p > 0 && p < 100;
+            }).length;
+            const pending = allTasks.filter(t => (t.progress || 0) === 0).length;
+            
+            pieChart.data.datasets[0].data = [completed, inProgress, pending];
             pieChart.update();
-
-            // 更新條形圖 - 按進度分組
-            const progressGroups = [0, 0, 0, 0, 0]; // 0-25%, 26-50%, 51-75%, 76-99%, 100%
-            if (tasks && tasks.length > 0) {
-                tasks.forEach(task => {
-                    const progress = task.progress || 0;
-                    if (progress === 100) progressGroups[4]++;
-                    else if (progress >= 76) progressGroups[3]++;
-                    else if (progress >= 51) progressGroups[2]++;
-                    else if (progress >= 26) progressGroups[1]++;
-                    else progressGroups[0]++;
-                });
+            
+            // 更新优先级分布饼图
+            const highPriority = allTasks.filter(t => t.priority === 'high').length;
+            const mediumPriority = allTasks.filter(t => t.priority === 'medium').length;
+            const lowPriority = allTasks.filter(t => !t.priority || t.priority === 'low').length;
+            
+            priorityChart.data.datasets[0].data = [highPriority, mediumPriority, lowPriority];
+            priorityChart.update();
+            
+            // 更新趋势图（最近30天）
+            const now = new Date();
+            const labels = [];
+            const taskData = [];
+            const logData = [];
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date(now);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
+                
+                const dayData = calendarData[dateStr] || { tasks: [], logs: [] };
+                taskData.push(dayData.tasks.length);
+                logData.push(dayData.logs.length);
             }
-            barChart.data.datasets[0].data = progressGroups;
-            barChart.update();
-
-            // 折線圖使用模擬數據（實際項目中可以從後端獲取）
-            // 這裡可以根據任務的創建日期和完成日期來生成真實數據
+            
+            trendChart.data.labels = labels;
+            trendChart.data.datasets[0].data = taskData;
+            trendChart.data.datasets[1].data = logData;
+            trendChart.update();
         }
-
-        // 頁面載入時執行
-        document.addEventListener('DOMContentLoaded', function() {
-            initCharts();
-            loadStats();
-        });
+        
+        // 加载公司重要事项
+        async function loadImportantTasks() {
+            try {
+                const tasks = await window.API.getImportantTasks();
+                const container = document.getElementById('importantTasksList');
+                
+                if (!tasks || tasks.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; color: #7a5a33; padding: 20px;">暂无重要事项</div>';
+                    return;
+                }
+                
+                container.innerHTML = tasks.map(task => `
+                    <div class="important-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>${task}</span>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('加载公司重要事项失败:', error);
+                document.getElementById('importantTasksList').innerHTML = 
+                    '<div style="text-align: center; color: #999; padding: 20px;">加载失败</div>';
+            }
+        }
     </script>
 </body>
 </html>
-

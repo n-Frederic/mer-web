@@ -195,45 +195,6 @@ public class ApiProxyController {
         }
     }
 
-    @GetMapping("/tasks/personal")
-    public ResponseEntity<?> getPersonalTasks(
-            @RequestParam String userId,
-            @RequestParam(required = false) String status,
-            @RequestParam(required = false) String priority,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestHeader(value = "Authorization", required = false) String authorization) {
-        try {
-            String url = backendUrl + "/tasks/personal?userId=" + userId + 
-                        "&page=" + page + "&pageSize=" + pageSize;
-            if (status != null && !status.isEmpty()) {
-                url += "&status=" + status;
-            }
-            if (priority != null && !priority.isEmpty()) {
-                url += "&priority=" + priority;
-            }
-            
-            // 创建请求头并添加 Authorization
-            HttpHeaders headers = new HttpHeaders();
-            if (authorization != null) {
-                headers.set("Authorization", authorization);
-            }
-            
-            HttpEntity<Void> request = new HttpEntity<>(headers);
-            
-            ResponseEntity<Map> response = restTemplate.exchange(
-                url, 
-                HttpMethod.GET, 
-                request, 
-                Map.class
-            );
-            return ResponseEntity.ok(response.getBody());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", true, "message", "获取个人任务失败: " + e.getMessage()));
-        }
-    }
-
     @GetMapping("/tasks/all")
     public ResponseEntity<?> getAllTasks(
             @RequestParam(required = false) String status,
@@ -441,9 +402,24 @@ public class ApiProxyController {
                 Map.class
             );
             return ResponseEntity.ok(response.getBody());
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            // 后端500错误，返回更友好的错误信息
+            return ResponseEntity.ok(Map.of(
+                "list", new java.util.ArrayList<>(),
+                "total", 0,
+                "page", page,
+                "pageSize", pageSize,
+                "error", true,
+                "message", "日志数据加载失败，可能存在数据不一致问题。请联系管理员检查数据库。"
+            ));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", true, "message", "获取日志列表失败: " + e.getMessage()));
+                    .body(Map.of(
+                        "error", true, 
+                        "message", "获取日志列表失败: " + e.getMessage(),
+                        "list", new java.util.ArrayList<>(),
+                        "total", 0
+                    ));
         }
     }
 
@@ -484,6 +460,205 @@ public class ApiProxyController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("ok", false, "message", "创建日志失败: " + e.getMessage()));
+        }
+    }
+
+    // ==================== 团队管理相关API ====================
+    
+    @GetMapping("/team/{teamId}")
+    public ResponseEntity<?> getTeamName(
+            @PathVariable Long teamId,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/team/" + teamId;
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "message", "查询编号对应团队失败"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "查询编号对应团队失败: " + e.getMessage()));
+        }
+    }
+
+    // ==================== 任务管理相关API ====================
+    
+    /**
+     * 创建任务
+     * POST /api/tasks
+     */
+    @PostMapping("/tasks")
+    public ResponseEntity<?> createTask(
+            @RequestBody Map<String, Object> taskData,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(taskData, headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                backendUrl + "/tasks",
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "error", "创建任务失败: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "error", "创建任务失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 获取个人任务列表
+     * GET /api/tasks/personal
+     */
+    @GetMapping("/tasks/personal")
+    public ResponseEntity<?> getPersonalTasks(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/tasks/personal?page=" + page + "&pageSize=" + pageSize;
+            if (status != null && !status.isEmpty()) {
+                url += "&status=" + status;
+            }
+            if (priority != null && !priority.isEmpty()) {
+                url += "&priority=" + priority;
+            }
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "error", "获取个人任务失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 获取可见任务列表
+     * GET /api/tasks/myView
+     */
+    @GetMapping("/tasks/myView")
+    public ResponseEntity<?> getViewTasks(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String priority,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/tasks/myView?page=" + page + "&pageSize=" + pageSize;
+            if (status != null && !status.isEmpty()) {
+                url += "&status=" + status;
+            }
+            if (priority != null && !priority.isEmpty()) {
+                url += "&priority=" + priority;
+            }
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "error", "获取可见任务失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 代理获取公司重要事项
+     * GET /api/company-tasks/important
+     */
+    @GetMapping("/company-tasks/important")
+    public ResponseEntity<?> getImportantTasks(@RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null && !authorization.isEmpty()) {
+                headers.set("Authorization", authorization);
+            }
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            // 转发到后端
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    backendUrl + "/company-tasks/important",
+                    HttpMethod.GET,
+                    entity,
+                    Map.class
+            );
+
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("tasks", new String[]{}));
         }
     }
 }

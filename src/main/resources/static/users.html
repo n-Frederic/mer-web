@@ -80,21 +80,28 @@
             transform: translate(-50%, -50%);
             background: white;
             border-radius: 16px;
-            padding: 24px;
+            padding: 32px 40px;
             width: 90%;
-            max-width: 500px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
         .modal-header {
             margin-bottom: 20px;
             padding-bottom: 12px;
             border-bottom: 2px solid #ffd3a1;
+            background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%);
+            margin: -32px -40px 20px -40px;
+            padding: 20px 40px;
+            border-radius: 16px 16px 0 0;
         }
         .modal-header h3 {
             margin: 0;
-            color: var(--color-primary);
+            color: #ffffff;
             font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
             font-size: 20px;
+            font-weight: 600;
         }
         .form-group {
             margin-bottom: 16px;
@@ -194,7 +201,7 @@
             </div>
             <table>
                 <thead>
-                    <tr><th>用户名</th><th>邮箱</th><th>角色</th><th>操作</th></tr>
+                    <tr><th>姓名</th><th>用户名</th><th>邮箱</th><th>团队</th><th>角色</th><th>操作</th></tr>
                 </thead>
                 <tbody id="userTableBody"></tbody>
             </table>
@@ -208,42 +215,109 @@
                 <h3>编辑用户信息</h3>
             </div>
             <form id="editForm">
+                <input type="hidden" id="editUserId" name="user_id">
+                
                 <div class="form-group">
-                    <label for="editName">姓名</label>
+                    <label for="editName">姓名 <span style="color:red;">*</span></label>
                     <input type="text" id="editName" name="name" required>
                 </div>
                 <div class="form-group">
+                    <label for="editEmail">邮箱 <span style="color:red;">*</span></label>
+                    <input type="email" id="editEmail" name="email" required placeholder="请输入邮箱">
+                </div>
+                <div class="form-group">
                     <label for="editPhone">手机号</label>
-                    <input type="tel" id="editPhone" name="phone">
+                    <input type="tel" id="editPhone" name="phone" placeholder="选填">
                 </div>
                 <div class="form-group">
-                    <label for="editTeamId">团队</label>
-                    <select id="editTeamId" name="team_id">
-                        <option value="1">研发团队</option>
-                        <option value="2">测试团队</option>
-                        <option value="3">产品团队</option>
+                    <label for="editTeamId">团队 <span style="color:red;">*</span></label>
+                    <select id="editTeamId" name="team_id" required>
+                        <option value="">加载中...</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="editRoleId">角色</label>
+                    <label for="editRoleId">角色 <span style="color:red;">*</span></label>
                     <select id="editRoleId" name="role_id" required>
-                        <option value="1">管理员</option>
-                        <option value="2">经理</option>
-                        <option value="3">成员</option>
+                        <option value="1">公司首席执行官</option>
+                        <option value="2">部门经理</option>
+                        <option value="3">团队负责人</option>
+                        <option value="4">普通成员</option>
+                        <option value="5">系统管理员</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="editStatus">状态</label>
-                    <select id="editStatus" name="status">
+                    <label for="editStatus">状态 <span style="color:red;">*</span></label>
+                    <select id="editStatus" name="status" required>
                         <option value="active">激活</option>
                         <option value="inactive">停用</option>
+                        <option value="suspended">暂停</option>
                     </select>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="closeEditModal()">取消</button>
-                    <button type="submit" class="btn-save">保存</button>
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> 保存更改
+                    </button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- 查看用户详情模态框 -->
+    <div id="viewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>用户详细信息</h3>
+            </div>
+            <div id="viewUserInfo" style="padding: 16px 0;">
+                <div class="info-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 16px;">
+                    <!-- 左列 -->
+                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: 90px 1fr; gap: 12px; line-height: 2;">
+                            <div style="color: #666; font-weight: 600;">用户ID：</div>
+                            <div id="viewUserId" style="color: #333;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">姓名：</div>
+                            <div id="viewUserRealName" style="color: #333; font-weight: 600; font-size: 16px;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">用户名：</div>
+                            <div id="viewUserLoginName" style="color: #333;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">邮箱：</div>
+                            <div id="viewUserEmail" style="color: #333; word-break: break-all;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">手机：</div>
+                            <div id="viewUserPhone" style="color: #333;"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- 右列 -->
+                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
+                        <div style="display: grid; grid-template-columns: 90px 1fr; gap: 12px; line-height: 2;">
+                            <div style="color: #666; font-weight: 600;">团队：</div>
+                            <div id="viewUserTeam" style="color: #ff8a00; font-weight: 500;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">角色：</div>
+                            <div id="viewUserRole" style="color: #ff8a00; font-weight: 500;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">性别：</div>
+                            <div id="viewUserGender" style="color: #333;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">生日：</div>
+                            <div id="viewUserBirthday" style="color: #333;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 个人简介单独一行 -->
+                <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
+                    <div style="color: #666; font-weight: 600; margin-bottom: 8px;">个人简介：</div>
+                    <div id="viewUserBio" style="color: #333; line-height: 1.6;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeViewModal()">关闭</button>
+            </div>
         </div>
     </div>
 
@@ -277,24 +351,24 @@
                 <div class="form-group">
                     <label for="createTeamId">团队 *</label>
                     <select id="createTeamId" name="team_id" required>
-                        <option value="1">研发团队</option>
-                        <option value="2">测试团队</option>
-                        <option value="3">产品团队</option>
+                        <option value="">加载中...</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="createRoleId">角色 *</label>
                     <select id="createRoleId" name="role_id" required>
-                        <option value="1">管理员</option>
-                        <option value="2">经理</option>
-                        <option value="3">成员</option>
+                        <option value="1">公司首席执行官</option>
+                        <option value="2">部门经理</option>
+                        <option value="3">团队负责人</option>
+                        <option value="4" selected>普通成员</option>
+                        <option value="5">系统管理员</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="createGender">性别</label>
                     <select id="createGender" name="gender">
-                        <option value="男">男</option>
-                        <option value="女">女</option>
+                        <option value="M">男</option>
+                        <option value="F">女</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -405,7 +479,7 @@
                     console.warn('4. 数据格式不符合预期');
                 }
                 
-                renderUserTable();
+                await renderUserTable();
                 updatePagination();
                 
             } catch (error) {
@@ -417,12 +491,12 @@
                     { user_id: 1, name: 'Alice (演示)', email: 'alice@example.com', role: { name: '管理员' } },
                     { user_id: 2, name: 'Bob (演示)', email: 'bob@example.com', role: { name: '员工' } }
                 ];
-                renderUserTable();
+                await renderUserTable();
             }
         }
         
         // 渲染用户表格
-        function renderUserTable() {
+        async function renderUserTable() {
             console.log('开始渲染用户表格，用户数量:', users.length);
             console.log('用户数据结构示例:', users.length > 0 ? users[0] : 'null');
             
@@ -434,45 +508,72 @@
             }
             
             if (users.length === 0) {
-                userTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #666;">暂无用户数据</td></tr>';
+                userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #666;">暂无用户数据</td></tr>';
                 return;
             }
             
-            userTableBody.innerHTML = users.map((u, index) => {
+            // 显示加载状态
+            userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #666;">加载中...</td></tr>';
+            
+            // 角色映射（五级身份）
+            const roleMap = {
+                1: '公司首席执行官',
+                2: '部门经理',
+                3: '团队负责人',
+                4: '普通成员',
+                5: '系统管理员'
+            };
+            
+            // 为每个用户获取团队名称
+            const userRows = await Promise.all(users.map(async (u, index) => {
                 console.log(`渲染用户 ${index}:`, {
                     id: u.id || u.userId || u.user_id,
                     name: u.name,
                     email: u.email,
                     role_id: u.roleId || u.role_id,
-                    role: u.role
+                    team_id: u.teamId || u.team_id,
+                    role: u.role,
+                    team: u.team
                 });
                 
-                // 处理角色显示（现在api.js已经标准化了数据）
+                // 处理角色显示（缺失时显示"未知"）
                 let roleDisplay = '未知';
                 if (u.role && u.role.name) {
                     roleDisplay = u.role.name;
                 } else if (u.roleId || u.role_id) {
-                    // 根据role_id映射显示名称
-                    const roleMap = {
-                        1: '管理员',
-                        2: '经理',
-                        3: '成员'
-                    };
                     const roleId = u.roleId || u.role_id;
-                    roleDisplay = roleMap[roleId] || `角色${roleId}`;
+                    roleDisplay = roleMap[roleId] || '未知';
                 } else if (u.role) {
-                    // 如果role是字符串
                     roleDisplay = u.role;
                 }
                 
-                // 确保用户ID存在（优先使用标准化后的字段）
+                // 处理团队显示（缺失时显示"未知"）
+                let teamDisplay = '未知';
+                if (u.team && u.team.name) {
+                    // 后端已返回team对象
+                    teamDisplay = u.team.name;
+                } else if (u.teamId || u.team_id) {
+                    // 调用API获取团队名称
+                    const teamId = u.teamId || u.team_id;
+                    try {
+                        const fetchedName = await window.API.getTeamNameCached(teamId);
+                        teamDisplay = fetchedName || '未知';
+                    } catch (error) {
+                        console.error('获取团队名称失败:', error);
+                        teamDisplay = '未知';
+                    }
+                }
+                
+                // 确保用户ID存在
                 const userId = u.id || u.userId || u.user_id || (1000 + index);
                 
                 return `
                     <tr>
-                        <td>${u.name || '未知'}</td>
+                        <td style="font-weight: 500;">${u.name || '未知'}</td>
+                        <td>${u.username || '未知'}</td>
                         <td>${u.email || '未知'}</td>
-                        <td>${roleDisplay}</td>
+                        <td style="color: #ff8a00; font-weight: 500;">${teamDisplay}</td>
+                        <td style="color: #a55b00;">${roleDisplay}</td>
                         <td>
                             <div class="btn-group">
                                 <button class="btn-sm" onclick="viewUser(${userId})">查看</button>
@@ -481,8 +582,9 @@
                         </td>
                     </tr>
                 `;
-            }).join('');
+            }));
             
+            userTableBody.innerHTML = userRows.join('');
             console.log('用户表格渲染完成');
         }
 
@@ -621,103 +723,207 @@
                     return;
                 }
                 
-                // 处理角色和团队显示
+                // 处理角色和团队显示（五级身份）
                 const roleMap = {
-                    1: '管理员',
-                    2: '经理', 
-                    3: '成员'
-                };
-                
-                const teamMap = {
-                    1: '研发团队',
-                    2: '测试团队',
-                    3: '产品团队'
+                    1: '公司首席执行官',
+                    2: '部门经理',
+                    3: '团队负责人',
+                    4: '普通成员',
+                    5: '系统管理员'
                 };
                 
                 const genderMap = {
                     'M': '男',
-                    'F': '女'
+                    'F': '女',
+                    '男': '男',
+                    '女': '女'
                 };
                 
-                // 格式化用户信息进行显示（使用标准化后的字段名）
-                let userInfo = `用户详细信息：\n`;
-                userInfo += `用户ID：${user.id || user.userId || user.user_id || '未知'}\n`;
-                userInfo += `姓名：${user.name || '未知'}\n`;
-                userInfo += `用户名：${user.username || '未设置'}\n`;
-                userInfo += `邮箱：${user.email || '未知'}\n`;
-                userInfo += `手机：${user.phone || '未设置'}\n`;
+                // 填充用户信息到模态框（缺失字段统一显示"未知"）
+                document.getElementById('viewUserId').textContent = user.id || user.userId || user.user_id || '未知';
+                document.getElementById('viewUserRealName').textContent = user.name || '未知';
+                document.getElementById('viewUserLoginName').textContent = user.username || '未知';
+                document.getElementById('viewUserEmail').textContent = user.email || '未知';
+                document.getElementById('viewUserPhone').textContent = user.phone || '未知';
                 
-                // 处理团队信息（优先使用标准化字段）
+                // 处理团队信息（缺失时显示"未知"）
+                let teamDisplay = '未知';
+                console.log('🔍 用户团队信息调试:', {
+                    'user对象': user,
+                    'user.team': user.team,
+                    'user.teamId': user.teamId,
+                    'user.team_id': user.team_id
+                });
+                
                 if (user.team && user.team.name) {
-                    userInfo += `团队：${user.team.name}\n`;
+                    teamDisplay = user.team.name;
+                    console.log('✅ 使用后端返回的team对象:', teamDisplay);
                 } else if (user.teamId || user.team_id) {
                     const teamId = user.teamId || user.team_id;
-                    userInfo += `团队：${teamMap[teamId] || '团队' + teamId}\n`;
+                    console.log('🔄 准备调用团队API，teamId:', teamId);
+                    try {
+                        const fetchedName = await window.API.getTeamNameCached(teamId);
+                        teamDisplay = fetchedName || '未知';
+                        console.log('✅ 团队API返回:', teamDisplay);
+                    } catch (error) {
+                        console.error('❌ 获取团队名称失败:', error);
+                        teamDisplay = '未知';
+                    }
                 } else {
-                    userInfo += `团队：未分配\n`;
+                    console.warn('⚠️ 用户没有团队ID');
                 }
+                document.getElementById('viewUserTeam').textContent = teamDisplay;
                 
-                // 处理角色信息（优先使用标准化字段）
+                // 处理角色信息（缺失时显示"未知"）
+                let roleDisplay = '未知';
                 if (user.role && user.role.name) {
-                    userInfo += `角色：${user.role.name}\n`;
+                    roleDisplay = user.role.name;
                 } else if (user.roleId || user.role_id) {
                     const roleId = user.roleId || user.role_id;
-                    userInfo += `角色：${roleMap[roleId] || '角色' + roleId}\n`;
-                } else {
-                    userInfo += `角色：未设置\n`;
+                    roleDisplay = roleMap[roleId] || '未知';
                 }
+                document.getElementById('viewUserRole').textContent = roleDisplay;
                 
-                userInfo += `性别：${genderMap[user.gender] || user.gender || '未设置'}\n`;
-                userInfo += `状态：${user.status || '正常'}\n`;
+                document.getElementById('viewUserGender').textContent = genderMap[user.gender] || user.gender || '未知';
+                document.getElementById('viewUserBirthday').textContent = user.birthday || user.birth_date || '未知';
+                document.getElementById('viewUserBio').textContent = user.bio || '无';
                 
-                if (user.bio) {
-                    userInfo += `个人简介：${user.bio}\n`;
-                }
-                
-                if (user.birthday || user.birth_date) {
-                    userInfo += `生日：${user.birthday || user.birth_date}\n`;
-                }
-                
-                if (user.lastLogin || user.last_login) {
-                    const lastLogin = new Date(user.lastLogin || user.last_login).toLocaleString('zh-CN');
-                    userInfo += `最后登录：${lastLogin}\n`;
-                }
-                
-                if (user.createdAt || user.created_at) {
-                    const createdAt = new Date(user.createdAt || user.created_at).toLocaleString('zh-CN');
-                    userInfo += `创建时间：${createdAt}`;
-                }
-                
-                alert(userInfo);
+                // 显示模态框
+                document.getElementById('viewModal').style.display = 'block';
                 
             } catch (error) {
                 console.error('获取用户详情失败:', error);
                 alert('获取用户详情失败：' + error.message);
             }
         }
+        
+        // 关闭查看模态框
+        function closeViewModal() {
+            document.getElementById('viewModal').style.display = 'none';
+        }
+
+        // 动态加载团队列表到编辑表单
+        async function loadTeamsToEditForm() {
+            try {
+                // 尝试获取所有团队
+                const teams = [];
+                for (let i = 1; i <= 10; i++) {
+                    try {
+                        const teamName = await window.API.getTeamNameCached(i);
+                        if (teamName && teamName !== '未知团队') {
+                            teams.push({ id: i, name: teamName });
+                        }
+                    } catch (e) {
+                        break; // 没有更多团队
+                    }
+                }
+                
+                const select = document.getElementById('editTeamId');
+                if (teams.length > 0) {
+                    select.innerHTML = teams.map(t => 
+                        '<option value="' + t.id + '">' + t.name + '</option>'
+                    ).join('');
+                } else {
+                    // 降级：使用默认团队
+                    select.innerHTML = '<option value="1">研发团队</option>' +
+                                     '<option value="2">测试团队</option>' +
+                                     '<option value="3">产品团队</option>';
+                }
+            } catch (error) {
+                console.error('加载团队列表失败:', error);
+                // 使用默认值
+                const select = document.getElementById('editTeamId');
+                select.innerHTML = '<option value="1">研发团队</option>' +
+                                 '<option value="2">测试团队</option>' +
+                                 '<option value="3">产品团队</option>';
+            }
+        }
 
         // 编辑用户信息
-        function editUser(index) {
+        async function editUser(index) {
             currentEditIndex = index;
             const user = users[index];
             
-            // 填充编辑表单（使用标准化后的字段名）
+            console.log('📝 编辑用户:', user);
+
+            // 填充用户ID
+            const userId = user.id || user.userId || user.user_id;
+            const userEmail = user.email || '';
+
+            if (!userEmail) {
+                alert('错误：用户邮箱信息缺失，无法编辑');
+                return;
+            }
+
+            // 填充表单字段
+            document.getElementById('editUserId').value = userId;
             document.getElementById('editName').value = user.name || '';
+            document.getElementById('editEmail').value = userEmail;  // 邮箱可编辑，默认显示原值
             document.getElementById('editPhone').value = user.phone || '';
-            document.getElementById('editTeamId').value = user.teamId || user.team_id || '1';
-            document.getElementById('editRoleId').value = user.roleId || user.role_id || '3';
+            document.getElementById('editRoleId').value = user.roleId || user.role_id || '4';  // 默认普通成员
             document.getElementById('editStatus').value = user.status || 'active';
+            
+            // 加载团队列表
+            await loadTeamsToEditForm();
+            
+            // 设置当前团队
+            document.getElementById('editTeamId').value = user.teamId || user.team_id || '1';
             
             // 显示模态框
             document.getElementById('editModal').style.display = 'block';
         }
 
         // 打开创建用户模态框
-        function openCreateModal() {
+        async function openCreateModal() {
             // 重置表单
             document.getElementById('createForm').reset();
+            
+            // 加载团队列表
+            await loadTeamsToCreateForm();
+            
             // 显示模态框
             document.getElementById('createModal').style.display = 'block';
+        }
+        
+        // 加载团队列表到创建表单
+        async function loadTeamsToCreateForm() {
+            try {
+                // 尝试获取所有团队
+                const teams = [];
+                for (let i = 1; i <= 10; i++) {
+                    try {
+                        const teamName = await window.API.getTeamNameCached(i);
+                        if (teamName && teamName !== '未知团队') {
+                            teams.push({ id: i, name: teamName });
+                        }
+                    } catch (e) {
+                        break; // 没有更多团队
+                    }
+                }
+
+                const select = document.getElementById('createTeamId');
+                if (teams.length > 0) {
+                    select.innerHTML = teams.map(t =>
+                        '<option value="' + t.id + '">' + t.name + '</option>'
+                    ).join('');
+                    // 默认选中第一个团队
+                    if (teams.length > 0) {
+                        select.value = teams[0].id;
+                    }
+                } else {
+                    // 降级：使用默认团队
+                    select.innerHTML = '<option value="1">研发团队</option>' +
+                                     '<option value="2">测试团队</option>' +
+                                     '<option value="3">产品团队</option>';
+                }
+            } catch (error) {
+                console.error('加载团队列表失败:', error);
+                // 使用默认值
+                const select = document.getElementById('createTeamId');
+                select.innerHTML = '<option value="1">研发团队</option>' +
+                                 '<option value="2">测试团队</option>' +
+                                 '<option value="3">产品团队</option>';
+            }
         }
 
         // 关闭编辑模态框
@@ -733,6 +939,12 @@
         }
 
         // 点击模态框外部关闭
+        document.getElementById('viewModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeViewModal();
+            }
+        });
+
         document.getElementById('editModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeEditModal();
@@ -760,32 +972,34 @@
             
             // 获取表单数据
             const formData = new FormData(this);
-            const userData = {
-                name: formData.get('name').trim(),
-                phone: formData.get('phone') ? formData.get('phone').trim() : null,
-                team_id: parseInt(formData.get('team_id')) || 1,
-                role_id: parseInt(formData.get('role_id')) || 3,
-                status: formData.get('status') || 'active',
-                // 添加必需字段：email 和 username（从原用户数据中获取）
-                email: user.email,
-                username: user.username
-            };
             
-            // 清理空值
-            Object.keys(userData).forEach(key => {
-                if (userData[key] === '' || userData[key] === 'null') {
-                    if (key === 'phone') {
-                        userData[key] = null;
-                    } else if (key === 'status') {
-                        userData[key] = 'active';
-                    }
-                }
-            });
+            // 获取并验证必填字段
+            const userName = formData.get('name') ? formData.get('name').trim() : '';
+            const userEmail = formData.get('email') ? formData.get('email').trim() : '';
             
-            // 验证数据
-            if (!userData.name) {
+            if (!userName) {
                 alert('请输入姓名！');
                 return;
+            }
+            
+            if (!userEmail) {
+                alert('请输入邮箱！邮箱不能为空。');
+                return;
+            }
+            
+            // 构建更新数据：根据后端UserUpdateDTO的@JsonProperty注解
+            const userData = {
+                name: userName,
+                email: userEmail,  // 必须包含且不能为空（可以是修改后的新值或原值）
+                phone: formData.get('phone') ? formData.get('phone').trim() : null,
+                team_id: parseInt(formData.get('team_id')) || 1,  // 匹配@JsonProperty("team_id")
+                role_id: parseInt(formData.get('role_id')) || 4,  // 匹配@JsonProperty("role_id")，默认普通成员
+                status: formData.get('status') || 'active'        // 状态字段
+            };
+            
+            // 清理phone字段：如果为空字符串，设为null
+            if (userData.phone === '') {
+                userData.phone = null;
             }
             
             try {
@@ -855,21 +1069,21 @@
                 email: formData.get('email').trim(),
                 password: formData.get('password'),
                 phone: formData.get('phone') ? formData.get('phone').trim() : null,
-                team_id: parseInt(formData.get('team_id')) || 1,
-                role_id: parseInt(formData.get('role_id')) || 3,
-                gender: formData.get('gender') || '男',
-                birth_date: formData.get('birth_date') || null
+                team_id: parseInt(formData.get('team_id')) || 1,  // 保持下划线，匹配setTeam_id()
+                role_id: parseInt(formData.get('role_id')) || 4,  // 保持下划线，创建用户接口匹配
+                gender: formData.get('gender') || 'M',
+                birthday: formData.get('birth_date') || null      // 改为birthday，匹配setBirthday()
             };
             
             // 清理空值和无效值
             Object.keys(userData).forEach(key => {
                 if (userData[key] === '' || userData[key] === 'null') {
-                    if (key === 'phone' || key === 'birth_date') {
+                    if (key === 'phone' || key === 'birthday') {
                         userData[key] = null;
                     } else if (key === 'team_id' || key === 'role_id') {
                         // 保持默认值
                     } else if (key === 'gender') {
-                        userData[key] = '男';
+                        userData[key] = 'M';
                     }
                 }
             });
@@ -877,6 +1091,17 @@
             // 验证必填数据
             if (!userData.name || !userData.username || !userData.email || !userData.password) {
                 alert('请填写所有必填字段！');
+                return;
+            }
+            
+            // 验证team_id和role_id必须有效
+            if (!userData.team_id || userData.team_id === 0 || isNaN(userData.team_id)) {
+                alert('请选择团队！');
+                return;
+            }
+            
+            if (!userData.role_id || userData.role_id === 0 || isNaN(userData.role_id)) {
+                alert('请选择角色！');
                 return;
             }
             
@@ -949,7 +1174,9 @@
         // ESC键关闭模态框
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (document.getElementById('editModal').style.display === 'block') {
+                if (document.getElementById('viewModal').style.display === 'block') {
+                    closeViewModal();
+                } else if (document.getElementById('editModal').style.display === 'block') {
                 closeEditModal();
                 } else if (document.getElementById('createModal').style.display === 'block') {
                     closeCreateModal();
