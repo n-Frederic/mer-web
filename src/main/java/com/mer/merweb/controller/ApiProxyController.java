@@ -502,6 +502,46 @@ public class ApiProxyController {
         }
     }
 
+    /**
+     * 删除工作日志
+     * DELETE /api/journals/{journalId}
+     */
+    @DeleteMapping("/journals/{journalId}")
+    public ResponseEntity<?> deleteJournal(
+            @PathVariable Long journalId,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                backendUrl + "/journals/" + journalId,
+                HttpMethod.DELETE,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "error", "ConstraintViolation", "message", "该日志无法删除"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "删除日志失败: " + e.getMessage()));
+        }
+    }
+
     // ==================== 团队管理相关API ====================
     
     @GetMapping("/team/{teamId}")

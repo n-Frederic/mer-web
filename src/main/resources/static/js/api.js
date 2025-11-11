@@ -372,10 +372,10 @@
           throw new Error('Token保存失败，登录无效');
         }
         
-        // 保存用户信息
+        // 保存用户信息（先保存基本信息）
         try { 
           localStorage.setItem('currentUser', JSON.stringify(user)); 
-          console.log('✅ 用户信息已保存:', user);
+          console.log('✅ 用户基本信息已保存:', user);
         } catch(e) { 
           console.error('❌ 用户信息保存失败:', e);
         }
@@ -386,14 +386,38 @@
           user: user 
         });
         
-        // 立即验证保存的认证信息
-        setTimeout(function() {
+        // 🔧 关键修复：立即获取完整的用户信息（包含user_id等）
+        setTimeout(async function() {
+          try {
+            console.log('🔄 获取完整用户信息...');
+            var profileData = await window.API.getProfile();
+            var fullUser = profileData.user || profileData || {};
+            
+            // 合并基本信息和完整信息
+            var completeUser = {
+              name: fullUser.name || user.name,
+              email: fullUser.email || user.email,
+              userId: fullUser.id || fullUser.userId || fullUser.user_id,
+              id: fullUser.id || fullUser.userId || fullUser.user_id,
+              user_id: fullUser.id || fullUser.userId || fullUser.user_id,
+              username: fullUser.username,
+              phone: fullUser.phone,
+              team_id: fullUser.team || fullUser.team_id,
+              role_id: fullUser.role_id
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(completeUser));
+            console.log('✅ 完整用户信息已更新:', completeUser);
+          } catch(e) {
+            console.warn('⚠️ 获取完整用户信息失败，使用基本信息:', e);
+          }
+          
           var authCheck = checkAuthStatus();
           console.log('登录后认证状态验证:', authCheck);
           if (!authCheck.isValid) {
             console.warn('⚠️ 警告：登录成功但认证状态无效，可能需要检查token有效期');
           }
-        }, 100);
+        }, 500);
         
         return { token: token, user: user };
       }).catch(function(error) {
@@ -1340,6 +1364,49 @@
         console.error('设置认证信息失败:', e);
       }
     },
+    
+    // 获取当前用户完整信息（含userId）
+    getCurrentUserWithId: async function() {
+      try {
+        var userData = localStorage.getItem('currentUser');
+        if (!userData) {
+          return null;
+        }
+        
+        var user = JSON.parse(userData);
+        
+        // 如果已经有userId，直接返回
+        if (user.userId || user.id || user.user_id) {
+          return user;
+        }
+        
+        // 如果没有userId，从API获取完整信息
+        console.log('⚠️ currentUser缺少userId，从API获取完整信息...');
+        var profileData = await this.getProfile();
+        var fullUser = profileData.user || profileData || {};
+        
+        // 合并并保存
+        var completeUser = {
+          name: fullUser.name || user.name,
+          email: fullUser.email || user.email,
+          userId: fullUser.id || fullUser.userId || fullUser.user_id,
+          id: fullUser.id || fullUser.userId || fullUser.user_id,
+          user_id: fullUser.id || fullUser.userId || fullUser.user_id,
+          username: fullUser.username,
+          phone: fullUser.phone,
+          team_id: fullUser.team || fullUser.team_id,
+          role_id: fullUser.role_id
+        };
+        
+        localStorage.setItem('currentUser', JSON.stringify(completeUser));
+        console.log('✅ 完整用户信息已更新:', completeUser);
+        
+        return completeUser;
+      } catch(e) {
+        console.error('❌ 获取当前用户信息失败:', e);
+        return null;
+      }
+    },
 
     // ==================== 个人日志相关API ====================
     
@@ -1381,14 +1448,10 @@
           // 处理关键词
           var keywords = log.keywords || [];
           
-          // 构建标题（如果没有title，使用todaySummary的前30个字符）
-          var title = log.title;
-          if (!title && log.todaySummary) {
-            title = log.todaySummary.length > 30 ? log.todaySummary.substring(0, 30) + '...' : log.todaySummary;
-          }
-          if (!title) {
-            title = '未命名';
-          }
+          // 构建标题：编号-作者-日期格式
+          var logId = log.log_id || log.id || log.logId || 'LOG-' + Date.now();
+          var titleDate = log.log_date || '';
+          var title = logId + '-' + authorName + '-' + titleDate;
           
           // 构建内容（合并todaySummary和tomorrowPlan）
           var content = '';
@@ -1449,11 +1512,11 @@
     createJournal: function(journalData) {
       // 构建符合新API接口要求的数据
       var postData = {
-        todaySummary: journalData.todaySummary || journalData.summary || '',
+        todaySummary: journalData.todaySummary || journalData.content || journalData.summary || '',
         tomorrowPlan: journalData.tomorrowPlan || '',
         helpNeeded: journalData.helpNeeded || null,
-        log_date: journalData.log_date || journalData.date || new Date().toISOString().split('T')[0],
-        taskId: journalData.taskId || []
+        log_date: journalData.log_date || journalData.logDate || journalData.date || new Date().toISOString().split('T')[0],
+        taskId: Array.isArray(journalData.taskId) ? journalData.taskId : (journalData.taskId ? [String(journalData.taskId)] : [])
       };
       
       return http('POST', base + '/api/journals/', postData).then(function(res) {
@@ -1489,14 +1552,14 @@
       });
     },
 
-    // 删除日志
+    // 删除日志（匹配新接口格式）
     deleteJournal: function(journalId) {
-      console.log('🔄 删除日志:', journalId);
       return http('DELETE', base + '/api/journals/' + encodeURIComponent(journalId)).then(function(res) {
-        console.log('✅ 日志删除成功');
+        if (res && res.ok) {
+          return res;
+        }
         return { ok: true };
       }).catch(function(error) {
-        console.error('❌ 删除日志失败:', error);
         throw error;
       });
     },
@@ -1661,6 +1724,218 @@
         return res;
       }).catch(function(error) {
         console.error('❌ 获取可见任务失败:', error);
+        throw error;
+      });
+    },
+
+    // ==================== 评论相关API ====================
+    
+    // 创建评论
+    createComment: function(commentData) {
+      console.log('🔄 创建评论:', commentData);
+      
+      // 数据验证
+      if (!commentData.ownerType || !commentData.ownerId || !commentData.content) {
+        return Promise.reject(new Error('评论数据不完整'));
+      }
+      
+      if (commentData.ownerType !== 'task' && commentData.ownerType !== 'log') {
+        return Promise.reject(new Error('ownerType必须是task或log'));
+      }
+      
+      var url = base + '/api/comments';
+      var requestData = {
+        ownerType: commentData.ownerType,
+        ownerId: commentData.ownerId,
+        content: commentData.content.trim()
+      };
+      
+      return http('POST', url, requestData).then(function(res) {
+        console.log('✅ 评论创建成功:', res);
+        if (res && (res.code === 201 || res.code === 200)) {
+          return res;
+        }
+        return res || { code: 201, message: '评论创建成功' };
+      }).catch(function(error) {
+        console.error('❌ 创建评论失败:', error);
+        if (error.message && error.message.includes('400')) {
+          throw new Error('评论创建失败');
+        }
+        throw error;
+      });
+    },
+    
+    // 获取评论列表
+    getComments: function(ownerType, ownerId, page, pageSize) {
+      console.log('🔄 获取评论列表:', { ownerType: ownerType, ownerId: ownerId, page: page, pageSize: pageSize });
+      
+      if (!ownerType || !ownerId) {
+        return Promise.reject(new Error('ownerType和ownerId不能为空'));
+      }
+      
+      var url = base + '/api/comments?ownerType=' + encodeURIComponent(ownerType) + 
+                '&ownerId=' + encodeURIComponent(ownerId) +
+                '&page=' + (page || 1) +
+                '&pageSize=' + (pageSize || 10);
+      
+      return http('GET', url).then(function(res) {
+        console.log('✅ 评论列表获取成功:', res);
+        
+        // 标准化返回数据
+        var list = res.list || [];
+        var total = res.total || 0;
+        
+        return {
+          list: list,
+          total: total,
+          page: res.page || page || 1,
+          pageSize: res.pageSize || pageSize || 10
+        };
+      }).catch(function(error) {
+        console.error('❌ 获取评论列表失败:', error);
+        // 如果是404，说明还没有评论，返回空列表而不是抛出错误
+        if (error.message && error.message.includes('404')) {
+          console.log('暂无评论（404），返回空列表');
+          return {
+            list: [],
+            total: 0,
+            page: page || 1,
+            pageSize: pageSize || 10
+          };
+        }
+        throw error;
+      });
+    },
+    
+    // 删除评论
+    deleteComment: function(commentId, userId) {
+      console.log('🔄 删除评论:', { commentId: commentId, userId: userId });
+      
+      if (!commentId) {
+        return Promise.reject(new Error('commentId不能为空'));
+      }
+      
+      var url = base + '/api/comments/' + encodeURIComponent(commentId);
+      if (userId) {
+        url += '?userId=' + encodeURIComponent(userId);
+      }
+      
+      return http('DELETE', url).then(function(res) {
+        console.log('✅ 评论删除成功:', res);
+        if (res && res.code === 200) {
+          return res;
+        }
+        return res || { code: 200, message: '评论删除成功' };
+      }).catch(function(error) {
+        console.error('❌ 删除评论失败:', error);
+        if (error.message && error.message.includes('403')) {
+          throw new Error('无权删除此评论');
+        } else if (error.message && error.message.includes('404')) {
+          throw new Error('删除评论失败');
+        }
+        throw error;
+      });
+    },
+    
+    // ==================== 任务进度和信息更新API ====================
+    
+    // 更新任务进度
+    updateTaskProgress: function(taskId, userId, progressPct) {
+      console.log('🔄 更新任务进度:', { taskId: taskId, userId: userId, progressPct: progressPct });
+      
+      // 数据验证
+      if (!taskId) {
+        return Promise.reject(new Error('任务ID不能为空'));
+      }
+      if (!userId) {
+        return Promise.reject(new Error('用户ID不能为空'));
+      }
+      if (progressPct < 0 || progressPct > 100) {
+        return Promise.reject(new Error('进度百分比必须在0-100之间'));
+      }
+      
+      // 🔧 确保taskId格式正确
+      var formattedTaskId = String(taskId);
+      if (!formattedTaskId.startsWith('T-') && !isNaN(formattedTaskId)) {
+        console.log('任务ID为纯数字:', formattedTaskId);
+      }
+      
+      var url = base + '/api/tasks/' + encodeURIComponent(formattedTaskId) + '/progress';
+      console.log('📡 更新进度请求URL:', url);
+      
+      var requestData = {
+        userId: String(userId),
+        progressPct: parseInt(progressPct, 10)
+      };
+      
+      console.log('📡 更新进度请求数据:', requestData);
+      
+      return http('PUT', url, requestData).then(function(res) {
+        console.log('✅ 任务进度更新成功:', res);
+        if (res && res.code === 200) {
+          return res;
+        }
+        // 如果没有明确的成功标志，但也没有错误，认为成功
+        return res || { code: 200, message: '任务进度更新成功' };
+      }).catch(function(error) {
+        console.error('❌ 更新任务进度失败:', error);
+        // 根据错误信息提供更友好的提示
+        if (error.message && error.message.includes('400')) {
+          throw new Error('进度数据格式错误，无法修改');
+        } else if (error.message && error.message.includes('404')) {
+          throw new Error('用户没有权限更新该任务的进度');
+        }
+        throw error;
+      });
+    },
+    
+    // 更新任务完整信息
+    updateTaskInfo: function(taskId, taskData) {
+      console.log('🔄 更新任务信息:', { taskId: taskId, data: taskData });
+      
+      // 数据验证
+      if (!taskId) {
+        return Promise.reject(new Error('任务ID不能为空'));
+      }
+      if (!taskData || typeof taskData !== 'object') {
+        return Promise.reject(new Error('任务数据不能为空'));
+      }
+      
+      // 🔧 确保taskId格式正确（后端期望T-xxx格式或纯数字）
+      var formattedTaskId = String(taskId);
+      if (!formattedTaskId.startsWith('T-') && !isNaN(formattedTaskId)) {
+        // 如果是纯数字，保持原样（后端的parseId可以处理）
+        console.log('任务ID为纯数字:', formattedTaskId);
+      }
+      
+      var url = base + '/api/tasks/' + encodeURIComponent(formattedTaskId);
+      console.log('📡 请求URL:', url);
+      
+      // 构建符合接口要求的请求数据
+      var requestData = {
+        title: taskData.title,
+        description: taskData.description,
+        priority: taskData.priority,
+        status: taskData.status,
+        startAt: taskData.startAt,
+        dueAt: taskData.dueAt,
+        parentTask: taskData.parentTask || null,
+        tags: taskData.tags || []
+      };
+      
+      return http('PUT', url, requestData).then(function(res) {
+        console.log('✅ 任务信息更新成功:', res);
+        if (res && res.code === 200) {
+          return res;
+        }
+        // 如果没有明确的成功标志，但也没有错误，认为成功
+        return res || { code: 200, message: '任务更新成功' };
+      }).catch(function(error) {
+        console.error('❌ 更新任务信息失败:', error);
+        // 根据错误信息提供更友好的提示
+        if (error.message && error.message.includes('404')) {
+          throw new Error('更新任务信息失败');
+        }
         throw error;
       });
     }

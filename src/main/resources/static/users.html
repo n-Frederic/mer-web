@@ -9,159 +9,390 @@
     <link href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/theme.css">
     <style>
-        body { align-items: flex-start; }
-        .layout { width: 100%; max-width: 1320px; margin: 32px auto; padding: 0 40px; }
-        .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        body { 
+            align-items: flex-start; 
+            background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%);
+            min-height: 100vh;
+        }
+        .layout { width: 100%; max-width: 1680px; margin: 32px auto; padding: 0 40px; }
+        .topbar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            margin-bottom: 24px;
+            background: white;
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(255, 138, 0, 0.1);
+        }
         .brand { display: flex; align-items: center; gap: 12px; }
         .brand .logo { width: 48px; height: 48px; margin: 0; }
-        .brand strong { font-size: 20px; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; }
-        .avatar { width: 40px; height: 40px; border-radius: 50%; background: radial-gradient(circle at 30% 30%, var(--color-peach), var(--color-primary-2)); border: 2px solid #fff; box-shadow: 0 3px 10px rgba(255,138,0,0.25); }
-        .panel { background: #fff; border-radius: 14px; padding: 18px; }
-        .panel h3 { margin-bottom: 12px; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 22px; }
-        table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 14px; overflow: hidden; }
-        th, td { padding: 14px 16px; border-bottom: 1px solid #eee; text-align: left; font-size: 15px; }
-        th { background: #fff7ef; color: #a55b00; font-size: 16px; }
-        .nav-links { display:flex; gap:10px; }
-        .nav-links a { padding:8px 12px; border-radius:10px; background:#fff7ef; border:1px solid #ffd3a1; color:#a55b00; text-decoration:none; }
-        .nav-links a:hover { background:#ffe9d2; }
-        
-        /* 表格按鈕樣式 */
-        .btn-group { display: flex; gap: 8px; align-items: center; }
-        .btn-sm {
-            padding: 6px 12px;
-            background: linear-gradient(to right, var(--color-primary), var(--color-primary-2));
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 6px rgba(255, 138, 0, 0.2);
+        .brand strong { 
+            font-size: 22px; 
+            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; 
+            background: linear-gradient(135deg, #ff8a00, #ffb06b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .btn-sm:hover {
-            transform: translateY(-1px);
+        .avatar { 
+            width: 44px; 
+            height: 44px; 
+            border-radius: 50%; 
+            background: linear-gradient(135deg, #ff8a00, #ffb06b); 
+            border: 3px solid #fff; 
             box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
-            background: linear-gradient(to right, #ff951a, #ff6a12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
         }
-        .btn-outline {
-            padding: 6px 12px;
-            background: #fff;
-            color: var(--color-primary);
-            border: 1px solid var(--color-primary-2);
-            border-radius: 6px;
-            font-size: 13px;
+        .nav-links { display: flex; gap: 12px; }
+        .nav-links a { 
+            padding: 10px 18px; 
+            border-radius: 12px; 
+            background: #fff7ef; 
+            border: 2px solid #ffd3a1; 
+            color: #a55b00; 
+            text-decoration: none;
             font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s;
         }
-        .btn-outline:hover {
-            background: var(--color-cream);
-            border-color: var(--color-primary);
-            transform: translateY(-1px);
+        .nav-links a:hover { 
+            background: linear-gradient(135deg, #ff8a00, #ffb06b);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
         }
         
-        /* 编辑模态框样式 */
-        .modal {
-            display: none;
-            position: fixed;
+        .panel { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 28px; 
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            margin-bottom: 24px;
+        }
+        .panel h3 { 
+            margin: 0 0 24px 0; 
+            color: #ff8a00; 
+            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; 
+            font-size: 26px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        /* 工具栏 */
+        .toolbar { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 16px; 
+            margin-bottom: 24px; 
+            flex-wrap: wrap;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff7ef, #ffe9d2);
+            border-radius: 14px;
+        }
+        .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .toolbar-right { display: flex; align-items: center; gap: 12px; }
+        
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid #ffd3a1;
+            border-radius: 12px;
+            padding: 10px 16px;
+            gap: 8px;
+            min-width: 300px;
+            transition: all 0.3s;
+        }
+        .search-box:focus-within {
+            border-color: #ff8a00;
+            box-shadow: 0 4px 12px rgba(255, 138, 0, 0.2);
+        }
+        .search-box input {
+            border: none;
+            outline: none;
+            flex: 1;
+            font-size: 14px;
+            background: transparent;
+        }
+        .search-box i { color: #ff8a00; }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff8a00, #ffb06b);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(255, 138, 0, 0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #ff8a00;
+            border: 2px solid #ff8a00;
+        }
+        .btn-secondary:hover {
+            background: #fff7ef;
+        }
+        
+        /* 用户卡片网格 */
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        
+        .user-card {
+            background: linear-gradient(135deg, #ffffff, #fffaf5);
+            border: 2px solid #ffe8d6;
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .user-card::before {
+            content: '';
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
+            height: 4px;
+            background: linear-gradient(90deg, #ff8a00, #ffb06b);
         }
-        .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 16px;
-            padding: 32px 40px;
-            width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        .user-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(255, 138, 0, 0.2);
+            border-color: #ffd3a1;
         }
-        .modal-header {
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #ffd3a1;
-            background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%);
-            margin: -32px -40px 20px -40px;
-            padding: 20px 40px;
-            border-radius: 16px 16px 0 0;
-        }
-        .modal-header h3 {
-            margin: 0;
-            color: #ffffff;
-            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
-            font-size: 20px;
-            font-weight: 600;
-        }
-        .form-group {
+        
+        .user-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
             margin-bottom: 16px;
         }
-        .form-group label {
-            display: block;
-            margin-bottom: 6px;
-            color: #a55b00;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #ffd3a1;
-            border-radius: 12px;
-            font-size: 15px;
-            background: #fff;
-            transition: all 0.3s ease;
-        }
-        .form-group input:focus, .form-group select:focus {
-            outline: none;
-            border-color: var(--color-primary);
-            box-shadow: 0 0 0 3px rgba(255, 176, 107, 0.3);
-        }
-        .modal-footer {
+        .user-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff8a00, #ffb06b);
             display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-            padding-top: 16px;
-            border-top: 1px solid #eee;
-        }
-        .btn-cancel {
-            padding: 10px 20px;
-            background: #f5f5f5;
-            color: #666;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .btn-cancel:hover {
-            background: #e8e8e8;
-            border-color: #ccc;
-        }
-        .btn-save {
-            padding: 10px 20px;
-            background: linear-gradient(to right, var(--color-primary), var(--color-primary-2));
+            align-items: center;
+            justify-content: center;
             color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 600;
-        }
-        .btn-save:hover {
-            background: linear-gradient(to right, #ff951a, #ff6a12);
-            transform: translateY(-1px);
+            font-size: 24px;
+            font-weight: bold;
             box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
+        }
+        .user-info {
+            flex: 1;
+        }
+        .user-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .user-id {
+            font-size: 12px;
+            color: #999;
+            background: #fff7ef;
+            padding: 2px 8px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .user-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .user-detail-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #666;
+        }
+        .user-detail-item i {
+            color: #ff8a00;
+            width: 16px;
+        }
+        
+        .user-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+        .tag {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .tag-role {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .tag-team {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        .tag-status {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #ffe8d6;
+        }
+        .btn-icon {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid #ffd3a1;
+            background: white;
+            color: #ff8a00;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-icon:hover {
+            background: #fff7ef;
+            transform: scale(1.05);
+        }
+        .btn-icon.danger {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-icon.danger:hover {
+            background: #fff5f5;
+        }
+        
+        /* 分页 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 32px;
+        }
+        .pagination button {
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 2px solid #ffd3a1;
+            background: white;
+            color: #ff8a00;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .pagination button:hover:not(:disabled) {
+            background: #fff7ef;
+            transform: scale(1.05);
+        }
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination .page-info {
+            color: #666;
+            font-weight: 500;
+            padding: 0 12px;
+        }
+        
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: #ff8a00;
+            font-size: 18px;
+        }
+        .loading i {
+            font-size: 48px;
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .empty-state i {
+            font-size: 64px;
+            color: #ffd3a1;
+            margin-bottom: 16px;
+        }
+        .empty-state h4 {
+            color: #ff8a00;
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        .empty-state p {
+            color: #999;
+        }
+        
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .users-grid {
+                grid-template-columns: 1fr;
+            }
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-box {
+                min-width: 100%;
+            }
+        }
+        
+        /* 模态框动画 */
+        @keyframes modalShow {
+            from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        
+        .modal {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
 </head>
@@ -174,7 +405,7 @@
                 </div>
                 <strong>用户管理</strong>
             </div>
-            <div style="display:flex; align-items:center; gap:16px;">
+            <div style="display: flex; align-items: center; gap: 16px;">
                 <nav class="nav-links">
                     <a href="publish.html">发布任务</a>
                     <a href="dashboard.html">工作日志</a>
@@ -182,573 +413,578 @@
                     <a href="calendar.html">日程表</a>
                     <a href="profile.html">个人信息</a>
                 </nav>
-                <div class="profile" onclick="location.href='profile.html'" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                <div class="profile" onclick="location.href='profile.html'" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                 <span id="currentUserName">用户</span>
-                <div class="avatar"></div>
+                    <div class="avatar" id="topAvatar">👤</div>
                 </div>
             </div>
         </div>
 
         <div class="panel">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3>用户列表</h3>
-                <div style="display: flex; gap: 10px;">
-                    <button class="btn-outline" onclick="loadUsers()" title="刷新用户列表">
-                        <i class="fas fa-refresh"></i> 刷新
+            <h3>
+                <i class="fas fa-users"></i>
+                用户管理
+            </h3>
+            
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="搜索用户名称、邮箱..." />
+                    </div>
+                    <button class="btn btn-primary" onclick="showCreateUserModal()">
+                        <i class="fas fa-user-plus"></i>
+                        创建用户
                     </button>
-                    <button class="btn-sm" onclick="openCreateModal()">
-                        <i class="fas fa-plus"></i> 创建用户
+                    <button class="btn btn-secondary" onclick="refreshUsers()">
+                        <i class="fas fa-sync-alt"></i>
+                        刷新
                     </button>
                 </div>
             </div>
-            <table>
-                <thead>
-                    <tr><th>姓名</th><th>用户名</th><th>邮箱</th><th>团队</th><th>部门</th><th>角色</th><th>操作</th></tr>
-                </thead>
-                <tbody id="userTableBody"></tbody>
-            </table>
+            
+            <div id="usersContainer">
+                <div class="loading">
+                    <i class="fas fa-spinner"></i>
+                    <p>加载中...</p>
         </div>
     </div>
 
-    <!-- 编辑用户模态框 -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>编辑用户信息</h3>
-            </div>
-            <form id="editForm">
-                <input type="hidden" id="editUserId" name="user_id">
-                
-                <div class="form-group">
-                    <label for="editName">姓名 <span style="color:red;">*</span></label>
-                    <input type="text" id="editName" name="name" required>
-                </div>
-                <div class="form-group">
-                    <label for="editEmail">邮箱 <span style="color:red;">*</span></label>
-                    <input type="email" id="editEmail" name="email" required placeholder="请输入邮箱">
-                </div>
-                <div class="form-group">
-                    <label for="editPhone">手机号</label>
-                    <input type="tel" id="editPhone" name="phone" placeholder="选填">
-                </div>
-                <div class="form-group">
-                    <label for="editTeamId">团队 <span style="color:red;">*</span></label>
-                    <select id="editTeamId" name="team_id" required>
-                        <option value="">加载中...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editRoleId">角色 <span style="color:red;">*</span></label>
-                    <select id="editRoleId" name="role_id" required>
-                        <option value="1">公司首席执行官</option>
-                        <option value="2">部门经理</option>
-                        <option value="3">团队负责人</option>
-                        <option value="4">普通成员</option>
-                        <option value="5">系统管理员</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="editStatus">状态 <span style="color:red;">*</span></label>
-                    <select id="editStatus" name="status" required>
-                        <option value="active">激活</option>
-                        <option value="inactive">停用</option>
-                        <option value="suspended">暂停</option>
-                    </select>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeEditModal()">取消</button>
-                    <button type="submit" class="btn-save">
-                        <i class="fas fa-save"></i> 保存更改
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 查看用户详情模态框 -->
-    <div id="viewModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>用户详细信息</h3>
-            </div>
-            <div id="viewUserInfo" style="padding: 16px 0;">
-                <div class="info-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 16px;">
-                    <!-- 左列 -->
-                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
-                        <div style="display: grid; grid-template-columns: 90px 1fr; gap: 12px; line-height: 2;">
-                            <div style="color: #666; font-weight: 600;">用户ID：</div>
-                            <div id="viewUserId" style="color: #333;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">姓名：</div>
-                            <div id="viewUserRealName" style="color: #333; font-weight: 600; font-size: 16px;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">用户名：</div>
-                            <div id="viewUserLoginName" style="color: #333;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">邮箱：</div>
-                            <div id="viewUserEmail" style="color: #333; word-break: break-all;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">手机：</div>
-                            <div id="viewUserPhone" style="color: #333;"></div>
-                        </div>
-                    </div>
-                    
-                    <!-- 右列 -->
-                    <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
-                        <div style="display: grid; grid-template-columns: 90px 1fr; gap: 12px; line-height: 2;">
-                            <div style="color: #666; font-weight: 600;">团队：</div>
-                            <div id="viewUserTeam" style="color: #ff8a00; font-weight: 500;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">部门：</div>
-                            <div id="viewUserDepartment" style="color: #4682b4; font-weight: 500;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">角色：</div>
-                            <div id="viewUserRole" style="color: #ff8a00; font-weight: 500;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">性别：</div>
-                            <div id="viewUserGender" style="color: #333;"></div>
-                            
-                            <div style="color: #666; font-weight: 600;">生日：</div>
-                            <div id="viewUserBirthday" style="color: #333;"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 个人简介单独一行 -->
-                <div style="padding: 16px; background: #f9f9f9; border-radius: 8px;">
-                    <div style="color: #666; font-weight: 600; margin-bottom: 8px;">个人简介：</div>
-                    <div id="viewUserBio" style="color: #333; line-height: 1.6;"></div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" onclick="closeViewModal()">关闭</button>
+            <div class="pagination" id="pagination" style="display: none;">
+                <button id="prevPage" onclick="prevPage()">
+                    <i class="fas fa-chevron-left"></i> 上一页
+                </button>
+                <span class="page-info" id="pageInfo"></span>
+                <button id="nextPage" onclick="nextPage()">
+                    下一页 <i class="fas fa-chevron-right"></i>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- 创建用户模态框 -->
-    <div id="createModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>创建新用户</h3>
-            </div>
-            <form id="createForm">
-                <div class="form-group">
-                    <label for="createName">姓名 *</label>
-                    <input type="text" id="createName" name="name" required>
+    <div id="createUserModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(5px);">
+        <div class="modal-content" style="background: white; margin: 3% auto; padding: 0; border-radius: 16px; width: 90%; max-width: 700px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); animation: modalShow 0.3s ease;">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 2px solid #ffd3a1; background: linear-gradient(135deg, #fff7ef, #ffe9d2); border-radius: 16px 16px 0 0;">
+                <h3 style="margin: 0; color: #ff8a00; font-size: 22px; font-weight: 700;"><i class="fas fa-user-plus"></i> 创建新用户</h3>
+                <span onclick="closeCreateUserModal()" style="font-size: 28px; font-weight: bold; color: #ff8a00; cursor: pointer; line-height: 1; transition: color 0.2s;">&times;</span>
                 </div>
-                <div class="form-group">
-                    <label for="createUsername">用户名 *</label>
-                    <input type="text" id="createUsername" name="username" required>
+            <div class="modal-body" style="padding: 24px;">
+                <form id="createUserForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">姓名 <span style="color: red;">*</span></label>
+                        <input id="cu_name" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
                 </div>
-                <div class="form-group">
-                    <label for="createEmail">邮箱 *</label>
-                    <input type="email" id="createEmail" name="email" required>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">用户名 <span style="color: red;">*</span></label>
+                        <input id="cu_username" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
                 </div>
-                <div class="form-group">
-                    <label for="createPassword">密码 *</label>
-                    <input type="password" id="createPassword" name="password" required minlength="6">
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">邮箱 <span style="color: red;">*</span></label>
+                        <input id="cu_email" type="email" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
                 </div>
-                <div class="form-group">
-                    <label for="createPhone">手机号</label>
-                    <input type="tel" id="createPhone" name="phone">
-                </div>
-                <div class="form-group">
-                    <label for="createTeamId">团队 *</label>
-                    <select id="createTeamId" name="team_id" required>
-                        <option value="">加载中...</option>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">密码 <span style="color: red;">*</span></label>
+                        <input id="cu_password" type="password" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                    </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">手机号</label>
+                        <input id="cu_phone" type="tel" style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                    </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">性别</label>
+                        <select id="cu_gender" style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                            <option value="">保密</option>
+                            <option value="男">男</option>
+                            <option value="女">女</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="createRoleId">角色 *</label>
-                    <select id="createRoleId" name="role_id" required>
-                        <option value="1">公司首席执行官</option>
-                        <option value="2">部门经理</option>
-                        <option value="3">团队负责人</option>
-                        <option value="4" selected>普通成员</option>
-                        <option value="5">系统管理员</option>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">出生日期</label>
+                        <input id="cu_birth_date" type="date" style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                    </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">团队 <span style="color: red;">*</span></label>
+                        <select id="cu_team_id" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                            <option value="">请选择团队</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="createGender">性别</label>
-                    <select id="createGender" name="gender">
-                        <option value="M">男</option>
-                        <option value="F">女</option>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">角色 <span style="color: red;">*</span></label>
+                        <select id="cu_role_id" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                            <option value="">请选择角色</option>
+                            <option value="1">1 - CEO</option>
+                            <option value="2">2 - Manager</option>
+                            <option value="3">3 - Team Leader</option>
+                            <option value="4">4 - Member</option>
+                            <option value="5">5 - Admin</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="createBirthDate">生日</label>
-                    <input type="date" id="createBirthDate" name="birth_date">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-cancel" onclick="closeCreateModal()">取消</button>
-                    <button type="submit" class="btn-save">创建用户</button>
+                    <div class="form-item" style="grid-column: span 2; margin-top: 10px;">
+                        <button type="button" class="btn btn-primary" onclick="createUser()" style="width: 100%; padding: 14px; font-size: 16px;">
+                            <i class="fas fa-check"></i> 创建用户
+                    </button>
                 </div>
             </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 查看用户详情模态框 -->
+    <div id="viewUserModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(5px);">
+        <div class="modal-content" style="background: white; margin: 3% auto; padding: 0; border-radius: 16px; width: 90%; max-width: 700px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 2px solid #ffd3a1; background: linear-gradient(135deg, #fff7ef, #ffe9d2); border-radius: 16px 16px 0 0;">
+                <h3 style="margin: 0; color: #ff8a00; font-size: 22px; font-weight: 700;"><i class="fas fa-user"></i> 用户详情</h3>
+                <span onclick="closeViewUserModal()" style="font-size: 28px; font-weight: bold; color: #ff8a00; cursor: pointer; line-height: 1;">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div id="userDetailContent"></div>
+                        </div>
+                    </div>
+                </div>
+                
+    <!-- 编辑用户模态框 -->
+    <div id="editUserModal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; backdrop-filter: blur(5px);">
+        <div class="modal-content" style="background: white; margin: 3% auto; padding: 0; border-radius: 16px; width: 90%; max-width: 700px; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 24px; border-bottom: 2px solid #ffd3a1; background: linear-gradient(135deg, #fff7ef, #ffe9d2); border-radius: 16px 16px 0 0;">
+                <h3 style="margin: 0; color: #ff8a00; font-size: 22px; font-weight: 700;"><i class="fas fa-edit"></i> 编辑用户</h3>
+                <span onclick="closeEditUserModal()" style="font-size: 28px; font-weight: bold; color: #ff8a00; cursor: pointer; line-height: 1;">&times;</span>
+                </div>
+            <div class="modal-body" style="padding: 24px;">
+                <form id="editUserForm" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <input type="hidden" id="eu_userId">
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">姓名 <span style="color: red;">*</span></label>
+                        <input id="eu_name" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+            </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">手机号</label>
+                        <input id="eu_phone" type="tel" style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+            </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">团队 <span style="color: red;">*</span></label>
+                        <select id="eu_team_id" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                            <option value="">请选择团队</option>
+                    </select>
+                </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">角色 <span style="color: red;">*</span></label>
+                        <select id="eu_role_id" required style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                            <option value="">请选择角色</option>
+                            <option value="1">1 - CEO</option>
+                            <option value="2">2 - Manager</option>
+                            <option value="3">3 - Team Leader</option>
+                            <option value="4">4 - Member</option>
+                            <option value="5">5 - Admin</option>
+                    </select>
+                </div>
+                    <div class="form-item">
+                        <label style="color: #a55b00; font-weight: 600; margin-bottom: 6px; display: block;">状态</label>
+                        <select id="eu_status" style="width: 100%; padding: 12px; border: 2px solid #ffd3a1; border-radius: 10px;">
+                            <option value="active">正常</option>
+                            <option value="inactive">停用</option>
+                    </select>
+                </div>
+                    <div class="form-item" style="grid-column: span 2; margin-top: 10px;">
+                        <button type="button" class="btn btn-primary" onclick="saveEditUser()" style="width: 100%; padding: 14px; font-size: 16px;">
+                            <i class="fas fa-save"></i> 保存修改
+                        </button>
+                </div>
+            </form>
+            </div>
         </div>
     </div>
 
     <script src="js/common.js"></script>
     <script src="js/api.js"></script>
     <script>
-        // 顶部显示用户名
-        try {
-            const raw = localStorage.getItem('currentUser');
-            const u = raw ? JSON.parse(raw) : { name: '用户' };
-            document.getElementById('currentUserName').textContent = u.name || '用户';
-        } catch(e) {}
-
-        // 用户数据和状态管理
-        let users = [];
-        let currentEditIndex = -1;
         let currentPage = 1;
+        let pageSize = 12;
         let totalPages = 1;
+        let allUsers = [];
+        let allTeams = []; // 存储所有团队列表
         
-        // 检查认证状态
-        function checkAuthStatus() {
-            let token = '';
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('用户管理页面加载...');
+            
+            // 更新顶部用户名
             try {
-                const raw = localStorage.getItem('authToken');
-                if (raw) token = JSON.parse(raw);
+                const userData = localStorage.getItem('currentUser');
+                if (userData) {
+                    const user = JSON.parse(userData);
+                    document.getElementById('currentUserName').textContent = user.name || '用户';
+                    const avatar = document.getElementById('topAvatar');
+                    if (avatar && user.name) {
+                        avatar.textContent = user.name.charAt(0);
+                    }
+                }
             } catch(e) {}
             
-            console.log('当前认证状态:', {
-                hasToken: !!token,
-                token: token ? token.substring(0, 20) + '...' : null
-            });
+            // 加载用户列表
+            loadUsers();
             
-            if (!token) {
-                console.warn('用户未登录或token已过期');
-                alert('请先登录后再访问用户管理页面\n\n点击确定跳转到登录页面');
-                window.location.href = 'login.html';
-                return false;
-            }
-            return true;
-        }
-
-        // 加载用户数据
-        async function loadUsers(page = 1, keyword = '') {
-            // 检查认证状态
-            if (!checkAuthStatus()) {
-                return;
-            }
-            
-            try {
-                const params = {
-                    page: page,
-                    pageSize: 10
-                };
-                
-                if (keyword && keyword.trim()) {
-                    params.keyword = keyword.trim();
-                }
-                
-                console.log('加载用户数据，参数:', params);
-                console.log('API调用URL:', window.APP.apiBase + '/api/user');
-                
-                const data = await window.API.listUsers(params);
-                
-                console.log('用户数据加载成功:', data);
-                console.log('数据类型:', typeof data, '是否为数组:', Array.isArray(data));
-                
-                // 处理不同的返回格式
-                if (Array.isArray(data)) {
-                    // 如果直接返回数组
-                    users = data;
-                    currentPage = page;
-                    totalPages = Math.ceil(data.length / params.pageSize);
-                } else if (data && data.list) {
-                    // 如果返回的是包含list的对象
-                    users = data.list || [];
-                    currentPage = data.page || page;
-                    totalPages = data.totalPages || 1;
-                } else if (data && typeof data === 'object') {
-                    // 如果返回的是其他格式的对象，尝试直接使用
-                    users = [data];
-                    currentPage = page;
-                    totalPages = 1;
-                } else {
-                    users = [];
-                    currentPage = page;
-                    totalPages = 1;
-                }
-                
-                console.log('处理后的用户数据:', users);
-                console.log('用户数量:', users.length);
-                
-                if (users.length === 0) {
-                    console.warn('用户列表为空，可能的原因：');
-                    console.warn('1. 数据库中没有用户数据');
-                    console.warn('2. 认证token无效或过期');
-                    console.warn('3. 后端接口权限限制');
-                    console.warn('4. 数据格式不符合预期');
-                }
-                
-                await renderUserTable();
-                updatePagination();
-                
-            } catch (error) {
-                console.error('加载用户数据失败:', error);
-                alert('加载用户数据失败：' + error.message + '\n请检查网络连接和登录状态');
-                
-                // 如果API调用失败，使用默认数据作为演示
-                users = [
-                    { user_id: 1, name: 'Alice (演示)', email: 'alice@example.com', role: { name: '管理员' } },
-                    { user_id: 2, name: 'Bob (演示)', email: 'bob@example.com', role: { name: '员工' } }
-                ];
-                await renderUserTable();
-            }
-        }
-        
-        // 渲染用户表格
-        async function renderUserTable() {
-            console.log('开始渲染用户表格，用户数量:', users.length);
-            console.log('用户数据结构示例:', users.length > 0 ? users[0] : 'null');
-            
-            const userTableBody = document.getElementById('userTableBody');
-            
-            if (!userTableBody) {
-                console.error('找不到用户表格容器元素 #userTableBody');
-                return;
-            }
-            
-            if (users.length === 0) {
-                userTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #666;">暂无用户数据</td></tr>';
-                return;
-            }
-            
-            // 显示加载状态
-            userTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #666;">加载中...</td></tr>';
-            
-            // 角色映射（五级身份）
-            const roleMap = {
-                1: '公司首席执行官',
-                2: '部门经理',
-                3: '团队负责人',
-                4: '普通成员',
-                5: '系统管理员'
-            };
-            
-            // 为每个用户获取团队名称和部门名称
-            const userRows = await Promise.all(users.map(async (u, index) => {
-                console.log(`渲染用户 ${index}:`, {
-                    id: u.id || u.userId || u.user_id,
-                    name: u.name,
-                    email: u.email,
-                    role_id: u.roleId || u.role_id,
-                    team_id: u.teamId || u.team_id,
-                    role: u.role,
-                    team: u.team
-                });
-                
-                // 处理角色显示（缺失时显示"未知"）
-                let roleDisplay = '未知';
-                if (u.role && u.role.name) {
-                    roleDisplay = u.role.name;
-                } else if (u.roleId || u.role_id) {
-                    const roleId = u.roleId || u.role_id;
-                    roleDisplay = roleMap[roleId] || '未知';
-                } else if (u.role) {
-                    roleDisplay = u.role;
-                }
-                
-                // 处理团队显示（缺失时显示"未知"）
-                let teamDisplay = '未知';
-                if (u.team && u.team.name) {
-                    // 后端已返回team对象
-                    teamDisplay = u.team.name;
-                } else if (u.teamId || u.team_id) {
-                    // 调用API获取团队名称
-                    const teamId = u.teamId || u.team_id;
-                    try {
-                        const fetchedName = await window.API.getTeamNameCached(teamId);
-                        teamDisplay = fetchedName || '未知';
-                    } catch (error) {
-                        console.error('获取团队名称失败:', error);
-                        teamDisplay = '未知';
-                    }
-                }
-                
-                // 处理部门显示（根据团队ID获取部门名称）
-                let departmentDisplay = '未知';
-                if (u.teamId || u.team_id) {
-                    const teamId = u.teamId || u.team_id;
-                    try {
-                        const deptName = await window.API.getDepartmentNameCached(teamId);
-                        departmentDisplay = deptName || '未知';
-                    } catch (error) {
-                        console.error('获取部门名称失败:', error);
-                        departmentDisplay = '未知';
-                    }
-                }
-                
-                // 确保用户ID存在
-                const userId = u.id || u.userId || u.user_id || (1000 + index);
-                
-                return `
-                    <tr>
-                        <td style="font-weight: 500;">${u.name || '未知'}</td>
-                        <td>${u.username || '未知'}</td>
-                        <td>${u.email || '未知'}</td>
-                        <td style="color: #ff8a00; font-weight: 500;">${teamDisplay}</td>
-                        <td style="color: #4682b4; font-weight: 500;">${departmentDisplay}</td>
-                        <td style="color: #a55b00;">${roleDisplay}</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn-sm" onclick="viewUser(${userId})">查看</button>
-                                <button class="btn-outline" onclick="editUser(${index})">编辑</button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }));
-            
-            userTableBody.innerHTML = userRows.join('');
-            console.log('用户表格渲染完成');
-        }
-
-        // 更新分页信息
-        function updatePagination() {
-            // 这里可以添加分页控件的更新逻辑
-            console.log(`当前页: ${currentPage}, 总页数: ${totalPages}`);
-        }
-
-        // 初始化应用配置
-        window.APP = window.APP || {};
-        window.APP.apiBase = window.APP.apiBase || '';
-        
-        console.log('应用配置:', window.APP);
-        console.log('当前页面URL:', window.location.href);
-        console.log('API基础URL:', window.APP.apiBase);
-        
-        // 添加全局错误处理
-        window.addEventListener('error', function(e) {
-            console.error('页面错误:', e.error);
+            // 搜索框事件
+            document.getElementById('searchInput')?.addEventListener('input', debounce(function() {
+                currentPage = 1;
+                loadUsers();
+            }, 500));
         });
         
-        window.addEventListener('unhandledrejection', function(e) {
-            console.error('未处理的Promise拒绝:', e.reason);
-        });
-
-        // 初始加载
-        setTimeout(function() {
-            console.log('开始加载用户数据...');
-            loadUsers().catch(function(error) {
-                console.error('初始加载用户数据失败:', error);
-            });
-        }, 100);
-
-        // 调试功能：在控制台中提供测试函数
-        window.debugUserAPI = {
-            // 测试API连接
-            testConnection: async function() {
-                try {
-                    console.log('测试API连接...');
-                    console.log('API Base URL:', window.APP.apiBase);
-                    
-                    // 测试基本连接
-                    const response = await fetch(window.APP.apiBase + '/api/user?page=1&pageSize=1');
-                    console.log('响应状态:', response.status);
-                    console.log('响应头:', [...response.headers.entries()]);
-                    
-                    const data = await response.json();
-                    console.log('响应数据:', data);
-                    
-                    return data;
-                } catch (error) {
-                    console.error('连接测试失败:', error);
-                    return null;
-                }
-            },
+        // 加载用户列表
+        async function loadUsers() {
+            try {
+                const container = document.getElementById('usersContainer');
+                const pagination = document.getElementById('pagination');
+                
+                container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i><p>加载中...</p></div>';
+                
+                if (!window.API || typeof window.API.listUsers !== 'function') {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><h4>API不可用</h4><p>无法加载用户数据</p></div>';
+                return;
+            }
             
-            // 检查认证信息
-            checkAuth: function() {
-                let token = '';
-                let user = null;
+                const keyword = document.getElementById('searchInput')?.value.trim() || '';
                 
-                try {
-                    const tokenRaw = localStorage.getItem('authToken');
-                    const userRaw = localStorage.getItem('currentUser');
-                    
-                    if (tokenRaw) token = JSON.parse(tokenRaw);
-                    if (userRaw) user = JSON.parse(userRaw);
-                } catch(e) {
-                    console.error('解析localStorage数据失败:', e);
-                }
+                console.log('📋 加载用户列表，页码:', currentPage, '关键词:', keyword);
                 
-                console.log('认证信息:', {
-                    hasToken: !!token,
-                    token: token,
-                    user: user
+                const result = await window.API.listUsers({
+                    page: currentPage,
+                    pageSize: pageSize,
+                    keyword: keyword
                 });
                 
-                return { token, user };
-            },
-            
-            // 手动调用用户API
-            callUserAPI: async function() {
-                try {
-                    console.log('手动调用用户API...');
-                    const data = await window.API.listUsers({ page: 1, pageSize: 10 });
-                    console.log('API调用结果:', data);
-                    return data;
-                } catch (error) {
-                    console.error('API调用失败:', error);
-                    return null;
-                }
-            },
-            
-            // 测试特定用户详情
-            testUserDetail: async function(userId) {
-                try {
-                    userId = userId || 1001;
-                    console.log('测试获取用户详情，用户ID:', userId);
-                    const user = await window.API.getUserById(userId);
-                    console.log('用户详情结果:', user);
-                    return user;
-                } catch (error) {
-                    console.error('获取用户详情失败:', error);
-                    return null;
-                }
-            },
-            
-            // 刷新用户列表
-            refreshUsers: async function() {
-                try {
-                    console.log('刷新用户列表...');
-                    await loadUsers();
-                    console.log('用户列表已刷新');
-                } catch (error) {
-                    console.error('刷新失败:', error);
-                }
-            }
-        };
-        
-        console.log('调试功能已加载，请在控制台中使用：');
-        console.log('debugUserAPI.testConnection() - 测试API连接');
-        console.log('debugUserAPI.checkAuth() - 检查认证信息');
-        console.log('debugUserAPI.callUserAPI() - 手动调用用户API');
-        console.log('debugUserAPI.testUserDetail(1001) - 测试获取用户详情');
-        console.log('debugUserAPI.refreshUsers() - 刷新用户列表');
-
-        // 查看用户信息
-        async function viewUser(userId) {
-            try {
-                console.log('查看用户详情，用户ID:', userId);
-                const user = await window.API.getUserById(userId);
+                console.log('✅ 用户列表加载成功:', result);
                 
-                if (!user) {
-                    alert('无法获取用户详情');
+                allUsers = result || [];
+                
+                if (!allUsers || allUsers.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><h4>暂无用户数据</h4><p>没有找到符合条件的用户</p></div>';
+                    pagination.style.display = 'none';
                     return;
                 }
                 
-                // 处理角色和团队显示（五级身份）
+                // 渲染用户卡片
+                renderUsers(allUsers);
+                
+                // 更新分页（简化版，因为后端返回的是完整列表）
+                totalPages = Math.ceil(allUsers.length / pageSize);
+                updatePagination();
+                
+            } catch(error) {
+                console.error('❌ 加载用户失败:', error);
+                const container = document.getElementById('usersContainer');
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h4>加载失败</h4><p>' + (error.message || '请稍后重试') + '</p></div>';
+            }
+        }
+        
+        // 五级身份映射
+        const roleMap = {
+            1: 'CEO',
+            2: 'Manager',
+            3: 'Team Leader',
+            4: 'Member',
+            5: 'Admin'
+        };
+        
+        // 渲染用户列表
+        async function renderUsers(users) {
+            const container = document.getElementById('usersContainer');
+            
+            if (!users || users.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><h4>暂无用户数据</h4><p>没有找到符合条件的用户</p></div>';
+                return;
+            }
+            
+            // 分页处理
+            const startIndex = (currentPage - 1) * pageSize;
+            const endIndex = startIndex + pageSize;
+            const paginatedUsers = users.slice(startIndex, endIndex);
+            
+            // 预加载所有team和部门名称
+            const teamIds = [...new Set(paginatedUsers.map(u => u.teamId || u.team_id).filter(Boolean))];
+            const teamNames = {};
+            const deptNames = {};
+            
+            // 批量查询team和部门名称
+            for (const teamId of teamIds) {
+                try {
+                    if (window.API && typeof window.API.getTeamNameCached === 'function') {
+                        teamNames[teamId] = await window.API.getTeamNameCached(teamId);
+                    }
+                    if (window.API && typeof window.API.getDepartmentNameCached === 'function') {
+                        deptNames[teamId] = await window.API.getDepartmentNameCached(teamId);
+                    }
+                } catch(e) {
+                    console.warn('查询team/dept名称失败:', teamId, e);
+                }
+            }
+            
+            const html = '<div class="users-grid">' + paginatedUsers.map(function(user) {
+                const userId = user.id || user.userId || user.user_id || 'N/A';
+                const userName = user.name || '未命名';
+                const userEmail = user.email || '无邮箱';
+                const userPhone = user.phone || '无电话';
+                const gender = user.gender || '未知';
+                const teamId = user.teamId || user.team_id;
+                const roleId = user.roleId || user.role_id;
+                
+                // 获取角色名称
+                const roleName = roleMap[roleId] || 'Unknown';
+                
+                // 获取团队和部门名称
+                const teamName = teamNames[teamId] || '未知团队';
+                const deptName = deptNames[teamId] || '未知部门';
+                
+                // 性别图标
+                const genderIcon = gender === 'Male' || gender === '男' || gender === 'M' ? '<i class="fas fa-mars" style="color: #2196f3;"></i>' : 
+                                  gender === 'Female' || gender === '女' || gender === 'F' ? '<i class="fas fa-venus" style="color: #e91e63;"></i>' : 
+                                  '<i class="fas fa-genderless" style="color: #999;"></i>';
+                
+                // 获取用户名首字母作为头像
+                const initial = userName.charAt(0).toUpperCase();
+                
+                return '<div class="user-card">\
+                    <div class="user-header">\
+                        <div class="user-avatar">' + initial + '</div>\
+                        <div class="user-info">\
+                            <div class="user-name">' + escapeHtml(userName) + ' ' + genderIcon + '</div>\
+                            <div class="user-id">ID: ' + escapeHtml(userId) + '</div>\
+                        </div>\
+                    </div>\
+                    <div class="user-details">\
+                        <div class="user-detail-item">\
+                            <i class="fas fa-envelope"></i>\
+                            <span>' + escapeHtml(userEmail) + '</span>\
+                        </div>\
+                        <div class="user-detail-item">\
+                            <i class="fas fa-phone"></i>\
+                            <span>' + escapeHtml(userPhone) + '</span>\
+                        </div>\
+                        <div class="user-detail-item">\
+                            <i class="fas fa-building"></i>\
+                            <span>部门: ' + escapeHtml(deptName) + '</span>\
+                        </div>\
+                        <div class="user-detail-item">\
+                            <i class="fas fa-users"></i>\
+                            <span>团队: ' + escapeHtml(teamName) + '</span>\
+                        </div>\
+                    </div>\
+                    <div class="user-tags">\
+                        <span class="tag tag-role">' + escapeHtml(roleName) + '</span>\
+                        <span class="tag tag-team">' + escapeHtml(teamName) + '</span>\
+                        <span class="tag tag-status">正常</span>\
+                    </div>\
+                    <div class="user-actions">\
+                        <button class="btn-icon" onclick="viewUser(\'' + escapeHtml(userId) + '\')">\
+                            <i class="fas fa-eye"></i> 查看\
+                        </button>\
+                        <button class="btn-icon" onclick="editUser(\'' + escapeHtml(userId) + '\')">\
+                            <i class="fas fa-edit"></i> 编辑\
+                        </button>\
+                    </div>\
+                </div>';
+            }).join('') + '</div>';
+            
+            container.innerHTML = html;
+        }
+        
+        // 更新分页
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPage');
+            const nextBtn = document.getElementById('nextPage');
+            
+            if (totalPages <= 1) {
+                pagination.style.display = 'none';
+                return;
+            }
+            
+            pagination.style.display = 'flex';
+            pageInfo.textContent = '第 ' + currentPage + ' / ' + totalPages + ' 页';
+            
+            prevBtn.disabled = currentPage <= 1;
+            nextBtn.disabled = currentPage >= totalPages;
+        }
+        
+        // 上一页
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderUsers(allUsers);
+                updatePagination();
+            }
+        }
+        
+        // 下一页
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderUsers(allUsers);
+                updatePagination();
+            }
+        }
+        
+        // 刷新用户列表
+        function refreshUsers() {
+            currentPage = 1;
+            loadUsers();
+        }
+        
+        // 重置搜索
+        function resetSearch() {
+            document.getElementById('searchInput').value = '';
+            currentPage = 1;
+            loadUsers();
+        }
+        
+        // 显示创建用户模态框
+        async function showCreateUserModal() {
+            document.getElementById('createUserModal').style.display = 'block';
+            // 清空表单
+            document.getElementById('createUserForm').reset();
+            
+            // 填充团队选项（从已加载的用户数据中提取唯一的团队ID）
+            await populateTeamOptions('cu_team_id');
+        }
+        
+        // 填充团队选项
+        async function populateTeamOptions(selectId) {
+            const select = document.getElementById(selectId);
+            if (!select) return;
+            
+            // 从已加载的用户中提取唯一的团队ID
+            const uniqueTeamIds = [...new Set(allUsers.map(u => u.teamId || u.team_id).filter(Boolean))];
+            
+            // 清空现有选项（保留第一个"请选择"选项）
+            select.innerHTML = '<option value="">请选择团队</option>';
+            
+            // 为每个团队ID添加选项
+            for (const teamId of uniqueTeamIds.sort((a, b) => a - b)) {
+                try {
+                    let teamName = String(teamId);
+                    
+                    // 尝试获取团队名称
+                    if (window.API && typeof window.API.getTeamNameCached === 'function') {
+                        teamName = await window.API.getTeamNameCached(teamId);
+                    }
+                    
+                    const option = document.createElement('option');
+                    option.value = teamId;
+                    option.textContent = teamId + ' - ' + teamName;
+                    select.appendChild(option);
+                } catch(e) {
+                    console.warn('获取团队名称失败:', teamId, e);
+                    const option = document.createElement('option');
+                    option.value = teamId;
+                    option.textContent = teamId + ' - 未知团队';
+                    select.appendChild(option);
+                }
+            }
+            
+            // 如果没有团队选项，添加提示
+            if (uniqueTeamIds.length === 0) {
+                select.innerHTML = '<option value="">暂无团队数据</option>';
+            }
+        }
+        
+        // 关闭创建用户模态框
+        function closeCreateUserModal() {
+            document.getElementById('createUserModal').style.display = 'none';
+        }
+        
+        // 创建用户
+        async function createUser() {
+            try {
+                // 获取表单数据
+                const name = document.getElementById('cu_name').value.trim();
+                const username = document.getElementById('cu_username').value.trim();
+                const email = document.getElementById('cu_email').value.trim();
+                const password = document.getElementById('cu_password').value.trim();
+                const phone = document.getElementById('cu_phone').value.trim();
+                const gender = document.getElementById('cu_gender').value;
+                const birth_date = document.getElementById('cu_birth_date').value;
+                const team_id = document.getElementById('cu_team_id').value;
+                const role_id = document.getElementById('cu_role_id').value;
+                
+                // 验证必填项
+                if (!name || !username || !email || !password) {
+                    alert('请填写所有必填项（姓名、用户名、邮箱、密码）');
+                    return;
+                }
+                
+                if (!team_id || !role_id) {
+                    alert('请填写团队ID和角色ID');
+                    return;
+                }
+                
+                // 构建用户数据
+                const userData = {
+                    name: name,
+                    username: username,
+                    email: email,
+                    password: password,
+                    phone: phone || null,
+                    team_id: parseInt(team_id, 10),
+                    role_id: parseInt(role_id, 10),
+                    gender: gender || null,
+                    birth_date: birth_date || null
+                };
+                
+                console.log('📝 创建用户数据:', userData);
+                
+                // 调用API
+                if (!window.API || typeof window.API.createUser !== 'function') {
+                    alert('❌ API不可用');
+                    return;
+                }
+                
+                const result = await window.API.createUser(userData);
+                
+                console.log('✅ 用户创建成功:', result);
+                
+                if (result && result.ok) {
+                    alert('✅ 用户创建成功！');
+                    closeCreateUserModal();
+            // 刷新用户列表
+                    await loadUsers();
+                } else {
+                    alert('❌ 创建失败：' + (result.message || '未知错误'));
+                }
+                
+            } catch(error) {
+                console.error('❌ 创建用户失败:', error);
+                alert('❌ 创建失败：' + (error.message || '请稍后重试'));
+            }
+        }
+        
+        // 查看用户详情
+        async function viewUser(userId) {
+            try {
+                if (!window.API || typeof window.API.getUserById !== 'function') {
+                    alert('❌ API不可用');
+                    return;
+                }
+                
+                console.log('🔍 查看用户详情:', userId);
+                
+                const user = await window.API.getUserById(userId);
+                
+                if (!user) {
+                    alert('❌ 未找到用户信息');
+                    return;
+                }
+                
+                console.log('✅ 用户详情:', user);
+                
+                // 使用统一的角色映射
                 const roleMap = {
-                    1: '公司首席执行官',
-                    2: '部门经理',
-                    3: '团队负责人',
-                    4: '普通成员',
-                    5: '系统管理员'
+                    1: 'CEO',
+                    2: 'Manager',
+                    3: 'Team Leader',
+                    4: 'Member',
+                    5: 'Admin'
                 };
                 
                 const genderMap = {
@@ -758,469 +994,239 @@
                     '女': '女'
                 };
                 
-                // 填充用户信息到模态框（缺失字段统一显示"未知"）
-                document.getElementById('viewUserId').textContent = user.id || user.userId || user.user_id || '未知';
-                document.getElementById('viewUserRealName').textContent = user.name || '未知';
-                document.getElementById('viewUserLoginName').textContent = user.username || '未知';
-                document.getElementById('viewUserEmail').textContent = user.email || '未知';
-                document.getElementById('viewUserPhone').textContent = user.phone || '未知';
+                // 获取团队和部门名称
+                const teamId = user.team_id || user.teamId;
+                let teamName = '未知团队';
+                let deptName = '未知部门';
                 
-                // 处理团队信息（缺失时显示"未知"）
-                let teamDisplay = '未知';
-                console.log('🔍 用户团队信息调试:', {
-                    'user对象': user,
-                    'user.team': user.team,
-                    'user.teamId': user.teamId,
-                    'user.team_id': user.team_id
-                });
-                
-                if (user.team && user.team.name) {
-                    teamDisplay = user.team.name;
-                    console.log('✅ 使用后端返回的team对象:', teamDisplay);
-                } else if (user.teamId || user.team_id) {
-                    const teamId = user.teamId || user.team_id;
-                    console.log('🔄 准备调用团队API，teamId:', teamId);
+                if (teamId && window.API) {
                     try {
-                        const fetchedName = await window.API.getTeamNameCached(teamId);
-                        teamDisplay = fetchedName || '未知';
-                        console.log('✅ 团队API返回:', teamDisplay);
-                    } catch (error) {
-                        console.error('❌ 获取团队名称失败:', error);
-                        teamDisplay = '未知';
+                        if (typeof window.API.getTeamNameCached === 'function') {
+                            teamName = await window.API.getTeamNameCached(teamId);
+                        }
+                        if (typeof window.API.getDepartmentNameCached === 'function') {
+                            deptName = await window.API.getDepartmentNameCached(teamId);
+                        }
+                    } catch(e) {
+                        console.warn('查询team/dept名称失败:', e);
                     }
-                } else {
-                    console.warn('⚠️ 用户没有团队ID');
                 }
-                document.getElementById('viewUserTeam').textContent = teamDisplay;
                 
-                // 处理部门信息（根据团队ID获取部门名称）
-                let departmentDisplay = '未知';
-                if (user.teamId || user.team_id) {
-                    const teamId = user.teamId || user.team_id;
-                    console.log('🔄 准备调用部门API，teamId:', teamId);
-                    try {
-                        const deptName = await window.API.getDepartmentNameCached(teamId);
-                        departmentDisplay = deptName || '未知';
-                        console.log('✅ 部门API返回:', departmentDisplay);
-                    } catch (error) {
-                        console.error('❌ 获取部门名称失败:', error);
-                        departmentDisplay = '未知';
-                    }
-                } else {
-                    console.warn('⚠️ 用户没有团队ID，无法获取部门');
-                }
-                document.getElementById('viewUserDepartment').textContent = departmentDisplay;
+                const roleId = user.role_id || user.roleId;
+                const roleName = roleMap[roleId] || 'Unknown';
                 
-                // 处理角色信息（缺失时显示"未知"）
-                let roleDisplay = '未知';
-                if (user.role && user.role.name) {
-                    roleDisplay = user.role.name;
-                } else if (user.roleId || user.role_id) {
-                    const roleId = user.roleId || user.role_id;
-                    roleDisplay = roleMap[roleId] || '未知';
-                }
-                document.getElementById('viewUserRole').textContent = roleDisplay;
+                const detailHtml = '<div style="display: grid; gap: 16px;">' +
+                    '<div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #fff7ef, #ffe9d2); border-radius: 12px;">' +
+                        '<div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #ff8a00, #ffb06b); display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 32px; font-weight: bold; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(255,138,0,0.3);">' + 
+                            (user.name ? user.name.charAt(0) : '?') +
+                        '</div>' +
+                        '<h4 style="margin: 0; color: #ff8a00; font-size: 22px;">' + escapeHtml(user.name || '未知') + '</h4>' +
+                        '<p style="margin: 8px 0 0 0; color: #999; font-size: 13px;">ID: ' + escapeHtml(String(user.userId || user.user_id || user.id)) + '</p>' +
+                    '</div>' +
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #fafafa; padding: 20px; border-radius: 12px;">' +
+                        '<div><strong style="color: #a55b00;">用户名：</strong><br><span style="color: #666;">' + escapeHtml(user.username || '-') + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">邮箱：</strong><br><span style="color: #666;">' + escapeHtml(user.email || '-') + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">手机：</strong><br><span style="color: #666;">' + escapeHtml(user.phone || '-') + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">性别：</strong><br><span style="color: #666;">' + (genderMap[user.gender] || user.gender || '-') + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">出生日期：</strong><br><span style="color: #666;">' + escapeHtml(user.birth_date || user.birthday || '-') + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">部门：</strong><br><span style="color: #666;">' + escapeHtml(deptName) + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">团队：</strong><br><span style="color: #666;">' + escapeHtml(teamName) + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">角色：</strong><br><span style="color: #666;">' + escapeHtml(roleName) + '</span></div>' +
+                        '<div><strong style="color: #a55b00;">状态：</strong><br><span style="color: #666;">' + (user.status === 'active' ? '✅ 正常' : '⛔ 停用') + '</span></div>' +
+                    '</div>' +
+                    (user.bio ? '<div style="background: #fff; padding: 16px; border-radius: 12px; border-left: 4px solid #ff8a00;"><strong style="color: #a55b00;">个人简介：</strong><br><p style="margin: 8px 0 0 0; color: #666; line-height: 1.6;">' + escapeHtml(user.bio) + '</p></div>' : '') +
+                    '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; font-size: 12px; color: #999; text-align: center; padding-top: 16px; border-top: 1px solid #eee;">' +
+                        '<div><strong>创建时间</strong><br>' + formatDateTime(user.createdAt || user.created_at) + '</div>' +
+                        '<div><strong>更新时间</strong><br>' + formatDateTime(user.updatedAt || user.updated_at) + '</div>' +
+                        '<div><strong>最后登录</strong><br>' + formatDateTime(user.lastLogin || user.last_login) + '</div>' +
+                    '</div>' +
+                '</div>';
                 
-                document.getElementById('viewUserGender').textContent = genderMap[user.gender] || user.gender || '未知';
-                document.getElementById('viewUserBirthday').textContent = user.birthday || user.birth_date || '未知';
-                document.getElementById('viewUserBio').textContent = user.bio || '无';
+                document.getElementById('userDetailContent').innerHTML = detailHtml;
+                document.getElementById('viewUserModal').style.display = 'block';
                 
-                // 显示模态框
-                document.getElementById('viewModal').style.display = 'block';
-                
-            } catch (error) {
-                console.error('获取用户详情失败:', error);
-                alert('获取用户详情失败：' + error.message);
+            } catch(error) {
+                console.error('❌ 查看用户详情失败:', error);
+                alert('❌ 查看失败：' + (error.message || '请稍后重试'));
             }
         }
         
-        // 关闭查看模态框
-        function closeViewModal() {
-            document.getElementById('viewModal').style.display = 'none';
+        // 关闭查看用户模态框
+        function closeViewUserModal() {
+            document.getElementById('viewUserModal').style.display = 'none';
         }
-
-        // 动态加载团队列表到编辑表单
-        async function loadTeamsToEditForm() {
+        
+        // 编辑用户
+        async function editUser(userId) {
             try {
-                // 尝试获取所有团队
-                const teams = [];
-                for (let i = 1; i <= 10; i++) {
-                    try {
-                        const teamName = await window.API.getTeamNameCached(i);
-                        if (teamName && teamName !== '未知团队') {
-                            teams.push({ id: i, name: teamName });
-                        }
-                    } catch (e) {
-                        break; // 没有更多团队
-                    }
+                if (!window.API || typeof window.API.getUserById !== 'function') {
+                    alert('❌ API不可用');
+                    return;
                 }
                 
-                const select = document.getElementById('editTeamId');
-                if (teams.length > 0) {
-                    select.innerHTML = teams.map(t => 
-                        '<option value="' + t.id + '">' + t.name + '</option>'
-                    ).join('');
-                } else {
-                    // 降级：使用默认团队
-                    select.innerHTML = '<option value="1">研发团队</option>' +
-                                     '<option value="2">测试团队</option>' +
-                                     '<option value="3">产品团队</option>';
-                }
-            } catch (error) {
-                console.error('加载团队列表失败:', error);
-                // 使用默认值
-                const select = document.getElementById('editTeamId');
-                select.innerHTML = '<option value="1">研发团队</option>' +
-                                 '<option value="2">测试团队</option>' +
-                                 '<option value="3">产品团队</option>';
-            }
-        }
-
-        // 编辑用户信息
-        async function editUser(index) {
-            currentEditIndex = index;
-            const user = users[index];
-            
-            console.log('📝 编辑用户:', user);
-
-            // 填充用户ID
-            const userId = user.id || user.userId || user.user_id;
-            const userEmail = user.email || '';
-
-            if (!userEmail) {
-                alert('错误：用户邮箱信息缺失，无法编辑');
+                console.log('✏️ 编辑用户:', userId);
+                
+                const user = await window.API.getUserById(userId);
+                
+                if (!user) {
+                    alert('❌ 未找到用户信息');
                 return;
             }
 
-            // 填充表单字段
-            document.getElementById('editUserId').value = userId;
-            document.getElementById('editName').value = user.name || '';
-            document.getElementById('editEmail').value = userEmail;  // 邮箱可编辑，默认显示原值
-            document.getElementById('editPhone').value = user.phone || '';
-            document.getElementById('editRoleId').value = user.roleId || user.role_id || '4';  // 默认普通成员
-            document.getElementById('editStatus').value = user.status || 'active';
-            
-            // 加载团队列表
-            await loadTeamsToEditForm();
-            
-            // 设置当前团队
-            document.getElementById('editTeamId').value = user.teamId || user.team_id || '1';
-            
-            // 显示模态框
-            document.getElementById('editModal').style.display = 'block';
-        }
-
-        // 打开创建用户模态框
-        async function openCreateModal() {
-            // 重置表单
-            document.getElementById('createForm').reset();
-            
-            // 加载团队列表
-            await loadTeamsToCreateForm();
-            
-            // 显示模态框
-            document.getElementById('createModal').style.display = 'block';
-        }
-        
-        // 加载团队列表到创建表单
-        async function loadTeamsToCreateForm() {
-            try {
-                // 尝试获取所有团队
-                const teams = [];
-                for (let i = 1; i <= 10; i++) {
-                    try {
-                        const teamName = await window.API.getTeamNameCached(i);
-                        if (teamName && teamName !== '未知团队') {
-                            teams.push({ id: i, name: teamName });
-                        }
-                    } catch (e) {
-                        break; // 没有更多团队
-                    }
-                }
-
-                const select = document.getElementById('createTeamId');
-                if (teams.length > 0) {
-                    select.innerHTML = teams.map(t =>
-                        '<option value="' + t.id + '">' + t.name + '</option>'
-                    ).join('');
-                    // 默认选中第一个团队
-                    if (teams.length > 0) {
-                        select.value = teams[0].id;
-                    }
-                } else {
-                    // 降级：使用默认团队
-                    select.innerHTML = '<option value="1">研发团队</option>' +
-                                     '<option value="2">测试团队</option>' +
-                                     '<option value="3">产品团队</option>';
-                }
-            } catch (error) {
-                console.error('加载团队列表失败:', error);
-                // 使用默认值
-                const select = document.getElementById('createTeamId');
-                select.innerHTML = '<option value="1">研发团队</option>' +
-                                 '<option value="2">测试团队</option>' +
-                                 '<option value="3">产品团队</option>';
+                console.log('✅ 加载用户数据用于编辑:', user);
+                
+                // 先填充团队选项
+                await populateTeamOptions('eu_team_id');
+                
+                // 填充编辑表单
+                document.getElementById('eu_userId').value = user.userId || user.user_id || user.id;
+                document.getElementById('eu_name').value = user.name || '';
+                document.getElementById('eu_phone').value = user.phone || '';
+                document.getElementById('eu_team_id').value = user.team_id || user.teamId || '';
+                document.getElementById('eu_role_id').value = user.role_id || user.roleId || '';
+                document.getElementById('eu_status').value = user.status || 'active';
+                
+                // 显示编辑模态框
+                document.getElementById('editUserModal').style.display = 'block';
+                
+            } catch(error) {
+                console.error('❌ 编辑用户失败:', error);
+                alert('❌ 加载失败：' + (error.message || '请稍后重试'));
             }
         }
-
-        // 关闭编辑模态框
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-            currentEditIndex = -1;
+        
+        // 关闭编辑用户模态框
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').style.display = 'none';
         }
-
-        // 关闭创建模态框
-        function closeCreateModal() {
-            document.getElementById('createModal').style.display = 'none';
-            document.getElementById('createForm').reset();
+        
+        // 保存编辑的用户信息
+        async function saveEditUser() {
+            try {
+                const userId = document.getElementById('eu_userId').value;
+                const name = document.getElementById('eu_name').value.trim();
+                const phone = document.getElementById('eu_phone').value.trim();
+                const team_id = document.getElementById('eu_team_id').value;
+                const role_id = document.getElementById('eu_role_id').value;
+                const status = document.getElementById('eu_status').value;
+                
+                // 验证必填项
+                if (!name) {
+                    alert('请填写用户姓名');
+                return;
+            }
+            
+                if (!team_id || !role_id) {
+                    alert('请填写团队ID和角色ID');
+                return;
+            }
+            
+                // 构建更新数据 - 注意：email不能为null，所以不包含在更新中
+            const userData = {
+                    name: name,
+                    phone: phone || null,
+                    team_id: parseInt(team_id, 10),
+                    role_id: parseInt(role_id, 10),
+                    status: status
+                };
+                
+                console.log('💾 更新用户数据:', { userId: userId, data: userData });
+                
+                // 调用API
+                if (!window.API || typeof window.API.updateUser !== 'function') {
+                    alert('❌ API不可用');
+                    return;
+                }
+                
+                const result = await window.API.updateUser(userId, userData);
+                
+                console.log('✅ 用户更新成功:', result);
+                
+                if (result && result.ok) {
+                    alert('✅ 用户信息更新成功！');
+                    closeEditUserModal();
+                    // 刷新用户列表
+                    await loadUsers();
+                } else {
+                    alert('❌ 更新失败：' + (result.message || '未知错误'));
+                }
+                
+            } catch(error) {
+                console.error('❌ 保存用户信息失败:', error);
+                alert('❌ 保存失败：' + (error.message || '请稍后重试'));
+            }
         }
-
+        
+        // 格式化日期时间
+        function formatDateTime(dateStr) {
+            if (!dateStr) return '-';
+            try {
+                const date = new Date(dateStr);
+                return date.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch(e) {
+                return dateStr;
+            }
+        }
+        
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function() {
+                const context = this;
+                const args = arguments;
+                clearTimeout(timeout);
+                timeout = setTimeout(function() {
+                    func.apply(context, args);
+                }, wait);
+            };
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+        
         // 点击模态框外部关闭
-        document.getElementById('viewModal').addEventListener('click', function(e) {
+        document.getElementById('createUserModal')?.addEventListener('click', function(e) {
             if (e.target === this) {
-                closeViewModal();
+                closeCreateUserModal();
             }
         });
-
-        document.getElementById('editModal').addEventListener('click', function(e) {
+        
+        document.getElementById('viewUserModal')?.addEventListener('click', function(e) {
             if (e.target === this) {
-                closeEditModal();
+                closeViewUserModal();
             }
         });
-
-        document.getElementById('createModal').addEventListener('click', function(e) {
+        
+        document.getElementById('editUserModal')?.addEventListener('click', function(e) {
             if (e.target === this) {
-                closeCreateModal();
+                closeEditUserModal();
             }
         });
-
-        // 处理编辑表单提交
-        document.getElementById('editForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            if (currentEditIndex === -1) return;
-            
-            const user = users[currentEditIndex];
-            const userId = user.id || user.userId || user.user_id;
-            if (!user || !userId) {
-                alert('无法获取用户信息');
-                return;
-            }
-            
-            // 获取表单数据
-            const formData = new FormData(this);
-            
-            // 获取并验证必填字段
-            const userName = formData.get('name') ? formData.get('name').trim() : '';
-            const userEmail = formData.get('email') ? formData.get('email').trim() : '';
-            
-            if (!userName) {
-                alert('请输入姓名！');
-                return;
-            }
-            
-            if (!userEmail) {
-                alert('请输入邮箱！邮箱不能为空。');
-                return;
-            }
-            
-            // 构建更新数据：根据后端UserUpdateDTO的@JsonProperty注解
-            const userData = {
-                name: userName,
-                email: userEmail,  // 必须包含且不能为空（可以是修改后的新值或原值）
-                phone: formData.get('phone') ? formData.get('phone').trim() : null,
-                team_id: parseInt(formData.get('team_id')) || 1,  // 匹配@JsonProperty("team_id")
-                role_id: parseInt(formData.get('role_id')) || 4,  // 匹配@JsonProperty("role_id")，默认普通成员
-                status: formData.get('status') || 'active'        // 状态字段
-            };
-            
-            // 清理phone字段：如果为空字符串，设为null
-            if (userData.phone === '') {
-                userData.phone = null;
-            }
-            
-            try {
-                console.log('准备更新用户，数据验证:', userData);
-                
-                // 最终验证数据格式
-                if (isNaN(userData.team_id) || isNaN(userData.role_id)) {
-                    throw new Error('团队ID或角色ID格式错误');
-                }
-                
-                // 检查认证token
-                let token = '';
-                try {
-                    const raw = localStorage.getItem('authToken');
-                    if (raw) token = JSON.parse(raw);
-                } catch(e) {}
-                
-                if (!token) {
-                    throw new Error('用户未登录，请重新登录后再试');
-                }
-                
-                console.log('认证token存在:', !!token);
-                console.log('用户ID:', userId);
-                console.log('发送更新用户请求:', userData);
-                
-                const response = await window.API.updateUser(userId, userData);
-                
-                console.log('更新用户成功:', response);
-                
-                // 关闭模态框
-                closeEditModal();
-                
-                // 重新加载用户列表
-                await loadUsers(currentPage);
-                
-                alert('用户信息更新成功！');
-                
-            } catch (error) {
-                console.error('更新用户完整错误信息:', error);
-                
-                let errorMessage = '更新用户失败';
-                if (error.message) {
-                    errorMessage += ': ' + error.message;
-                }
-                
-                // 提供更多调试信息
-                console.error('错误详情:', {
-                    message: error.message,
-                    stack: error.stack,
-                    userId: userId,
-                    userData: userData
-                });
-                
-                alert(errorMessage + '\n\n请检查控制台获取详细错误信息');
-            }
-        });
-
-        // 处理创建表单提交
-        document.getElementById('createForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            // 获取表单数据
-            const formData = new FormData(this);
-            const userData = {
-                name: formData.get('name').trim(),
-                username: formData.get('username').trim(),
-                email: formData.get('email').trim(),
-                password: formData.get('password'),
-                phone: formData.get('phone') ? formData.get('phone').trim() : null,
-                team_id: parseInt(formData.get('team_id')) || 1,  // 保持下划线，匹配setTeam_id()
-                role_id: parseInt(formData.get('role_id')) || 4,  // 保持下划线，创建用户接口匹配
-                gender: formData.get('gender') || 'M',
-                birthday: formData.get('birth_date') || null      // 改为birthday，匹配setBirthday()
-            };
-            
-            // 清理空值和无效值
-            Object.keys(userData).forEach(key => {
-                if (userData[key] === '' || userData[key] === 'null') {
-                    if (key === 'phone' || key === 'birthday') {
-                        userData[key] = null;
-                    } else if (key === 'team_id' || key === 'role_id') {
-                        // 保持默认值
-                    } else if (key === 'gender') {
-                        userData[key] = 'M';
-                    }
-                }
-            });
-            
-            // 验证必填数据
-            if (!userData.name || !userData.username || !userData.email || !userData.password) {
-                alert('请填写所有必填字段！');
-                return;
-            }
-            
-            // 验证team_id和role_id必须有效
-            if (!userData.team_id || userData.team_id === 0 || isNaN(userData.team_id)) {
-                alert('请选择团队！');
-                return;
-            }
-            
-            if (!userData.role_id || userData.role_id === 0 || isNaN(userData.role_id)) {
-                alert('请选择角色！');
-                return;
-            }
-            
-            // 验证邮箱格式
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(userData.email)) {
-                alert('请输入有效的邮箱地址！');
-                return;
-            }
-            
-            // 验证密码长度
-            if (userData.password.length < 6) {
-                alert('密码长度至少6位！');
-                return;
-            }
-            
-            try {
-                console.log('准备创建用户，数据验证:', userData);
-                
-                // 最终验证数据格式
-                if (isNaN(userData.team_id) || isNaN(userData.role_id)) {
-                    throw new Error('团队ID或角色ID格式错误');
-                }
-                
-                // 检查认证token
-                let token = '';
-                try {
-                    const raw = localStorage.getItem('authToken');
-                    if (raw) token = JSON.parse(raw);
-                } catch(e) {}
-                
-                if (!token) {
-                    throw new Error('用户未登录，请重新登录后再试');
-                }
-                
-                console.log('认证token存在:', !!token);
-                console.log('发送创建用户请求:', userData);
-                
-                const response = await window.API.createUser(userData);
-                
-                console.log('创建用户成功:', response);
-            
-                // 关闭模态框
-                closeCreateModal();
-                
-                // 重新加载用户列表
-                await loadUsers(currentPage);
-                
-                alert('用户创建成功！');
-                
-            } catch (error) {
-                console.error('创建用户完整错误信息:', error);
-                
-                let errorMessage = '创建用户失败';
-                if (error.message) {
-                    errorMessage += ': ' + error.message;
-                }
-                
-                // 提供更多调试信息
-                console.error('错误详情:', {
-                    message: error.message,
-                    stack: error.stack,
-                    userData: userData
-                });
-                
-                alert(errorMessage + '\n\n请检查控制台获取详细错误信息');
-            }
-        });
-
-        // ESC键关闭模态框
+        
+        // 按ESC键关闭所有模态框
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                if (document.getElementById('viewModal').style.display === 'block') {
-                    closeViewModal();
-                } else if (document.getElementById('editModal').style.display === 'block') {
-                closeEditModal();
-                } else if (document.getElementById('createModal').style.display === 'block') {
-                    closeCreateModal();
-                }
+                closeCreateUserModal();
+                closeViewUserModal();
+                closeEditUserModal();
             }
         });
     </script>
 </body>
 </html>
-

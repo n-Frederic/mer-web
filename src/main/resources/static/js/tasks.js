@@ -164,6 +164,57 @@
         var page = data.page || 1;
         var totalPages = data.totalPages || 1;
         
+        // 获取当前登录用户信息
+        var currentUser = null;
+        try {
+            var userData = localStorage.getItem('currentUser');
+            if (userData) {
+                currentUser = JSON.parse(userData);
+            }
+        } catch(e) {
+            console.error('获取当前用户信息失败:', e);
+        }
+        
+        // 任务排序：负责人是当前用户的任务优先，然后是发布人是当前用户的任务
+        if (currentUser && (currentUser.name || currentUser.userId || currentUser.id)) {
+            var currentUserId = currentUser.userId || currentUser.id || currentUser.user_id;
+            var currentUserName = currentUser.name;
+            
+            console.log('当前用户:', { id: currentUserId, name: currentUserName });
+            
+            list.sort(function(a, b) {
+                // 检查负责人
+                var aIsOwner = false;
+                var bIsOwner = false;
+                
+                if (a.owner === currentUserName || a.ownerId === currentUserId) {
+                    aIsOwner = true;
+                }
+                if (b.owner === currentUserName || b.ownerId === currentUserId) {
+                    aIsOwner = true;
+                }
+                
+                // 检查发布人
+                var aIsPublisher = false;
+                var bIsPublisher = false;
+                
+                if (a.publisher === currentUserName || a.creatorId === currentUserId || (a.creator && (a.creator.id === currentUserId || a.creator.name === currentUserName))) {
+                    aIsPublisher = true;
+                }
+                if (b.publisher === currentUserName || b.creatorId === currentUserId || (b.creator && (b.creator.id === currentUserId || b.creator.name === currentUserName))) {
+                    bIsPublisher = true;
+                }
+                
+                // 排序逻辑：负责人优先 > 发布人 > 其他
+                if (aIsOwner && !bIsOwner) return -1;
+                if (!aIsOwner && bIsOwner) return 1;
+                if (aIsPublisher && !bIsPublisher) return -1;
+                if (!aIsPublisher && bIsPublisher) return 1;
+                
+                return 0;
+            });
+        }
+        
         // 更新页面信息
         if (pageInfoTop) pageInfoTop.textContent = page + ' / ' + totalPages;
         if (pageInfoBottom) pageInfoBottom.textContent = page + ' / ' + totalPages;
@@ -189,8 +240,49 @@
             grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">暂无任务数据</div>';
         } else {
             grid.innerHTML = list.map(function(t){
+            // 判断当前用户是否是负责人或发布人
+            var isOwner = false;
+            var isPublisher = false;
+            
+            if (currentUser) {
+                var userId = currentUser.userId || currentUser.id || currentUser.user_id;
+                var userName = currentUser.name;
+                
+                // 检查是否是负责人
+                if (t.owner === userName || t.ownerId === userId) {
+                    isOwner = true;
+                }
+                
+                // 检查是否是发布人
+                if (t.publisher === userName || t.creatorId === userId || (t.creator && (t.creator.id === userId || t.creator.name === userName))) {
+                    isPublisher = true;
+                }
+            }
+            
+            // 构建操作按钮HTML
+            var actionButtons = '<a class="btn-detail" href="task-detail.html?id=' + encodeURIComponent(t.id) + '">查看详情</a>';
+            
+            // 如果是负责人，添加"更新任务进度"按钮
+            if (isOwner) {
+                actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #4682b4, #5a9fd4);" onclick="updateTaskProgress(\'' + escapeHtml(t.id) + '\')">📊 更新进度</button>';
+            }
+            
+            // 如果是发布人，添加"更新任务信息"按钮
+            if (isPublisher) {
+                actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #32cd32, #90ee90);" onclick="updateTaskInfo(\'' + escapeHtml(t.id) + '\')">✏️ 更新信息</button>';
+            }
+            
+            // 添加优先级标识
+            var priorityBadge = '';
+            if (isOwner) {
+                priorityBadge = '<div style="position: absolute; right: 10px; top: 10px; background: linear-gradient(135deg, #ff8a00, #ffb06b); color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;">🎯 我负责</div>';
+            } else if (isPublisher) {
+                priorityBadge = '<div style="position: absolute; right: 10px; top: 10px; background: linear-gradient(135deg, #9370db, #b19cd9); color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;">📝 我发布</div>';
+            }
+            
             return '<div class="task-card">\
                 <div class="task-id">' + escapeHtml(t.id) + '</div>\
+                ' + priorityBadge + '\
                 <div class="task-title">' + escapeHtml(t.name) + '</div>\
                 <div class="task-meta">\
                     <span>开始：' + escapeHtml(t.startDate) + '</span>\
@@ -202,7 +294,7 @@
                 <div class="task-details">' + escapeHtml(t.details) + '</div>\
                 <div class="progress"><div class="progress-inner" style="width:' + Math.max(0,Math.min(100,t.progress)) + '%;"></div></div>\
                 <div class="progress-text">完成度：' + Math.max(0,Math.min(100,t.progress)) + '%</div>\
-                <div class="card-actions"><a class="btn-detail" href="task-detail.html?id=' + encodeURIComponent(t.id) + '">查看详情</a></div>\
+                <div class="card-actions">' + actionButtons + '</div>\
             </div>';
         }).join('');
         }
@@ -320,4 +412,186 @@
             }
         }
     };
+    
+    // 全局函数：更新任务进度
+    window.updateTaskProgress = async function(taskId) {
+        try {
+            // 🔧 使用辅助函数获取完整用户信息
+            var currentUser = null;
+            if (window.API && typeof window.API.getCurrentUserWithId === 'function') {
+                currentUser = await window.API.getCurrentUserWithId();
+            } else {
+                // 降级方案
+                try {
+                    var userData = localStorage.getItem('currentUser');
+                    if (userData) {
+                        currentUser = JSON.parse(userData);
+                    }
+                } catch(e) {
+                    console.error('获取当前用户信息失败:', e);
+                }
+            }
+            
+            var userId = currentUser ? (currentUser.userId || currentUser.id || currentUser.user_id) : null;
+            
+            if (!userId) {
+                alert('❌ 无法获取当前用户信息，请重新登录');
+                console.error('当前用户数据:', currentUser);
+                return;
+            }
+            
+            // 确保userId是字符串格式（如"U-1001"或"5"）
+            userId = String(userId);
+            
+            // 弹出对话框让用户输入新的进度
+            var progressInput = prompt('请输入任务进度（0-100）：', '0');
+            
+            if (progressInput === null) {
+                // 用户取消
+                return;
+            }
+            
+            var progressPct = parseInt(progressInput, 10);
+            
+            // 验证输入
+            if (isNaN(progressPct) || progressPct < 0 || progressPct > 100) {
+                alert('❌ 请输入0-100之间的整数');
+                return;
+            }
+            
+            // 调用API更新进度
+            if (window.API && typeof window.API.updateTaskProgress === 'function') {
+                console.log('🔄 更新任务进度:', { taskId: taskId, userId: userId, progressPct: progressPct });
+                
+                var result = await window.API.updateTaskProgress(taskId, userId, progressPct);
+                
+                console.log('✅ 任务进度更新成功:', result);
+                alert('✅ 任务进度更新成功！');
+                
+                // 重新加载任务列表
+                location.reload();
+            } else {
+                alert('❌ API不可用，无法更新任务进度');
+            }
+            
+        } catch(error) {
+            console.error('❌ 更新任务进度失败:', error);
+            alert('❌ 更新失败：' + (error.message || '请稍后重试'));
+        }
+    };
+    
+    // 全局函数：更新任务信息
+    window.updateTaskInfo = async function(taskId) {
+        try {
+            // 获取任务详情
+            if (!window.API || typeof window.API.getTask !== 'function') {
+                alert('❌ API不可用，无法更新任务信息');
+                return;
+            }
+            
+            console.log('🔄 获取任务详情:', taskId);
+            var task = await window.API.getTask(taskId);
+            
+            if (!task) {
+                alert('❌ 无法获取任务信息');
+                return;
+            }
+            
+            console.log('✅ 获取到任务详情:', task);
+            
+            // 构建表单HTML
+            var formHtml = '<div style="text-align: left; max-width: 600px; margin: 0 auto;">';
+            formHtml += '<div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; font-weight: bold;">任务标题：</label><input type="text" id="edit_title" value="' + escapeHtml(task.title || task.name || '') + '" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></div>';
+            formHtml += '<div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; font-weight: bold;">任务描述：</label><textarea id="edit_description" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; min-height: 100px;">' + escapeHtml(task.description || task.summary || '') + '</textarea></div>';
+            formHtml += '<div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; font-weight: bold;">优先级：</label><select id="edit_priority" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"><option value="Low"' + (task.priority === 'Low' ? ' selected' : '') + '>低</option><option value="Medium"' + (task.priority === 'Medium' ? ' selected' : '') + '>中</option><option value="High"' + (task.priority === 'High' ? ' selected' : '') + '>高</option></select></div>';
+            formHtml += '<div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; font-weight: bold;">状态：</label><select id="edit_status" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"><option value="Published"' + (task.status === 'Published' ? ' selected' : '') + '>已发布</option><option value="Assigned"' + (task.status === 'Assigned' ? ' selected' : '') + '>已分配</option><option value="InProgress"' + (task.status === 'InProgress' ? ' selected' : '') + '>进行中</option><option value="Reported"' + (task.status === 'Reported' ? ' selected' : '') + '>已汇报</option><option value="Completed"' + (task.status === 'Completed' ? ' selected' : '') + '>已完成</option></select></div>';
+            formHtml += '<div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; font-weight: bold;">开始时间：</label><input type="datetime-local" id="edit_startAt" value="' + formatDateTimeLocal(task.startAt) + '" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></div>';
+            formHtml += '<div style="margin-bottom: 15px;"><label style="display: block; margin-bottom: 5px; font-weight: bold;">截止时间：</label><input type="datetime-local" id="edit_dueAt" value="' + formatDateTimeLocal(task.dueAt) + '" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px;"></div>';
+            formHtml += '</div>';
+            
+            // 创建临时的对话框容器
+            var dialogDiv = document.createElement('div');
+            dialogDiv.innerHTML = '<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">\
+                <div style="background: white; padding: 30px; border-radius: 14px; max-width: 700px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">\
+                    <h3 style="margin: 0 0 20px 0; color: #a55b00; font-size: 22px;">✏️ 更新任务信息</h3>\
+                    ' + formHtml + '\
+                    <div style="margin-top: 20px; text-align: center; display: flex; gap: 10px; justify-content: center;">\
+                        <button id="btn_save_task" style="padding: 10px 24px; background: linear-gradient(135deg, #ff8a00, #ffb06b); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px;">💾 保存</button>\
+                        <button id="btn_cancel_task" style="padding: 10px 24px; background: #ddd; color: #666; border: none; border-radius: 8px; cursor: pointer; font-size: 15px;">❌ 取消</button>\
+                    </div>\
+                </div>\
+            </div>';
+            
+            document.body.appendChild(dialogDiv);
+            
+            // 绑定取消按钮
+            document.getElementById('btn_cancel_task').addEventListener('click', function() {
+                document.body.removeChild(dialogDiv);
+            });
+            
+            // 绑定保存按钮
+            document.getElementById('btn_save_task').addEventListener('click', async function() {
+                try {
+                    var updatedTask = {
+                        title: document.getElementById('edit_title').value.trim(),
+                        description: document.getElementById('edit_description').value.trim(),
+                        priority: document.getElementById('edit_priority').value,
+                        status: document.getElementById('edit_status').value,
+                        startAt: document.getElementById('edit_startAt').value ? new Date(document.getElementById('edit_startAt').value).toISOString() : task.startAt,
+                        dueAt: document.getElementById('edit_dueAt').value ? new Date(document.getElementById('edit_dueAt').value).toISOString() : task.dueAt,
+                        tags: task.tags || []
+                    };
+                    
+                    console.log('🔄 更新任务信息:', updatedTask);
+                    
+                    var result = await window.API.updateTaskInfo(taskId, updatedTask);
+                    
+                    console.log('✅ 任务信息更新成功:', result);
+                    alert('✅ 任务信息更新成功！');
+                    
+                    document.body.removeChild(dialogDiv);
+                    
+                    // 重新加载任务列表
+                    location.reload();
+                    
+                } catch(error) {
+                    console.error('❌ 保存任务信息失败:', error);
+                    alert('❌ 保存失败：' + (error.message || '请稍后重试'));
+                }
+            });
+            
+        } catch(error) {
+            console.error('❌ 更新任务信息失败:', error);
+            alert('❌ 操作失败：' + (error.message || '请稍后重试'));
+        }
+    };
+    
+    // 辅助函数：格式化日期时间为datetime-local格式
+    function formatDateTimeLocal(dateStr) {
+        if (!dateStr) return '';
+        try {
+            var date = new Date(dateStr);
+            var year = date.getFullYear();
+            var month = String(date.getMonth() + 1).padStart(2, '0');
+            var day = String(date.getDate()).padStart(2, '0');
+            var hours = String(date.getHours()).padStart(2, '0');
+            var minutes = String(date.getMinutes()).padStart(2, '0');
+            return year + '-' + month + '-' + day + 'T' + hours + ':' + minutes;
+        } catch(e) {
+            return '';
+        }
+    }
+    
+    // HTML转义函数（全局版本）
+    function escapeHtml(text) {
+        if (!text) return '';
+        var map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
 })();

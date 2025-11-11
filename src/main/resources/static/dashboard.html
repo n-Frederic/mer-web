@@ -430,52 +430,28 @@
                     <h3>个人工作日志</h3>
                     <form id="journalForm" class="journal-form">
                         <div class="form-item full">
-                            <label>标题 <span style="color: red;">*</span></label>
-                            <input id="jl_title" placeholder="请输入日志标题，如：今日工作总结" required>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                            <div class="form-item">
-                                <label>日期 <span style="color: red;">*</span></label>
-                                <input id="jl_logDate" type="date" required>
-                            </div>
-                            <div class="form-item">
-                                <label>类型 <span style="color: red;">*</span></label>
-                                <select id="jl_viewType" required>
-                                    <option value="Day">日报</option>
-                                    <option value="Week">周报</option>
-                                    <option value="Month">月报</option>
-                                </select>
-                            </div>
-                            <div class="form-item">
-                                <label>心情</label>
-                                <select id="jl_mood">
-                                    <option value="">无</option>
-                                    <option value="Happy">😊 开心</option>
-                                    <option value="Productive">💪 高效</option>
-                                    <option value="Focused">🎯 专注</option>
-                                    <option value="Satisfied">✨ 满意</option>
-                                    <option value="Accomplished">🏆 成就感</option>
-                                    <option value="Neutral">😐 平静</option>
-                                    <option value="Tired">😴 疲惫</option>
-                                    <option value="Frustrated">😤 受挫</option>
-                                </select>
-                            </div>
+                            <label>📅 日志日期 <span style="color: red;">*</span></label>
+                            <input id="jl_logDate" type="date" required style="font-size: 15px;">
                         </div>
                         <div class="form-item full">
-                            <label>摘要</label>
-                            <input id="jl_summary" placeholder="一句话概括本次日志内容（可选）">
+                            <label>📝 今日总结 <span style="color: red;">*</span></label>
+                            <textarea id="jl_todaySummary" placeholder="记录今天完成的工作、遇到的问题和解决方案..." style="min-height: 150px; font-size: 14px;" required></textarea>
                         </div>
                         <div class="form-item full">
-                            <label>内容 <span style="color: red;">*</span></label>
-                            <textarea id="jl_content" placeholder="详细记录今天的工作内容、遇到的问题、解决方案和心得体会..." style="min-height: 150px;" required></textarea>
+                            <label>📋 明日计划 <span style="color: red;">*</span></label>
+                            <textarea id="jl_tomorrowPlan" placeholder="规划明天要完成的工作任务..." style="min-height: 120px; font-size: 14px;" required></textarea>
                         </div>
                         <div class="form-item full">
-                            <label>关联任务ID</label>
-                            <input id="jl_taskId" type="number" placeholder="输入关联的任务ID（可选）" min="1">
+                            <label>🆘 需要帮助（可选）</label>
+                            <textarea id="jl_helpNeeded" placeholder="遇到困难？需要什么支持？" style="min-height: 80px; font-size: 14px;"></textarea>
+                        </div>
+                        <div class="form-item full">
+                            <label>🔗 关联任务ID（多个用逗号分隔）</label>
+                            <input id="jl_taskIds" placeholder="例如：1,3,5" style="font-size: 14px;">
                         </div>
                         <div class="journal-actions full" style="justify-content:center;">
-                            <button type="button" class="btn-sm btn-wide" id="jl_save">💾 保存</button>
-                            <button type="button" class="btn-secondary btn-wide" id="jl_clear">🗑️ 清空</button>
+                            <button type="button" class="btn-sm btn-wide" id="jl_save" style="padding: 14px 32px; font-size: 16px;">💾 保存日志</button>
+                            <button type="button" class="btn-secondary btn-wide" id="jl_clear" style="padding: 14px 32px; font-size: 16px;">🔄 清空表单</button>
                         </div>
                     </form>
                     
@@ -566,6 +542,19 @@
         </div>
     </div>
 
+    <!-- 评论模态框 -->
+    <div id="commentsModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3>💬 评论</h3>
+                <span class="modal-close" onclick="closeCommentsModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="commentsContainer"></div>
+            </div>
+        </div>
+    </div>
+
     <script id="mockTasks" type="application/json">
     [
       {"id":"T-001","name":"周报整理与提交","startDate":"2025-09-15","endDate":"2025-09-18","summary":"收集成员周报并统一格式提交","details":"汇总各成员产出，统一模板，上传至项目盘并发送邮件通知。","publisher":"Alice","owner":"Bob","progress":80},
@@ -583,6 +572,7 @@
 
     <script src="js/common.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/comments.js"></script>
     <script>
         // 读取模拟登录用户（用戶名設置已在 common.js 中處理）
         let currentUser = { name: '用户', email: '' };
@@ -746,24 +736,19 @@
                         </div>\
                         \
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; overflow-x: hidden; min-height: 0; padding-right: 4px;">\
-                            '+ (todaySummary ? '<div class="entry-content-scrollable summary-scroll" style="background: #fff8dc; padding: 12px; border-radius: 6px; border-left: 3px solid #ffa500; max-height: 180px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #d2691e; display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600;">📝 今日总结</strong>\
-                                <div style="line-height: 1.8; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 4px; font-size: 13px;">'+ escapeHtml(todaySummary) +'</div>\
+                            '+ (todaySummary ? '<div class="entry-content-scrollable summary-scroll" style="background: #fff8dc; padding: 14px; border-radius: 8px; border-left: 3px solid #ffa500; max-height: 220px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
+                                <strong style="color: #d2691e; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">📝 今日总结</strong>\
+                                <div style="line-height: 1.9; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 6px; font-size: 13px;">'+ escapeHtml(todaySummary) +'</div>\
                             </div>' : '') +'\
                             \
-                            '+ (tomorrowPlan ? '<div class="entry-content-scrollable plan-scroll" style="background: #e6f3ff; padding: 12px; border-radius: 6px; border-left: 3px solid #4682b4; max-height: 180px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #4682b4; display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600;">📋 明日计划</strong>\
-                                <div style="line-height: 1.8; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 4px; font-size: 13px;">'+ escapeHtml(tomorrowPlan) +'</div>\
+                            '+ (tomorrowPlan ? '<div class="entry-content-scrollable plan-scroll" style="background: #e6f3ff; padding: 14px; border-radius: 8px; border-left: 3px solid #4682b4; max-height: 220px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
+                                <strong style="color: #4682b4; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">📋 明日计划</strong>\
+                                <div style="line-height: 1.9; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 6px; font-size: 13px;">'+ escapeHtml(tomorrowPlan) +'</div>\
                             </div>' : '') +'\
                             \
-                            '+ (helpNeeded ? '<div class="entry-content-scrollable help-scroll" style="background: #ffe6e6; padding: 12px; border-radius: 6px; border-left: 3px solid #dc143c; max-height: 180px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #dc143c; display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600;">🆘 需要帮助</strong>\
-                                <div style="line-height: 1.8; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 4px; font-size: 13px;">'+ escapeHtml(helpNeeded) +'</div>\
-                            </div>' : '') +'\
-                            \
-                            '+ (content && content.trim() ? '<div class="entry-content-scrollable content-scroll" style="background: #fafafa; padding: 12px; border-radius: 6px; border: 1px solid #e0e0e0; max-height: 180px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #d2691e; display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600;">📄 详细内容</strong>\
-                                <div style="line-height: 1.8; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 4px; font-size: 13px;">'+ escapeHtml(content) +'</div>\
+                            '+ (helpNeeded ? '<div class="entry-content-scrollable help-scroll" style="background: #ffe6e6; padding: 14px; border-radius: 8px; border-left: 3px solid #dc143c; max-height: 220px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
+                                <strong style="color: #dc143c; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">🆘 需要帮助</strong>\
+                                <div style="line-height: 1.9; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 6px; font-size: 13px;">'+ escapeHtml(helpNeeded) +'</div>\
                             </div>' : '') +'\
                             \
                             <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 4px; flex-shrink: 0;">\
@@ -773,6 +758,7 @@
                         </div>\
                         \
                         <div class="entry-actions" style="flex-shrink: 0; margin-top: 12px; padding-top: 12px; border-top: 2px solid #ffe8cf; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">\
+                            <button class="btn-sm" onclick="showJournalComments(\''+ entryId +'\')" style="background: linear-gradient(135deg, #32cd32, #90ee90); padding: 8px 16px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(50,205,50,0.3); transition: all 0.2s;">💬 评论</button>\
                             <button class="btn-sm" onclick="editJournalEntry(\''+ entryId +'\')" style="background: linear-gradient(135deg, #4682b4, #5a9fd4); padding: 8px 16px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(70,130,180,0.3); transition: all 0.2s;">✏️ 编辑</button>\
                             <button class="btn-outline" onclick="deleteJournalEntry(\''+ entryId +'\')" style="border: 2px solid #dc143c; color: #dc143c; background: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">🗑️ 删除</button>\
                             '+ (hasHistory ? '<button class="btn-info" onclick="showModificationHistory(\''+ entryId +'\')" style="background: linear-gradient(135deg, #9370db, #b19cd9); padding: 8px 16px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(147,112,219,0.3); transition: all 0.2s;">📜 历史</button>' : '') +'\
@@ -787,41 +773,43 @@
         
         document.getElementById('jl_save')?.addEventListener('click', async function(){
             // 获取所有表单字段
-            var title = document.getElementById('jl_title').value.trim();
-            var content = document.getElementById('jl_content').value.trim();
+            var todaySummary = document.getElementById('jl_todaySummary').value.trim();
+            var tomorrowPlan = document.getElementById('jl_tomorrowPlan').value.trim();
+            var helpNeeded = document.getElementById('jl_helpNeeded').value.trim();
             var logDate = document.getElementById('jl_logDate').value;
-            var viewType = document.getElementById('jl_viewType').value;
-            var mood = document.getElementById('jl_mood').value;
-            var summary = document.getElementById('jl_summary').value.trim();
-            var taskId = document.getElementById('jl_taskId').value;
+            var taskIdsStr = document.getElementById('jl_taskIds').value.trim();
             
             // 必填项校验
-            if (!title) {
-                alert('请填写日志标题');
+            if (!todaySummary) {
+                alert('请填写今日总结');
                 return;
             }
-            if (!content) {
-                alert('请填写日志内容');
+            if (!tomorrowPlan) {
+                alert('请填写明日计划');
                 return;
             }
             if (!logDate) {
                 alert('请选择日志日期');
                 return;
             }
-            if (!viewType) {
-                alert('请选择日志类型');
-                return;
+            
+            // 解析关联任务ID
+            var taskIds = [];
+            if (taskIdsStr) {
+                taskIds = taskIdsStr.split(',').map(function(id) {
+                    return id.trim();
+                }).filter(function(id) {
+                    return id.length > 0;
+                });
             }
             
-            // 按照后端接口格式构建请求体
+            // 按照新接口格式构建请求体
             var entry = {
-                title: title,
-                content: content,
-                logDate: logDate,
-                viewType: viewType,
-                mood: mood || null,
-                summary: summary || null,
-                taskId: taskId ? parseInt(taskId) : null
+                todaySummary: todaySummary,
+                tomorrowPlan: tomorrowPlan,
+                helpNeeded: helpNeeded || null,
+                log_date: logDate,
+                taskId: taskIds
             };
             
             console.log('📝 准备提交日志:', entry);
@@ -852,14 +840,12 @@
                     alert('✅ 日志保存成功（本地）！');
                 }
                 
-                // 清空表單
-                document.getElementById('jl_title').value = '';
-                document.getElementById('jl_content').value = '';
+                // 清空表单
+                document.getElementById('jl_todaySummary').value = '';
+                document.getElementById('jl_tomorrowPlan').value = '';
+                document.getElementById('jl_helpNeeded').value = '';
                 document.getElementById('jl_logDate').value = '';
-                document.getElementById('jl_viewType').value = 'Day';
-                document.getElementById('jl_mood').value = '';
-                document.getElementById('jl_summary').value = '';
-                document.getElementById('jl_taskId').value = '';
+                document.getElementById('jl_taskIds').value = '';
                 
                 // 重新載入並渲染
                 await renderEntries();
@@ -872,13 +858,11 @@
         
         document.getElementById('jl_clear')?.addEventListener('click', function(){
             if (confirm('确定要清空所有输入内容吗？')) {
-                document.getElementById('jl_title').value = '';
-                document.getElementById('jl_content').value = '';
-                document.getElementById('jl_logDate').value = '';
-                document.getElementById('jl_viewType').value = 'Day';
-                document.getElementById('jl_mood').value = '';
-                document.getElementById('jl_summary').value = '';
-                document.getElementById('jl_taskId').value = '';
+                document.getElementById('jl_todaySummary').value = '';
+                document.getElementById('jl_tomorrowPlan').value = '';
+                document.getElementById('jl_helpNeeded').value = '';
+                document.getElementById('jl_logDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('jl_taskIds').value = '';
             }
         });
         
@@ -1027,27 +1011,26 @@
             
             try {
                 if (window.API && typeof window.API.deleteJournal === 'function') {
-                    console.log('🔄 使用真实API删除日志');
-                    await window.API.deleteJournal(entryId);
-                    console.log('✅ 日志删除成功');
+                    const result = await window.API.deleteJournal(entryId);
+                    if (result && result.ok) {
+                        await renderEntries();
+                        alert(result.message || '日志删除成功');
+                    } else {
+                        alert('删除失败：' + (result.message || '未知错误'));
+                    }
                 } else {
                     // 本地存储删除
-                    console.log('⚠️ API不可用，使用本地存储');
                     const list = await loadEntries();
                     const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
                     if (index > -1) {
                         list.splice(index, 1);
                         saveEntries(list);
+                        await renderEntries();
+                        alert('删除成功（仅本地）');
                     }
                 }
-                
-                // 重新渲染日志列表
-                await renderEntries();
-                alert('删除成功');
-                
             } catch(error) {
-                console.error('删除日志失败:', error);
-                alert('删除失败，请重试');
+                alert('删除失败：' + (error.message || '网络错误，请稍后重试'));
             }
         };
         
@@ -1142,6 +1125,9 @@
                 }
                 if (document.getElementById('historyModal').style.display !== 'none') {
                     closeHistoryModal();
+                }
+                if (document.getElementById('commentsModal').style.display !== 'none') {
+                    closeCommentsModal();
                 }
             }
         });
@@ -1240,6 +1226,34 @@
         // 关闭历史模态框
         window.closeHistoryModal = function() {
             document.getElementById('historyModal').style.display = 'none';
+        };
+        
+        // 显示日志评论
+        window.showJournalComments = function(entryId) {
+            try {
+                var modal = document.getElementById('commentsModal');
+                if (!modal) {
+                    console.error('评论模态框不存在');
+                    return;
+                }
+                
+                modal.style.display = 'block';
+                
+                // 使用评论组件渲染评论
+                if (window.CommentsWidget && typeof window.CommentsWidget.renderComments === 'function') {
+                    window.CommentsWidget.renderComments('commentsContainer', 'log', entryId);
+                } else {
+                    document.getElementById('commentsContainer').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">评论组件加载失败</div>';
+                }
+            } catch(error) {
+                console.error('显示评论失败:', error);
+                alert('显示评论失败：' + (error.message || '请稍后重试'));
+            }
+        };
+        
+        // 关闭评论模态框
+        window.closeCommentsModal = function() {
+            document.getElementById('commentsModal').style.display = 'none';
         };
         
         // 获取字段显示名称
@@ -1345,6 +1359,13 @@
         document.getElementById('historyModal')?.addEventListener('click', function(e) {
             if (e.target === this) {
                 closeHistoryModal();
+            }
+        });
+        
+        // 点击评论模态框外部关闭
+        document.getElementById('commentsModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCommentsModal();
             }
         });
 

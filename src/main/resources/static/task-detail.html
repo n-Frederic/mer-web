@@ -27,6 +27,7 @@
     </style>
     <script src="js/common.js"></script>
     <script src="js/api.js"></script>
+    <script src="js/comments.js"></script>
     <script>
         function qs(name){ const u=new URL(location.href); return u.searchParams.get(name); }
         function loadLocal(){
@@ -162,6 +163,13 @@
                 // 设置上一条/下一条导航功能
                 await setupNavigation(task.taskId || task.task_id || id);
                 
+                // 加载评论
+                setTimeout(function() {
+                    if (window.CommentsWidget && typeof window.CommentsWidget.renderComments === 'function') {
+                        window.CommentsWidget.renderComments('commentsSection', 'task', id);
+                    }
+                }, 500);
+                
             } catch (error) {
                 console.error('加载任务详情失败:', error);
                 document.getElementById('root').innerHTML = '<div class="panel">加载任务详情失败: ' + error.message + '</div>';
@@ -193,6 +201,9 @@
             <div style="margin:10px 0; color:#555;">概括：<span id="summary"></span></div>
             <div style="margin:10px 0; color:#555;">详情：<span id="details"></span></div>
             <div class="progress"><div id="progressInner" class="progress-inner"></div></div>
+            
+            <!-- 评论区域 -->
+            <div id="commentsSection" style="margin-top: 32px;"></div>
         </div>
     </div>
 </body>
