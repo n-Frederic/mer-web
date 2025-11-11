@@ -178,7 +178,7 @@
             }
             
             // 更新currentUser
-            var currentUser;
+        var currentUser;
             try { 
                 currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}'); 
             } catch(e) { 
@@ -190,8 +190,8 @@
                 try { 
                     localStorage.setItem('currentUser', JSON.stringify(currentUser)); 
                 } catch(e) {}
-                
-                // 更新页面显示
+            
+            // 更新页面显示
                 var top = document.getElementById('currentUserName');
                 if(top) top.textContent = formData.name;
             }
@@ -200,7 +200,7 @@
             
             // p_company已经显示团队名称，不需要更新
             
-            syncChips();
+        syncChips();
             alert('已保存（仅本地）');
         }
     }

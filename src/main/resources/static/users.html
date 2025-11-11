@@ -169,7 +169,9 @@
     <div class="layout">
         <div class="topbar">
             <div class="brand">
-                <div class="logo">P</div>
+                <div class="logo" style="width: 48px; height: 48px; background: linear-gradient(135deg, #ff8a00 0%, #ffb06b 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3); overflow: hidden; padding: 4px;">
+                    <img src="data/picture/LOGO.png" alt="Logo" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
                 <strong>用户管理</strong>
             </div>
             <div style="display:flex; align-items:center; gap:16px;">
@@ -201,7 +203,7 @@
             </div>
             <table>
                 <thead>
-                    <tr><th>姓名</th><th>用户名</th><th>邮箱</th><th>团队</th><th>角色</th><th>操作</th></tr>
+                    <tr><th>姓名</th><th>用户名</th><th>邮箱</th><th>团队</th><th>部门</th><th>角色</th><th>操作</th></tr>
                 </thead>
                 <tbody id="userTableBody"></tbody>
             </table>
@@ -296,6 +298,9 @@
                         <div style="display: grid; grid-template-columns: 90px 1fr; gap: 12px; line-height: 2;">
                             <div style="color: #666; font-weight: 600;">团队：</div>
                             <div id="viewUserTeam" style="color: #ff8a00; font-weight: 500;"></div>
+                            
+                            <div style="color: #666; font-weight: 600;">部门：</div>
+                            <div id="viewUserDepartment" style="color: #4682b4; font-weight: 500;"></div>
                             
                             <div style="color: #666; font-weight: 600;">角色：</div>
                             <div id="viewUserRole" style="color: #ff8a00; font-weight: 500;"></div>
@@ -508,12 +513,12 @@
             }
             
             if (users.length === 0) {
-                userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #666;">暂无用户数据</td></tr>';
+                userTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #666;">暂无用户数据</td></tr>';
                 return;
             }
             
             // 显示加载状态
-            userTableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 20px; color: #666;">加载中...</td></tr>';
+            userTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #666;">加载中...</td></tr>';
             
             // 角色映射（五级身份）
             const roleMap = {
@@ -524,7 +529,7 @@
                 5: '系统管理员'
             };
             
-            // 为每个用户获取团队名称
+            // 为每个用户获取团队名称和部门名称
             const userRows = await Promise.all(users.map(async (u, index) => {
                 console.log(`渲染用户 ${index}:`, {
                     id: u.id || u.userId || u.user_id,
@@ -564,6 +569,19 @@
                     }
                 }
                 
+                // 处理部门显示（根据团队ID获取部门名称）
+                let departmentDisplay = '未知';
+                if (u.teamId || u.team_id) {
+                    const teamId = u.teamId || u.team_id;
+                    try {
+                        const deptName = await window.API.getDepartmentNameCached(teamId);
+                        departmentDisplay = deptName || '未知';
+                    } catch (error) {
+                        console.error('获取部门名称失败:', error);
+                        departmentDisplay = '未知';
+                    }
+                }
+                
                 // 确保用户ID存在
                 const userId = u.id || u.userId || u.user_id || (1000 + index);
                 
@@ -573,6 +591,7 @@
                         <td>${u.username || '未知'}</td>
                         <td>${u.email || '未知'}</td>
                         <td style="color: #ff8a00; font-weight: 500;">${teamDisplay}</td>
+                        <td style="color: #4682b4; font-weight: 500;">${departmentDisplay}</td>
                         <td style="color: #a55b00;">${roleDisplay}</td>
                         <td>
                             <div class="btn-group">
@@ -773,6 +792,24 @@
                     console.warn('⚠️ 用户没有团队ID');
                 }
                 document.getElementById('viewUserTeam').textContent = teamDisplay;
+                
+                // 处理部门信息（根据团队ID获取部门名称）
+                let departmentDisplay = '未知';
+                if (user.teamId || user.team_id) {
+                    const teamId = user.teamId || user.team_id;
+                    console.log('🔄 准备调用部门API，teamId:', teamId);
+                    try {
+                        const deptName = await window.API.getDepartmentNameCached(teamId);
+                        departmentDisplay = deptName || '未知';
+                        console.log('✅ 部门API返回:', departmentDisplay);
+                    } catch (error) {
+                        console.error('❌ 获取部门名称失败:', error);
+                        departmentDisplay = '未知';
+                    }
+                } else {
+                    console.warn('⚠️ 用户没有团队ID，无法获取部门');
+                }
+                document.getElementById('viewUserDepartment').textContent = departmentDisplay;
                 
                 // 处理角色信息（缺失时显示"未知"）
                 let roleDisplay = '未知';

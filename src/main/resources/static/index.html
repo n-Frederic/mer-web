@@ -5,16 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>潘多拉 工作日志管理系统</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/theme.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: url('data/picture/index底图.png') center/cover no-repeat fixed;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 0;
+        }
+        .hero {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 800px;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 211, 161, 0.5);
+        }
+        .logo-container {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #ff8a00 0%, #ffb06b 100%);
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 24px rgba(255, 138, 0, 0.3);
+            overflow: hidden;
+        }
+        .logo-container img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+        }
+        h1 {
+            font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif;
+            font-size: 42px;
+            color: #a55b00;
+            margin: 24px 0;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+        p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #7a5a33;
+            margin: 24px 0 40px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .cta {
+            display: inline-block;
+            padding: 18px 48px;
+            background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            box-shadow: 0 8px 20px rgba(255, 138, 0, 0.4);
+            transition: all 0.3s ease;
+        }
+        .cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(255, 138, 0, 0.5);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+        .feature i {
+            font-size: 32px;
+            color: #ff8a00;
+            margin-bottom: 12px;
+        }
+        .feature h3 {
+            font-size: 16px;
+            color: #a55b00;
+            margin: 12px 0 8px;
+        }
+        .feature p {
+            font-size: 13px;
+            color: #999;
+            margin: 0;
+            line-height: 1.6;
+        }
+        @media (max-width: 768px) {
+            .features {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="hero">
-        <div class="logo" style="margin-bottom:16px;">P</div>
+        <div class="logo-container">
+            <img src="data/picture/LOGO.png" alt="潘多拉 LOGO">
+        </div>
         <h1>潘多拉 工作日志管理系统</h1>
-        <p>这里是一段项目介绍的占位文案：lorem ipsum dolor sit amet，consectetur adipiscing elit。支持中文占位：这是一段关于系统功能与愿景的描述，用于在首页展示。Lorem ipsum dolor sit amet, consectetur adipisicing elit. Enim laudantium nulla possimus provident quis tempore vitae! Corporis, dolores inventore ipsa ipsam, maxime minus neque nostrum nulla officia quidem quod rerum.</p>
-        <a class="cta" href="login.html">开始使用</a>
+        <p>高效记录，智能管理，助力团队协作。整合任务管理、日志记录、数据统计于一体的现代化工作平台，让每一天的工作都清晰可见。</p>
+        <a class="cta" href="login.html"><i class="fas fa-sign-in-alt"></i> 开始使用</a>
+        
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-tasks"></i>
+                <h3>任务管理</h3>
+                <p>灵活的任务分配与跟踪</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-book"></i>
+                <h3>日志记录</h3>
+                <p>记录每日工作与心得</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-chart-pie"></i>
+                <h3>数据分析</h3>
+                <p>可视化统计与报表</p>
+            </div>
+        </div>
     </div>
 </body>
 </html>
-

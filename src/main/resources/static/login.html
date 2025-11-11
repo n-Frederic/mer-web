@@ -11,11 +11,13 @@
     <script src="js/common.js"></script>
     <script src="js/api.js"></script>
 </head>
-<body class="login-page">
+<body class="login-page" style="background: url('data/picture/index底图.png') center/cover no-repeat fixed;">
 <div id="app" class="container">
     <div class="card">
         <div class="card-header">
-            <div class="logo">P</div>
+            <div class="logo-container" style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, #ff8a00 0%, #ffb06b 100%); border-radius: 16px; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 16px rgba(255, 138, 0, 0.3); overflow: hidden;">
+                <img src="data/picture/LOGO.png" alt="Logo" style="width: 90%; height: 90%; object-fit: contain;">
+            </div>
             <h2>{{ isForgotPassword ? '找回密码' : (isLogin ? '欢迎回来' : '创建账户') }}</h2>
             <p>{{ isForgotPassword ? '重置您的登录密码' : (isLogin ? '请登录以继续使用' : '注册新账户以开始使用') }}</p>
         </div>

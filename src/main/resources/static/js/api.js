@@ -61,30 +61,15 @@
     var token = getValidToken();
     
     if (!token) {
-      console.log('🚫 无有效token，跳过认证头');
       return {};
     }
     
-    var headers = { 'Authorization': 'Bearer ' + token };
-    console.log('✅ 设置认证头:', {
-      'Authorization': 'Bearer ' + token.substring(0, 8) + '...' + token.slice(-8)
-    });
-    
-    return headers;
+    return { 'Authorization': 'Bearer ' + token };
   }
 
   async function http(method, url, body){
-    console.log('🌐 HTTP请求:', method, url);
-    
     var headers = Object.assign({}, authHeader());
     if(body !== undefined && body !== null) headers['Content-Type'] = 'application/json';
-    
-    console.log('📤 请求详情:', {
-      method: method,
-      url: url,
-      hasAuth: !!headers.Authorization,
-      authPreview: headers.Authorization ? headers.Authorization.substring(0, 20) + '...' : 'none'
-    });
     
     var res = await fetch(url, { 
       method: method, 
@@ -93,41 +78,20 @@
       cache: 'no-cache' 
     });
     
-    console.log('📥 响应状态:', res.status, res.statusText);
-    
     // 处理认证失败 - 只处理真正的401/403错误
     if(res.status === 401 || res.status === 403){
-      console.error('🚫 认证失败 (HTTP ' + res.status + ')');
-      
-      // 尝试获取详细错误信息
       try {
         var errorText = await res.text();
         var errorData = JSON.parse(errorText);
-        console.error('🔍 认证错误详情:', errorData);
-        
-        // 根据错误类型处理
-        if (errorData.error === 'TOKEN_MISSING') {
-          console.error('❌ 后端未收到token，检查Authorization头设置');
-        } else if (errorData.error === 'INVALID_TOKEN') {
-          console.error('❌ token无效，可能已被删除或格式错误');
-        } else if (errorData.error === 'TOKEN_EXPIRED') {
-          console.error('❌ token已过期，需要重新登录');
-        }
         
         // 清除无效的认证信息
         try{ 
           localStorage.removeItem('authToken'); 
           localStorage.removeItem('currentUser'); 
-          console.log('🧹 已清除无效的认证信息');
         }catch(e){}
         
-        // 抛出具体错误信息
         throw new Error(errorData.message || ('HTTP ' + res.status));
-        
       } catch(parseError) {
-        // 如果无法解析错误响应，抛出通用错误
-        console.error('❌ 无法解析认证错误响应:', parseError);
-        
         // 清除认证信息
         try{ 
           localStorage.removeItem('authToken'); 
@@ -138,16 +102,18 @@
       }
     }
     
-    // 处理其他HTTP错误状态
-    if (!res.ok && res.status !== 200) {
-      console.error('❌ HTTP请求失败:', res.status, res.statusText);
-      var errorText = await res.text();
+    // 处理其他HTTP错误状态（包括404）
+    if (!res.ok && res.status !== 200 && res.status !== 204) {
+      var errorText = '';
       try {
+        errorText = await res.text();
         var errorData = JSON.parse(errorText);
-        console.error('🔍 错误详情:', errorData);
         throw new Error(errorData.message || ('HTTP ' + res.status));
-      } catch(e) {
-        throw new Error('HTTP ' + res.status + ': ' + errorText);
+      } catch(parseError) {
+        if (parseError.message && parseError.message.startsWith('HTTP')) {
+          throw parseError;
+        }
+        throw new Error('HTTP ' + res.status + (errorText ? ': ' + errorText : ''));
       }
     }
     
@@ -157,14 +123,10 @@
     
     var ct = res.headers.get('content-type') || '';
     if(ct.indexOf('application/json') >= 0){
-      var jsonData = await res.json();
-      console.log('📋 JSON响应:', jsonData);
-      return jsonData;
+      return await res.json();
     }
     
     var text = await res.text();
-    console.log('📄 文本响应:', text.substring(0, 200) + (text.length > 200 ? '...' : ''));
-    
     try{ 
       return JSON.parse(text); 
     }catch(e){ 
@@ -736,10 +698,10 @@
         priority: params && params.priority
       };
       
-      var usp = new URLSearchParams();
+        var usp = new URLSearchParams();
       Object.keys(queryParams).forEach(function(k){
         var v = queryParams[k];
-        if(v === undefined || v === null || v === '') return;
+          if(v === undefined || v === null || v === '') return;
         usp.append(k, v);
       });
       
@@ -1401,27 +1363,81 @@
       return http('GET', url).then(function(res) {
         console.log('✅ 日志列表API响应:', res);
 
-        // 标准化日志数据
-        var list = (res.list || res || []).map(function(log) {
+        // 处理新API格式：{ code: 200, message: "success", data: { list: [...], total, page, pageSize, hasNext } }
+        var data = res.data || res;
+        var rawList = data.list || res.list || res || [];
+        
+        // 标准化日志数据 - 匹配新API字段
+        var list = rawList.map(function(log) {
+          // 处理作者信息
+          var authorInfo = log.author_info || log.authorInfo || {};
+          var authorName = authorInfo.name || log.authorName || log.author_name || '未知';
+          var authorEmail = authorInfo.email || log.authorEmail || log.author_email || '';
+          var authorId = authorInfo.id || authorInfo.user_id || log.authorId || log.author_id || '';
+          
+          // 处理关联任务
+          var relatedTasks = log.related_tasks || log.relatedTasks || [];
+          
+          // 处理关键词
+          var keywords = log.keywords || [];
+          
+          // 构建标题（如果没有title，使用todaySummary的前30个字符）
+          var title = log.title;
+          if (!title && log.todaySummary) {
+            title = log.todaySummary.length > 30 ? log.todaySummary.substring(0, 30) + '...' : log.todaySummary;
+          }
+          if (!title) {
+            title = '未命名';
+          }
+          
+          // 构建内容（合并todaySummary和tomorrowPlan）
+          var content = '';
+          if (log.todaySummary) {
+            content += '今日总结：\n' + log.todaySummary;
+          }
+          if (log.tomorrowPlan) {
+            if (content) content += '\n\n';
+            content += '明日计划：\n' + log.tomorrowPlan;
+          }
+          if (log.helpNeeded) {
+            if (content) content += '\n\n';
+            content += '需要帮助：\n' + log.helpNeeded;
+          }
+          
           return {
-            id: log.id || log.logId || log.log_id,
-            title: log.title,
-            date: log.date,
-            summary: log.summary,
-            content: log.content,
-            authorId: log.authorId || log.author_id,
-            authorName: log.authorName || log.author_name,
-            authorEmail: log.authorEmail || log.author_email,
-            createdAt: log.createdAt || log.created_at,
-            updatedAt: log.updatedAt || log.updated_at
+            id: log.log_id || log.id || log.logId,
+            log_id: log.log_id || log.id || log.logId,
+            title: title,
+            date: log.log_date || log.date,
+            log_date: log.log_date || log.date,
+            // 新字段
+            todaySummary: log.todaySummary || '',
+            tomorrowPlan: log.tomorrowPlan || '',
+            helpNeeded: log.helpNeeded || null,
+            // 作者信息
+            authorId: authorId,
+            authorName: authorName,
+            authorEmail: authorEmail,
+            author_info: authorInfo,
+            // 关联任务和关键词
+            related_tasks: relatedTasks,
+            keywords: keywords,
+            // 内容（合并后的）
+            content: content || log.content || '',
+            summary: log.todaySummary || log.summary || '',
+            // 时间字段
+            createdAt: log.created_at || log.createdAt,
+            updatedAt: log.updated_at || log.updatedAt,
+            status: log.status
           };
         });
 
         return {
           list: list,
-          total: res.total || list.length,
-          page: res.page || params.page || 1,
-          pageSize: res.pageSize || params.pageSize || 9
+          total: data.total || res.total || list.length,
+          page: data.page || res.page || params.page || 1,
+          pageSize: data.pageSize || res.pageSize || params.pageSize || 9,
+          hasNext: data.hasNext || res.hasNext || false
         };
       }).catch(function(error) {
         console.error('❌ 获取日志列表失败:', error);
@@ -1429,14 +1445,20 @@
       });
     },
 
-    // 创建日志
+    // 创建日志（匹配新接口格式）
     createJournal: function(journalData) {
-      console.log('🔄 创建日志:', journalData);
-      return http('POST', base + '/api/journals/', journalData).then(function(res) {
-        console.log('✅ 日志创建成功:', res);
+      // 构建符合新API接口要求的数据
+      var postData = {
+        todaySummary: journalData.todaySummary || journalData.summary || '',
+        tomorrowPlan: journalData.tomorrowPlan || '',
+        helpNeeded: journalData.helpNeeded || null,
+        log_date: journalData.log_date || journalData.date || new Date().toISOString().split('T')[0],
+        taskId: journalData.taskId || []
+      };
+      
+      return http('POST', base + '/api/journals/', postData).then(function(res) {
         return res;
       }).catch(function(error) {
-        console.error('❌ 创建日志失败:', error);
         throw error;
       });
     },
@@ -1531,6 +1553,50 @@
     // 清除团队缓存
     clearTeamCache: function() {
       this.teamNameCache = {};
+    },
+
+    // 获取团队所属部门名称
+    departmentNameCache: {},
+    
+    getDepartmentName: function(teamId) {
+      if (!teamId || teamId === 'undefined' || teamId === 'null' || teamId === 'NaN') {
+        return Promise.resolve('未知部门');
+      }
+      
+      var teamIdStr = String(teamId).trim();
+      if (!teamIdStr || teamIdStr === 'undefined' || teamIdStr === 'null') {
+        return Promise.resolve('未知部门');
+      }
+      
+      var url = base + '/api/team/department/' + teamIdStr;
+      
+      return http('GET', url).then(function(res) {
+        if (res && res.ok && res.department_name) {
+          return res.department_name;
+        }
+        if (res && res.department_name) {
+          return res.department_name;
+        }
+        return '未知部门';
+      }).catch(function(error) {
+        if (error.message && error.message.includes('404')) {
+          return '未知部门';
+        }
+        return '未知部门';
+      });
+    },
+
+    // 缓存版本的部门查询
+    getDepartmentNameCached: function(teamId) {
+      var self = this;
+      if (self.departmentNameCache[teamId]) {
+        return Promise.resolve(self.departmentNameCache[teamId]);
+      }
+      
+      return self.getDepartmentName(teamId).then(function(deptName) {
+        self.departmentNameCache[teamId] = deptName;
+        return deptName;
+      });
     },
 
     // ==================== 任务管理相关API ====================

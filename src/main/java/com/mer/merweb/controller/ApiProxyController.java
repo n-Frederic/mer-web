@@ -543,6 +543,45 @@ public class ApiProxyController {
         }
     }
 
+    @GetMapping("/team/department/{teamId}")
+    public ResponseEntity<?> getDepartmentName(
+            @PathVariable Long teamId,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/team/department/" + teamId;
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null && !authorization.isEmpty()) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("ok", false, "message", "查询团队所属部门失败"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("ok", false, "message", "查询团队所属部门失败: " + e.getMessage()));
+        }
+    }
+
     // ==================== 任务管理相关API ====================
     
     /**
