@@ -76,7 +76,7 @@
 
   // 提交任务
   function submitTask() {
-    console.log('📝 准备创建任务');
+    console.log('准备创建任务');
     
     if (!validateForm()) {
       return;
@@ -104,7 +104,7 @@
       assigneeIds: selectedUserIds
     };
 
-    console.log('📤 发送任务数据:', taskData);
+    console.log('发送任务数据:', taskData);
 
     // 显示加载状态
     var btnPublish = document.getElementById('btnPublish');
@@ -114,7 +114,7 @@
 
     // 调用API创建任务
     window.API.createTask(taskData).then(function(response) {
-      console.log('✅ 任务创建成功:', response);
+      console.log('任务创建成功:', response);
       
       // 恢复按钮状态
       btnPublish.disabled = false;
@@ -135,7 +135,7 @@
         resetForm();
       }
     }).catch(function(error) {
-      console.error('❌ 任务创建失败:', error);
+      console.error('任务创建失败:', error);
       
       // 恢复按钮状态
       btnPublish.disabled = false;
@@ -155,7 +155,7 @@
 
   // 显示用户选择器
   window.showUserSelector = async function() {
-    console.log('🔍 显示用户选择器');
+    console.log('显示用户选择器');
     var modal = document.getElementById('userModal');
     modal.style.display = 'block';
 
@@ -176,7 +176,7 @@
   // 加载用户列表
   async function loadUsers() {
     try {
-      console.log('📋 加载用户列表');
+      console.log('加载用户列表');
       var userListDiv = document.getElementById('userList');
       userListDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#999;"><i class="fas fa-spinner fa-spin"></i> 加载中...</div>';
 
@@ -187,24 +187,24 @@
       
       do {
         var response = await window.API.getUsers(currentPage, 100);
-        console.log('✅ 第' + currentPage + '页用户列表原始响应:', response);
+        console.log('第' + currentPage + '页用户列表原始响应:', response);
         
         // 兼容不同的返回格式
         var data = response.data || response;
-        console.log('📋 解析后的数据:', data);
+        console.log('解析后的数据:', data);
         
         if (data && data.list && Array.isArray(data.list)) {
-          console.log('✅ 获取到' + data.list.length + '个用户');
+          console.log('获取到' + data.list.length + '个用户');
           allUsersList = allUsersList.concat(data.list);
           totalPages = data.totalPages || 1;
           currentPage++;
         } else {
-          console.warn('⚠️ 数据格式不符合预期:', data);
+          console.warn('⚠数据格式不符合预期:', data);
           break;
         }
       } while (currentPage <= totalPages);
       
-      console.log('✅ 总共加载用户数:', allUsersList.length);
+      console.log('总共加载用户数:', allUsersList.length);
       
       if (allUsersList.length > 0) {
         allUsers = allUsersList;
@@ -214,7 +214,7 @@
         userListDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">没有找到用户</div>';
       }
     } catch (error) {
-      console.error('❌ 加载用户列表失败:', error);
+      console.error('加载用户列表失败:', error);
       var userListDiv = document.getElementById('userList');
       userListDiv.innerHTML = '<div style="text-align:center; padding:20px; color:#ff4d4f;">加载失败: ' + error.message + '</div>';
     }
@@ -271,8 +271,8 @@
              '<div class="user-name">' + escapeHtml(userName) + '</div>' +
              '<div class="user-meta">' +
              'ID: ' + userId + ' | ' + escapeHtml(userEmail) + '<br>' +
-             '<span style="color:#ff8a00;">👥 ' + escapeHtml(teamDisplay) + '</span> | ' +
-             '<span style="color:#a55b00;">🏷️ ' + escapeHtml(roleDisplay) + '</span>' +
+             '<span style="color:#ff8a00;">' + escapeHtml(teamDisplay) + '</span> | ' +
+             '<span style="color:#a55b00;">' + escapeHtml(roleDisplay) + '</span>' +
              '</div>' +
              '</div>' +
              '<div class="user-check">' + (isSelected ? '✓' : '') + '</div>' +
@@ -286,7 +286,7 @@
 
   // 切换用户选择状态
   window.toggleUser = async function(userId) {
-    console.log('👆 切换用户:', userId);
+    console.log('切换用户:', userId);
     
     var index = selectedUserIds.indexOf(userId);
     if (index >= 0) {
@@ -312,7 +312,7 @@
 
   // 确认用户选择
   window.confirmUserSelection = function() {
-    console.log('✅ 确认选择的用户:', selectedUserIds);
+    console.log('确认选择的用户:', selectedUserIds);
     
     if (selectedUserIds.length === 0) {
       alert('请至少选择一个用户');
@@ -372,7 +372,7 @@
 
   // 页面加载完成
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 发布任务页面加载完成');
+    console.log('发布任务页面加载完成');
 
     // 显示当前用户信息
     try {
@@ -436,6 +436,6 @@
       }
     });
 
-    console.log('✅ 发布任务页面初始化完成');
+    console.log('发布任务页面初始化完成');
   });
 })();

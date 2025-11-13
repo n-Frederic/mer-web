@@ -116,10 +116,10 @@
         
         // 调用真实API
         if (window.API && typeof window.API.updateProfile === 'function') {
-            console.log('🔄 调用API更新个人资料...');
+            console.log('调用API更新个人资料...');
             window.API.updateProfile(updateData)
                 .then(function(response) {
-                    console.log('✅ 个人资料更新成功:', response);
+                    console.log('个人资料更新成功:', response);
                     
                     // 更新localStorage缓存（保留团队和角色的显示名称）
                     var updatedProfile = Object.assign({}, cachedProfile, formData, {
@@ -165,12 +165,12 @@
                     alert('个人信息更新成功！');
                 })
                 .catch(function(error) {
-                    console.error('❌ 更新个人资料失败:', error);
+                    console.error('更新个人资料失败:', error);
                     alert('更新失败：' + (error.message || '网络错误，请稍后重试'));
                 });
         } else {
             // 降级：仅保存到localStorage
-            console.warn('⚠️ API不可用，仅保存到本地');
+            console.warn('⚠API不可用，仅保存到本地');
             try { 
                 localStorage.setItem('profile', JSON.stringify(formData)); 
             } catch(e) {

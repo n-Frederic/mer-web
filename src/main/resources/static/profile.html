@@ -118,65 +118,25 @@
             margin-top: 16px;
         }
         .btn-sm { 
-            padding: 12px 32px;
+            padding: 14px 40px;
             border-radius: 12px;
             background: linear-gradient(135deg, var(--color-primary), var(--color-primary-2));
             color: #fff;
             border: none;
             cursor: pointer;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             box-shadow: 0 4px 12px rgba(255, 138, 0, 0.3);
             transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
+            min-width: 160px;
         }
         .btn-sm:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(255, 138, 0, 0.4);
-        }
-        .btn-secondary { 
-            padding: 12px 32px;
-            border-radius: 12px;
-            border: 2px solid #ffd3a1;
-            background: #fff;
-            color: #a55b00;
-            cursor: pointer;
-            font-size: 15px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .btn-secondary:hover {
-            background: #fff7ef;
-            border-color: #ff8a00;
-        }
-        .btn-warning { 
-            padding: 10px 24px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #ff9a3c, #ffb06b);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .btn-warning:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 154, 60, 0.3);
-        }
-        .btn-danger { 
-            padding: 10px 24px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #ff6a00, #ff8a00);
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        .btn-danger:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(255, 106, 0, 0.3);
         }
     </style>
 </head>
@@ -276,14 +236,12 @@
                     <textarea id="pf_bio" placeholder="介绍一下自己吧"></textarea>
                 </div>
                 <div class="row-center full">
-                    <button type="button" class="btn-warning" id="deactivateBtn">注销账号</button>
-                </div>
-                <div class="row-center full">
-                    <button type="button" class="btn-danger" id="logoutBtn">退出登录</button>
-                </div>
-                <div class="row-center full">
-                    <button type="button" class="btn-sm" id="saveProfileBtn">保存</button>
-                    <button type="button" class="btn-secondary" id="resetProfileBtn">重置</button>
+                    <button type="button" class="btn-sm" id="saveProfileBtn">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    <button type="button" class="btn-sm" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> 退出登录
+                    </button>
                 </div>
             </form>
         </div>
@@ -314,15 +272,15 @@
             // 从真实API加载个人资料
             try {
                 if(window.API && typeof window.API.getProfile === 'function'){
-                    console.log('🔄 从API加载个人资料...');
+                    console.log('从API加载个人资料...');
                     var profileData = await window.API.getProfile();
-                    console.log('✅ API返回的个人资料:', profileData);
+                    console.log('API返回的个人资料:', profileData);
                     
-                    // 🔧 关键修复：后端返回的数据可能嵌套在 user 对象中
+
                     var userData = profileData.user || profileData;
-                    console.log('📋 用户数据:', userData);
-                    console.log('📋 team字段:', userData.team);
-                    console.log('📋 role_id字段:', userData.role_id);
+                    console.log('用户数据:', userData);
+                    console.log('team字段:', userData.team);
+                    console.log('role_id字段:', userData.role_id);
                     
                     if(userData && (userData.user_id || userData.name)) {
                         // 填充表单（使用正确的ID）
@@ -355,46 +313,45 @@
                         
                         // 年龄字段已在上面通过出生日期自动计算并填充
                         
-                        // 🔧 获取并显示团队名称（使用getTeamName接口）
-                        // 🔧 关键：后端返回的字段名是 "team" 而不是 "team_id"
+                        // 获取并显示团队名称（使用getTeamName接口）
                         var teamDisplay = '加载中...';
                         var teamId = userData.team || userData.team_id || userData.teamId;
-                        console.log('🔍 团队ID (userData.team):', teamId);
+                        console.log('团队ID (userData.team):', teamId);
                         
                         if(teamId) {
-                            console.log('🔄 获取团队名称，teamId:', teamId);
+                            console.log('获取团队名称，teamId:', teamId);
                             try {
                                 teamDisplay = await window.API.getTeamNameCached(teamId);
-                                console.log('✅ 团队名称:', teamDisplay);
+                                console.log('团队名称:', teamDisplay);
                             } catch(error) {
-                                console.error('❌ 获取团队名称失败:', error);
+                                console.error('获取团队名称失败:', error);
                                 teamDisplay = '未知团队';
                             }
                         } else {
                             teamDisplay = '未分配团队';
                         }
                         
-                        // 🔧 显示角色名称（使用五级身份映射）
+                        // 显示角色名称（使用五级身份映射）
                         var roleId = userData.role_id || userData.roleId;
                         var roleDisplay = roleMap[roleId] || '未知角色';
-                        console.log('📋 角色ID:', roleId, '→ 角色名称:', roleDisplay);
+                        console.log('角色ID:', roleId, '→ 角色名称:', roleDisplay);
                         
                         // 填充所属团队字段
                         var teamField = document.getElementById('pf_team');
                         if(teamField) {
                             teamField.value = teamDisplay;
-                            console.log('✅ 所属团队字段已填充:', teamDisplay);
+                            console.log('所属团队字段已填充:', teamDisplay);
                         } else {
-                            console.error('❌ 找不到pf_team字段');
+                            console.error('找不到pf_team字段');
                         }
                         
                         // 填充担任职位字段
                         var roleField = document.getElementById('pf_role');
                         if(roleField) {
                             roleField.value = roleDisplay;
-                            console.log('✅ 担任职位字段已填充:', roleDisplay);
+                            console.log('担任职位字段已填充:', roleDisplay);
                         } else {
-                            console.error('❌ 找不到pf_role字段');
+                            console.error('找不到pf_role字段');
                         }
                         
                         // 个人简介字段
@@ -403,7 +360,7 @@
                             bioField.value = userData.bio || '';
                         }
                         
-                        // 🔧 关键修复：更新头像下方的显示元素
+                        // 关键修复：更新头像下方的显示元素
                         // 头像下方显示username（不是name）
                         var pUsernameElem = document.getElementById('p_username');
                         if(pUsernameElem) pUsernameElem.textContent = userData.username || '用户名';
@@ -419,7 +376,7 @@
                         var pCompanyElem = document.getElementById('p_company');
                         if(pCompanyElem) pCompanyElem.textContent = teamDisplay;
                         
-                        // 🔧 自动计算年龄并更新chips显示
+                        // 自动计算年龄并更新chips显示
                         var chipGender = document.getElementById('chip_gender');
                         if(chipGender) {
                             var genderDisplay = genderMap[userData.gender] || userData.gender || '';
@@ -451,11 +408,11 @@
                             ageField.value = calculatedAge;
                         }
                         
-                        // 🔧 更新顶部导航栏的用户名显示
+                        //  更新顶部导航栏的用户名显示
                         var currentUserNameElem = document.getElementById('currentUserName');
                         if(currentUserNameElem) currentUserNameElem.textContent = userData.name || '用户';
                         
-                        // 🔧 同步更新currentUser到localStorage（确保其他页面也能获取到最新用户信息）
+                        // 同步更新currentUser到localStorage（确保其他页面也能获取到最新用户信息）
                         try {
                             var currentUser = {
                                 name: userData.name || '',
@@ -465,9 +422,9 @@
                                 id: userData.user_id || userData.id || ''
                             };
                             localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                            console.log('✅ currentUser已同步更新:', currentUser);
+                            console.log('currentUser已同步更新:', currentUser);
                         } catch(e) {
-                            console.warn('⚠️ currentUser更新失败:', e);
+                            console.warn('⚠currentUser更新失败:', e);
                         }
                         
                         // 保存到localStorage作为缓存（包含团队和角色的显示名称）
@@ -478,22 +435,20 @@
                             role_id: roleId   // 保存role_id以便后续更新使用
                         });
                         localStorage.setItem('profile', JSON.stringify(cacheData));
-                        console.log('✅ 个人资料加载成功，所有字段已填充（包括显示元素）');
+                        console.log('个人资料加载成功，所有字段已填充（包括显示元素）');
                     } else {
-                        console.warn('⚠️ API返回数据格式异常，使用缓存数据');
+                        console.warn('⚠API返回数据格式异常，使用缓存数据');
                         ProfilePage.fill();
                     }
                 } else {
-                    console.warn('⚠️ API不可用，使用缓存数据');
+                    console.warn('⚠API不可用，使用缓存数据');
                     ProfilePage.fill();
                 }
             } catch(e) {
-                console.error('❌ 从API加载个人资料失败:', e);
+                console.error('从API加载个人资料失败:', e);
                 // 降级到本地缓存
             ProfilePage.fill(); 
             }
-            
-            ProfilePage.bindLogout();
             
             // 綁定保存按鈕
             var saveBtn = document.getElementById('saveProfileBtn');
@@ -503,15 +458,21 @@
                 });
             }
             
-            // 綁定重置按鈕
-            var resetBtn = document.getElementById('resetProfileBtn');
-            if (resetBtn) {
-                resetBtn.addEventListener('click', function() {
-                    ProfilePage.reset();
+            // 綁定退出登录按鈕
+            var logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function() {
+                    if (confirm('确定要退出登录吗？')) {
+                        try {
+                            localStorage.removeItem('authToken');
+                            localStorage.removeItem('currentUser');
+                        } catch(e) {}
+                        location.href = 'index.html';
+                    }
                 });
             }
             
-            // 🎨 换头像功能
+            // 换头像功能
             var profileAvatar = document.getElementById('profileAvatar');
             var avatarInput = document.getElementById('avatarInput');
             
@@ -538,7 +499,7 @@
                             // 保存到localStorage（实际项目中应该上传到服务器）
                             try {
                                 localStorage.setItem('userAvatar', imageUrl);
-                                console.log('✅ 头像已更新（保存到本地）');
+                                console.log('头像已更新（保存到本地）');
                                 alert('头像已更新！\n（注：当前为演示模式，实际项目中会上传到服务器）');
                             } catch(e) {
                                 console.error('保存头像失败:', e);

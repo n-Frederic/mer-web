@@ -2,20 +2,17 @@
   var base = (window.APP && window.APP.apiBase) || '';
   var useApi = !!(window.APP && window.APP.useApi);
   var runtimeUseApi = useApi;
-  // === 全局/细粒度开关：可分别控制每个功能使用 真实后端 或 模拟数据 ===
-  // 说明：
-  // - 全局开关由 runtimeUseApi 控制；
-  // - 细粒度开关默认继承全局开关，可通过 API.setFeatureMode / API.setModes 单独覆盖；
+  // === 真实后端 或 模拟数据 ===
   var featureUseApi = {
     // 认证相关
-    authLogin: true,              // 登录 - 强制启用真实API
-    authRegister: true,           // 注册 - 强制启用真实API（包括找回密码功能）
-    authLogout: true,             // 登出 - 强制启用真实API
+    authLogin: true,              // 登录
+    authRegister: true,           // 注册
+    authLogout: true,             // 登出
     // 个人资料
-    profile: true,                // 个人资料 - 强制启用真实API
+    profile: true,                // 个人资料
     // 任务相关（分别控制 列表/详情/创建）
-    tasksList: true,              // 强制启用真实任务API
-    taskDetail: true,             // 强制启用真实任务详情API
+    tasksList: true,              // 真实任务
+    taskDetail: true,             // 任务详情
     taskCreate: runtimeUseApi,
     // 统计数据
     stats: runtimeUseApi,         // 统计数据
@@ -30,7 +27,7 @@
       var userData = localStorage.getItem('currentUser');
       
       if (!tokenData || !userData) {
-        console.log('🔒 无认证信息');
+        console.log('无认证信息');
         return null;
       }
       
@@ -39,11 +36,11 @@
       
       // 检查token基本格式（UUID格式）
       if (!token || typeof token !== 'string' || token.length < 10) {
-        console.error('❌ Token格式无效:', token);
+        console.error('Token格式无效:', token);
         return null;
       }
       
-      console.log('🔍 验证token:', {
+      console.log('验证token:', {
         tokenPreview: token.substring(0, 8) + '...' + token.slice(-8),
         tokenLength: token.length,
         user: user.name || user.email
@@ -52,7 +49,7 @@
       return token;
       
     } catch(e) {
-      console.error('❌ Token获取失败:', e);
+      console.error('Token获取失败:', e);
       return null;
     }
   }
@@ -78,7 +75,7 @@
       cache: 'no-cache' 
     });
     
-    // 处理认证失败 - 只处理真正的401/403错误
+    // 处理认证失败
     if(res.status === 401 || res.status === 403){
       try {
         var errorText = await res.text();
@@ -165,7 +162,7 @@
 
   // 重写认证状态检查函数 - 提供详细诊断和后端同步验证
   function checkAuthStatus() {
-    console.log('🔍 === 增强认证状态检查 ===');
+    console.log('=== 增强认证状态检查 ===');
     
     var token = '';
     var currentUser = null;
@@ -182,7 +179,7 @@
       var tokenRaw = localStorage.getItem('authToken');
       var userRaw = localStorage.getItem('currentUser');
       
-      console.log('📦 localStorage原始数据:', {
+      console.log('localStorage原始数据:', {
         authToken: tokenRaw,
         currentUser: userRaw
       });
@@ -194,7 +191,7 @@
           if (typeof token === 'string' && token.length > 0) {
             checkResult.hasToken = true;
             checkResult.token = token;
-            console.log('✅ Token解析成功:', {
+            console.log('Token解析成功:', {
               preview: token.substring(0, 8) + '...' + token.slice(-8),
               length: token.length,
               format: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token) ? 'UUID' : 'OTHER'
@@ -216,7 +213,7 @@
           if (currentUser && (currentUser.name || currentUser.email)) {
             checkResult.hasUser = true;
             checkResult.user = currentUser;
-            console.log('✅ 用户信息解析成功:', currentUser);
+            console.log('用户信息解析成功:', currentUser);
           } else {
             checkResult.issues.push('用户信息不完整');
           }
@@ -228,13 +225,13 @@
       }
       
     } catch(e) {
-      console.error('❌ 认证状态检查异常:', e);
+      console.error('认证状态检查异常:', e);
       checkResult.issues.push('认证检查异常: ' + e.message);
     }
     
     checkResult.isValid = checkResult.hasToken && checkResult.hasUser && checkResult.issues.length === 0;
     
-    console.log('📊 认证状态总结:', {
+    console.log('认证状态总结:', {
       hasToken: checkResult.hasToken,
       hasUser: checkResult.hasUser,
       isValid: checkResult.isValid,
@@ -242,15 +239,15 @@
     });
     
     if (checkResult.issues.length > 0) {
-      console.warn('⚠️ 发现认证问题:', checkResult.issues);
-      console.log('💡 建议操作:');
+      console.warn('发现认证问题:', checkResult.issues);
+      console.log('建议操作:');
       console.log('1. 清除认证信息: API.clearAuth()');
       console.log('2. 重新登录: API.testLogin(email, password)');
       console.log('3. 检查后端服务状态');
     }
     
     if (checkResult.isValid) {
-      console.log('🎉 认证状态有效，可以进行API调用');
+      console.log('认证状态有效，可以进行API调用');
     }
     
     return checkResult;
@@ -272,16 +269,16 @@
       if(featureUseApi.authLogout){
         try{ 
           await http('POST', base + '/api/user/logout', {}); 
-          console.log('✅ 后端登出成功');
+          console.log('后端登出成功');
         }catch(e){
-          console.error('❌ 后端登出失败:', e);
+          console.error('后端登出失败:', e);
         }
       }
       // 清除本地存储
       try{ 
         localStorage.removeItem('authToken'); 
         localStorage.removeItem('currentUser'); 
-        console.log('✅ 本地token已清除');
+        console.log('本地token已清除');
       }catch(e){}
       return { ok: true };
     },
@@ -320,7 +317,7 @@
         
         // 后端返回error: false表示成功
         if (res && res.error === false) {
-          console.log('✅ 后端确认登录成功');
+          console.log('后端确认登录成功');
         }
         
         var token = (res && (res.token || res.access_token || (res.data && (res.data.token || res.data.access_token)))) || '';
@@ -343,17 +340,17 @@
         }
         
         // 重写token保存逻辑 - 确保与后端验证机制完全匹配
-        console.log('💾 开始保存认证信息...');
+        console.log('开始保存认证信息...');
         
         // 验证token格式（后端使用UUID格式）
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(token)) {
-          console.warn('⚠️ Token格式异常，但继续保存:', token);
+          console.warn('Token格式异常，但继续保存:', token);
         }
         
         // 保存原始token字符串（不进行额外处理）
         try { 
           localStorage.setItem('authToken', JSON.stringify(token));
-          console.log('✅ Token已保存:', {
+          console.log('Token已保存:', {
             tokenPreview: token.substring(0, 8) + '...' + token.slice(-8),
             tokenLength: token.length,
             savedValue: JSON.stringify(token)
@@ -362,34 +359,34 @@
           // 立即验证保存是否成功
           var savedToken = JSON.parse(localStorage.getItem('authToken'));
           if (savedToken === token) {
-            console.log('✅ Token保存验证通过');
+            console.log('Token保存验证通过');
           } else {
-            console.error('❌ Token保存验证失败:', {expected: token, actual: savedToken});
+            console.error('Token保存验证失败:', {expected: token, actual: savedToken});
           }
           
         } catch(e) { 
-          console.error('❌ Token保存失败:', e);
+          console.error('Token保存失败:', e);
           throw new Error('Token保存失败，登录无效');
         }
         
         // 保存用户信息（先保存基本信息）
         try { 
           localStorage.setItem('currentUser', JSON.stringify(user)); 
-          console.log('✅ 用户基本信息已保存:', user);
+          console.log('用户基本信息已保存:', user);
         } catch(e) { 
-          console.error('❌ 用户信息保存失败:', e);
+          console.error('用户信息保存失败:', e);
         }
         
-        console.log('🎉 登录成功，认证信息已保存:', { 
+        console.log('登录成功，认证信息已保存:', {
           hasToken: !!token, 
           tokenPreview: token ? token.substring(0, 20) + '...' : 'null',
           user: user 
         });
         
-        // 🔧 关键修复：立即获取完整的用户信息（包含user_id等）
+
         setTimeout(async function() {
           try {
-            console.log('🔄 获取完整用户信息...');
+            console.log('获取完整用户信息...');
             var profileData = await window.API.getProfile();
             var fullUser = profileData.user || profileData || {};
             
@@ -407,22 +404,22 @@
             };
             
             localStorage.setItem('currentUser', JSON.stringify(completeUser));
-            console.log('✅ 完整用户信息已更新:', completeUser);
+            console.log('完整用户信息已更新:', completeUser);
           } catch(e) {
-            console.warn('⚠️ 获取完整用户信息失败，使用基本信息:', e);
+            console.warn('⚠获取完整用户信息失败，使用基本信息:', e);
           }
           
           var authCheck = checkAuthStatus();
           console.log('登录后认证状态验证:', authCheck);
           if (!authCheck.isValid) {
-            console.warn('⚠️ 警告：登录成功但认证状态无效，可能需要检查token有效期');
+            console.warn('⚠警告：登录成功但认证状态无效，可能需要检查token有效期');
           }
         }, 500);
         
         return { token: token, user: user };
       }).catch(function(error) {
         // 统一错误处理
-        console.error('❌ 登录API调用失败:', error);
+        console.error('登录API调用失败:', error);
         throw error;
       });
     },
@@ -534,8 +531,8 @@
         function normalizeUser(user) {
           if (!user) return null;
           
-          console.log('📝 getUserById - 原始用户数据:', user);
-          console.log('📝 team_id字段检查:', {
+          console.log('getUserById - 原始用户数据:', user);
+          console.log('team_id字段检查:', {
             'user.team_id': user.team_id,
             'user.teamId': user.teamId,
             'type of team_id': typeof user.team_id,
@@ -569,8 +566,8 @@
             status: user.status
           };
           
-          console.log('✅ getUserById - 标准化后用户数据:', normalized);
-          console.log('✅ 标准化后team_id:', {
+          console.log('getUserById - 标准化后用户数据:', normalized);
+          console.log('标准化后team_id:', {
             teamId: normalized.teamId,
             team_id: normalized.team_id
           });
@@ -650,10 +647,10 @@
         
         // 标准化个人资料数据字段名
         if (profile) {
-          // 🔧 关键修复：后端返回的字段名是 "team" 而不是 "team_id"
-          console.log('🔍 原始profile.team:', profile.team);
-          console.log('🔍 原始profile.team_id:', profile.team_id);
-          console.log('🔍 原始profile.role_id:', profile.role_id);
+
+          console.log('原始profile.team:', profile.team);
+          console.log('原始profile.team_id:', profile.team_id);
+          console.log('原始profile.role_id:', profile.role_id);
           
           return {
             // 统一ID字段
@@ -664,7 +661,6 @@
             email: profile.email,
             username: profile.username,
             phone: profile.phone,
-            // 🔧 关键：后端返回的字段名是 "team" 而不是 "team_id"
             team: profile.team || profile.team_id || profile.teamId,
             teamId: profile.team || profile.team_id || profile.teamId,
             team_id: profile.team || profile.team_id || profile.teamId,
@@ -688,7 +684,7 @@
       // === 切换点：个人资料更新（真实/模拟） ===
       if(!featureUseApi.profile){ try{ localStorage.setItem('profile', JSON.stringify(pf)); }catch(e){} return Promise.resolve({ ok:true }); }
       return http('PUT', base + '/api/user/profile', pf).then(function(res){ 
-        console.log('✅ 个人资料更新成功:', res);
+        console.log('个人资料更新成功:', res);
         return res || { ok:true }; 
       });
     },
@@ -729,7 +725,7 @@
         usp.append(k, v);
       });
       
-      console.log('📋 listTasks - 请求第' + page + '页，每页' + pageSize + '条');
+      console.log('listTasks - 请求第' + page + '页，每页' + pageSize + '条');
       var res = await http('GET', base + '/api/tasks/all?' + usp.toString());
       
       if (!res || !res.list) {
@@ -754,7 +750,7 @@
         }
         
         var normalized = {
-          // 统一ID字段：从原始Task实体获取task_id
+
           id: task.task_id || task.taskId || task.id,
           taskId: task.task_id || task.taskId || task.id,
           title: task.title,
@@ -774,7 +770,7 @@
         return normalized;
       });
       
-      console.log('✅ 获取到第' + page + '页' + normalizedList.length + '条任务，总共' + (res.total || 0) + '条');
+      console.log('获取到第' + page + '页' + normalizedList.length + '条任务，总共' + (res.total || 0) + '条');
       
       return { 
         total: res.total || 0, 
@@ -806,8 +802,7 @@
       }
       
       var res = await http('GET', base + '/api/tasks/personal?' + usp.toString());
-      
-      // 标准化个人任务数据字段名 - getPersonalTasks使用wrapResponse2已转换数据
+
       var normalizedList = (res.list || []).map(function(task) {
         console.log('原始个人任务数据:', task);
         
@@ -1309,14 +1304,14 @@
         
         // 登录成功后立即测试API调用
         setTimeout(function() {
-          console.log('🧪 测试登录后的API调用...');
+          console.log('测试登录后的API调用...');
           
           // 测试用户API
           window.API.listUsers({page: 1, pageSize: 1}).then(function(users) {
-            console.log('✅ 登录后API调用成功:', users);
+            console.log('登录后API调用成功:', users);
           }).catch(function(error) {
-            console.error('❌ 登录后API调用仍然失败:', error);
-            console.log('🔍 建议检查：');
+            console.error('登录后API调用仍然失败:', error);
+            console.log('建议检查：');
             console.log('1. 数据库中token的valid_to是否大于current_timestamp');
             console.log('2. 后端AuthInterceptor的token验证逻辑');
             console.log('3. 是否存在时区问题导致token立即过期');
@@ -1324,9 +1319,9 @@
           
           // 测试任务API
           window.API.listTasks().then(function(tasks) {
-            console.log('✅ 任务API调用成功:', tasks);
+            console.log('任务API调用成功:', tasks);
           }).catch(function(error) {
-            console.error('❌ 任务API调用失败:', error);
+            console.error('任务API调用失败:', error);
           });
           
         }, 500);
@@ -1381,7 +1376,7 @@
         }
         
         // 如果没有userId，从API获取完整信息
-        console.log('⚠️ currentUser缺少userId，从API获取完整信息...');
+        console.log('⚠currentUser缺少userId，从API获取完整信息...');
         var profileData = await this.getProfile();
         var fullUser = profileData.user || profileData || {};
         
@@ -1399,11 +1394,11 @@
         };
         
         localStorage.setItem('currentUser', JSON.stringify(completeUser));
-        console.log('✅ 完整用户信息已更新:', completeUser);
+        console.log('完整用户信息已更新:', completeUser);
         
         return completeUser;
       } catch(e) {
-        console.error('❌ 获取当前用户信息失败:', e);
+        console.error('获取当前用户信息失败:', e);
         return null;
       }
     },
@@ -1425,10 +1420,10 @@
         url += '?' + queryParams.join('&');
       }
 
-      console.log('🔄 获取个人日志列表:', url);
+      console.log('获取个人日志列表:', url);
 
       return http('GET', url).then(function(res) {
-        console.log('✅ 日志列表API响应:', res);
+        console.log('日志列表API响应:', res);
 
         // 处理新API格式：{ code: 200, message: "success", data: { list: [...], total, page, pageSize, hasNext } }
         var data = res.data || res;
@@ -1503,7 +1498,7 @@
           hasNext: data.hasNext || res.hasNext || false
         };
       }).catch(function(error) {
-        console.error('❌ 获取日志列表失败:', error);
+        console.error('获取日志列表失败:', error);
         throw error;
       });
     },
@@ -1529,25 +1524,25 @@
     // 获取单个日志详情
     getJournal: function(journalId) {
       var url = base + '/api/journals/' + encodeURIComponent(journalId);
-      console.log('🔄 获取日志详情:', url);
+      console.log('获取日志详情:', url);
       
       return http('GET', url).then(function(res) {
-        console.log('✅ 日志详情:', res);
+        console.log('日志详情:', res);
         return res;
       }).catch(function(error) {
-        console.error('❌ 获取日志详情失败:', error);
+        console.error('获取日志详情失败:', error);
         throw error;
       });
     },
 
     // 更新日志
     updateJournal: function(journalId, journalData) {
-      console.log('🔄 更新日志:', journalId, journalData);
+      console.log('更新日志:', journalId, journalData);
       return http('PUT', base + '/api/journals/' + encodeURIComponent(journalId), journalData).then(function(res) {
-        console.log('✅ 日志更新成功:', res);
+        console.log('日志更新成功:', res);
         return res;
       }).catch(function(error) {
-        console.error('❌ 更新日志失败:', error);
+        console.error('更新日志失败:', error);
         throw error;
       });
     },
@@ -1568,30 +1563,30 @@
     
     // 获取团队名称
     getTeamName: function(teamId) {
-      console.log('🔍 getTeamName调用，参数:', {
+      console.log('getTeamName调用，参数:', {
         teamId: teamId,
         type: typeof teamId,
         value: teamId
       });
       
       if (!teamId || teamId === 'undefined' || teamId === 'null') {
-        console.warn('⚠️ 无效的teamId:', teamId);
+        console.warn('无效的teamId:', teamId);
         return Promise.resolve('未分配');
       }
       
       var url = base + '/api/team/' + encodeURIComponent(teamId);
-      console.log('🔄 请求URL:', url);
+      console.log('请求URL:', url);
       
       return http('GET', url).then(function(res) {
-        console.log('✅ 团队API原始响应:', res);
+        console.log('团队API原始响应:', res);
         if (res && res.ok && res.team_name) {
-          console.log('✅ 返回团队名称:', res.team_name);
+          console.log('返回团队名称:', res.team_name);
           return res.team_name;
         }
-        console.warn('⚠️ API返回数据格式不正确:', res);
+        console.warn('API返回数据格式不正确:', res);
         return '未知团队';
       }).catch(function(error) {
-        console.error('❌ 获取团队名称失败:', error);
+        console.error('获取团队名称失败:', error);
         return '未知团队';
       });
     },
@@ -1666,7 +1661,7 @@
     
     // 创建任务
     createTask: function(taskData) {
-      console.log('🔄 创建任务，数据:', taskData);
+      console.log('创建任务，数据:', taskData);
       
       // 数据验证
       if (!taskData.title || !taskData.title.trim()) {
@@ -1686,10 +1681,10 @@
       }
       
       return http('POST', base + '/api/tasks', taskData).then(function(res) {
-        console.log('✅ 任务创建成功:', res);
+        console.log('任务创建成功:', res);
         return res;
       }).catch(function(error) {
-        console.error('❌ 创建任务失败:', error);
+        console.error('创建任务失败:', error);
         throw error;
       });
     },
@@ -1700,13 +1695,13 @@
       if (status) url += '&status=' + encodeURIComponent(status);
       if (priority) url += '&priority=' + encodeURIComponent(priority);
       
-      console.log('🔄 获取个人任务列表:', url);
+      console.log('获取个人任务列表:', url);
       
       return http('GET', url).then(function(res) {
-        console.log('✅ 个人任务列表:', res);
+        console.log('个人任务列表:', res);
         return res;
       }).catch(function(error) {
-        console.error('❌ 获取个人任务失败:', error);
+        console.error('获取个人任务失败:', error);
         throw error;
       });
     },
@@ -1717,13 +1712,13 @@
       if (status) url += '&status=' + encodeURIComponent(status);
       if (priority) url += '&priority=' + encodeURIComponent(priority);
       
-      console.log('🔄 获取可见任务列表:', url);
+      console.log('取可见任务列表:', url);
       
       return http('GET', url).then(function(res) {
-        console.log('✅ 可见任务列表:', res);
+        console.log('可见任务列表:', res);
         return res;
       }).catch(function(error) {
-        console.error('❌ 获取可见任务失败:', error);
+        console.error('获取可见任务失败:', error);
         throw error;
       });
     },
@@ -1732,7 +1727,7 @@
     
     // 创建评论
     createComment: function(commentData) {
-      console.log('🔄 创建评论:', commentData);
+      console.log('创建评论:', commentData);
       
       // 数据验证
       if (!commentData.ownerType || !commentData.ownerId || !commentData.content) {
@@ -1743,6 +1738,7 @@
         return Promise.reject(new Error('ownerType必须是task或log'));
       }
       
+      // 使用正确的API路径：前端代理控制器会转发到后端
       var url = base + '/api/comments';
       var requestData = {
         ownerType: commentData.ownerType,
@@ -1751,13 +1747,13 @@
       };
       
       return http('POST', url, requestData).then(function(res) {
-        console.log('✅ 评论创建成功:', res);
+        console.log('评论创建成功:', res);
         if (res && (res.code === 201 || res.code === 200)) {
           return res;
         }
         return res || { code: 201, message: '评论创建成功' };
       }).catch(function(error) {
-        console.error('❌ 创建评论失败:', error);
+        console.error('创建评论失败:', error);
         if (error.message && error.message.includes('400')) {
           throw new Error('评论创建失败');
         }
@@ -1767,19 +1763,20 @@
     
     // 获取评论列表
     getComments: function(ownerType, ownerId, page, pageSize) {
-      console.log('🔄 获取评论列表:', { ownerType: ownerType, ownerId: ownerId, page: page, pageSize: pageSize });
+      console.log('获取评论列表:', { ownerType: ownerType, ownerId: ownerId, page: page, pageSize: pageSize });
       
       if (!ownerType || !ownerId) {
         return Promise.reject(new Error('ownerType和ownerId不能为空'));
       }
       
-      var url = base + '/api/comments?ownerType=' + encodeURIComponent(ownerType) + 
+      // 使用正确的API路径：前端代理控制器会转发到后端
+      var url = base + '/api/comments?ownerType=' + encodeURIComponent(ownerType) +
                 '&ownerId=' + encodeURIComponent(ownerId) +
                 '&page=' + (page || 1) +
                 '&pageSize=' + (pageSize || 10);
       
       return http('GET', url).then(function(res) {
-        console.log('✅ 评论列表获取成功:', res);
+        console.log('评论列表获取成功:', res);
         
         // 标准化返回数据
         var list = res.list || [];
@@ -1792,7 +1789,7 @@
           pageSize: res.pageSize || pageSize || 10
         };
       }).catch(function(error) {
-        console.error('❌ 获取评论列表失败:', error);
+        console.error('获取评论列表失败:', error);
         // 如果是404，说明还没有评论，返回空列表而不是抛出错误
         if (error.message && error.message.includes('404')) {
           console.log('暂无评论（404），返回空列表');
@@ -1809,29 +1806,75 @@
     
     // 删除评论
     deleteComment: function(commentId, userId) {
-      console.log('🔄 删除评论:', { commentId: commentId, userId: userId });
+      console.log('删除评论:', { commentId: commentId, userId: userId });
       
       if (!commentId) {
         return Promise.reject(new Error('commentId不能为空'));
       }
+
       
-      var url = base + '/api/comments/' + encodeURIComponent(commentId);
-      if (userId) {
-        url += '?userId=' + encodeURIComponent(userId);
+      // 确保userId有正确的前缀
+      var formattedUserId = userId;
+      if (userId && typeof userId === 'string' && !userId.includes('U-')) {
+        // 如果没有U-前缀，添加它
+        formattedUserId = 'U-' + userId;
       }
       
+      // 确保commentId有正确的前缀
+      var formattedCommentId = commentId;
+      if (commentId && typeof commentId === 'string' && !commentId.includes('C-')) {
+        formattedCommentId = 'C-' + commentId;
+      }
+      
+      // 使用正确的API路径：前端代理控制器会转发到后端
+      var url = base + '/api/comments/' + encodeURIComponent(formattedCommentId);
+      if (formattedUserId) {
+        url += '?userId=' + encodeURIComponent(formattedUserId);
+      }
+      
+      console.log('删除评论请求URL:', url);
+      console.log('发送的ID格式:', {
+        originalCommentId: commentId,
+        formattedCommentId: formattedCommentId,
+        originalUserId: userId,
+        formattedUserId: formattedUserId
+      });
+      
       return http('DELETE', url).then(function(res) {
-        console.log('✅ 评论删除成功:', res);
+        console.log('评论删除响应:', res);
+        // 检查后端返回的响应格式
         if (res && res.code === 200) {
+          // 成功删除
           return res;
+        } else if (res && res.code === 403) {
+          // 权限不足
+          throw new Error(res.message || '无权删除此评论');
+        } else if (res && res.code === 404) {
+          // 评论不存在
+          throw new Error(res.message || '评论不存在或已被删除');
+        } else {
+          // 其他情况，如果有message字段，使用它
+          if (res && res.message) {
+            if (res.message.includes('成功')) {
+              return res;
+            } else {
+              throw new Error(res.message);
+            }
+          }
+          // 默认情况，认为成功
+          return res || { code: 200, message: '评论删除成功' };
         }
-        return res || { code: 200, message: '评论删除成功' };
       }).catch(function(error) {
-        console.error('❌ 删除评论失败:', error);
-        if (error.message && error.message.includes('403')) {
-          throw new Error('无权删除此评论');
-        } else if (error.message && error.message.includes('404')) {
-          throw new Error('删除评论失败');
+        console.error('删除评论失败:', error);
+        // 提供更详细的错误信息
+        if (error.message) {
+          if (error.message.includes('403') || error.message.includes('FORBIDDEN') || error.message.includes('无权删除')) {
+            throw new Error('您没有权限删除此评论');
+          } else if (error.message.includes('404') || error.message.includes('NOT_FOUND') || error.message.includes('不存在')) {
+            throw new Error('评论不存在或已被删除');
+          } else if (error.message.includes('400') || error.message.includes('BAD_REQUEST')) {
+            throw new Error('请求参数错误');
+          }
         }
         throw error;
       });
@@ -1841,7 +1884,7 @@
     
     // 更新任务进度
     updateTaskProgress: function(taskId, userId, progressPct) {
-      console.log('🔄 更新任务进度:', { taskId: taskId, userId: userId, progressPct: progressPct });
+      console.log('更新任务进度:', { taskId: taskId, userId: userId, progressPct: progressPct });
       
       // 数据验证
       if (!taskId) {
@@ -1854,31 +1897,29 @@
         return Promise.reject(new Error('进度百分比必须在0-100之间'));
       }
       
-      // 🔧 确保taskId格式正确
-      var formattedTaskId = String(taskId);
-      if (!formattedTaskId.startsWith('T-') && !isNaN(formattedTaskId)) {
-        console.log('任务ID为纯数字:', formattedTaskId);
-      }
+
+      var numericTaskId = String(taskId).replace('T-', '').replace(/[^0-9]/g, '');
+      console.log('任务ID转换: ' + taskId + ' → ' + numericTaskId);
       
-      var url = base + '/api/tasks/' + encodeURIComponent(formattedTaskId) + '/progress';
-      console.log('📡 更新进度请求URL:', url);
-      
+      var url = base + '/api/tasks/' + numericTaskId + '/progress';
+      console.log('更新进度请求URL:', url);
+
       var requestData = {
         userId: String(userId),
         progressPct: parseInt(progressPct, 10)
       };
       
-      console.log('📡 更新进度请求数据:', requestData);
+      console.log('更新进度请求数据:', requestData);
       
       return http('PUT', url, requestData).then(function(res) {
-        console.log('✅ 任务进度更新成功:', res);
+        console.log('任务进度更新成功:', res);
         if (res && res.code === 200) {
           return res;
         }
         // 如果没有明确的成功标志，但也没有错误，认为成功
         return res || { code: 200, message: '任务进度更新成功' };
       }).catch(function(error) {
-        console.error('❌ 更新任务进度失败:', error);
+        console.error('更新任务进度失败:', error);
         // 根据错误信息提供更友好的提示
         if (error.message && error.message.includes('400')) {
           throw new Error('进度数据格式错误，无法修改');
@@ -1891,7 +1932,7 @@
     
     // 更新任务完整信息
     updateTaskInfo: function(taskId, taskData) {
-      console.log('🔄 更新任务信息:', { taskId: taskId, data: taskData });
+      console.log('更新任务信息:', { taskId: taskId, data: taskData });
       
       // 数据验证
       if (!taskId) {
@@ -1900,16 +1941,12 @@
       if (!taskData || typeof taskData !== 'object') {
         return Promise.reject(new Error('任务数据不能为空'));
       }
+
+      var numericTaskId = String(taskId).replace('T-', '').replace(/[^0-9]/g, '');
+      console.log('任务ID转换: ' + taskId + ' → ' + numericTaskId);
       
-      // 🔧 确保taskId格式正确（后端期望T-xxx格式或纯数字）
-      var formattedTaskId = String(taskId);
-      if (!formattedTaskId.startsWith('T-') && !isNaN(formattedTaskId)) {
-        // 如果是纯数字，保持原样（后端的parseId可以处理）
-        console.log('任务ID为纯数字:', formattedTaskId);
-      }
-      
-      var url = base + '/api/tasks/' + encodeURIComponent(formattedTaskId);
-      console.log('📡 请求URL:', url);
+      var url = base + '/api/tasks/' + numericTaskId;
+      console.log('📡 更新任务信息请求URL:', url);
       
       // 构建符合接口要求的请求数据
       var requestData = {
@@ -1924,15 +1961,15 @@
       };
       
       return http('PUT', url, requestData).then(function(res) {
-        console.log('✅ 任务信息更新成功:', res);
+        console.log('任务信息更新成功:', res);
         if (res && res.code === 200) {
           return res;
         }
         // 如果没有明确的成功标志，但也没有错误，认为成功
         return res || { code: 200, message: '任务更新成功' };
       }).catch(function(error) {
-        console.error('❌ 更新任务信息失败:', error);
-        // 根据错误信息提供更友好的提示
+        console.error('更新任务信息失败:', error);
+
         if (error.message && error.message.includes('404')) {
           throw new Error('更新任务信息失败');
         }

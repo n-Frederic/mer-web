@@ -32,10 +32,10 @@
         }
     }
 
-    // Simple id helper
+
     window.$id = function(id){ return document.getElementById(id); };
 
-    // Expose helpers
+
     window.matchKeyword = function (val, kw) {
         if (!kw) return true;
         return String(val || '').toLowerCase().includes(String(kw).toLowerCase());

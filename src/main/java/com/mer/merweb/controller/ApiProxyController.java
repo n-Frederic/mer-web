@@ -779,4 +779,143 @@ public class ApiProxyController {
                     .body(Map.of("tasks", new String[]{}));
         }
     }
+
+    // ==================== 评论相关API ====================
+    
+    /**
+     * 创建评论
+     * POST /api/comments
+     */
+    @PostMapping("/comments")
+    public ResponseEntity<?> createComment(
+            @RequestBody Map<String, Object> commentData,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(commentData, headers);
+            
+            ResponseEntity<Map> response = restTemplate.postForEntity(
+                backendUrl + "/comments",
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("code", 400, "message", "评论创建失败"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("code", 500, "message", "评论创建失败: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 获取评论列表
+     * GET /api/comments
+     */
+    @GetMapping("/comments")
+    public ResponseEntity<?> getComments(
+            @RequestParam String ownerType,
+            @RequestParam String ownerId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/comments?ownerType=" + ownerType +
+                          "&ownerId=" + ownerId + "&page=" + page + "&pageSize=" + pageSize;
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.ok(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("list", new Object[]{}, "total", 0, "page", page, "pageSize", pageSize));
+        }
+    }
+
+    /**
+     * 删除评论
+     * DELETE /api/comments/{commentId}
+     */
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<?> deleteComment(
+            @PathVariable String commentId,
+            @RequestParam(required = false) String userId,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/comments/" + commentId;
+            if (userId != null && !userId.isEmpty()) {
+                url += "?userId=" + userId;
+            }
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.DELETE,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            try {
+                // 尝试解析后端返回的错误信息
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                // 如果无法解析错误信息，根据状态码返回标准错误格式
+                int statusCode = e.getStatusCode().value();
+                String message = "删除评论失败";
+                
+                if (statusCode == 403) {
+                    message = "无权删除此评论";
+                } else if (statusCode == 404) {
+                    message = "评论不存在或已被删除";
+                } else if (statusCode == 400) {
+                    message = "请求参数错误";
+                }
+                
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("code", statusCode, "message", message));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("code", 500, "message", "删除评论失败: " + e.getMessage()));
+        }
+    }
 }

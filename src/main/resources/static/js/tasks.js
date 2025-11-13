@@ -33,14 +33,14 @@
     async function fetchTasks(page, pageSize) {
         try {
             if (window.API && typeof window.API.listTasks === 'function'){
-                console.log('📋 正在从后端获取任务数据，第' + page + '页，每页' + pageSize + '条');
+                console.log('正在从后端获取任务数据，第' + page + '页，每页' + pageSize + '条');
                 
                 var resp = await window.API.listTasks({
                     page: page,
                     pageSize: pageSize
                 });
                 
-                console.log('✅ 后端返回数据:', resp);
+                console.log('后端返回数据:', resp);
                 
             // 转换后端数据格式以适配前端显示
             var tasks = (resp.list || []).map(function(task) {
@@ -52,17 +52,19 @@
                     startDate: task.startAt ? formatDate(task.startAt) : '',
                     endDate: task.dueAt ? formatDate(task.dueAt) : '',
                     publisher: task.creator ? (task.creator.name || '未知') : '未知',
+                    publisherId: task.creator ? task.creator.id : null,
                     owner: task.creator ? (task.creator.name || '未知') : '未知',
+                    ownerId: task.creator ? task.creator.id : null,
                     priority: task.priority || 'Medium',
                     status: task.status || 'Published',
-                    progress: calculateProgress(task.status),
+                    progress: task.progress_pct !== undefined ? task.progress_pct : calculateProgress(task.status),
                     createdAt: task.createdAt || new Date().toISOString(),
                     updatedAt: task.updatedAt || new Date().toISOString(),
                     _original: task
                 };
             });
                 
-                console.log('✅ 转换后的任务数据:', tasks);
+                console.log('转换后的任务数据:', tasks);
                 
                 return {
                     list: tasks,
@@ -83,7 +85,7 @@
                 };
             }
         } catch (error) {
-            console.error('❌ 获取任务数据失败:', error);
+            console.error('获取任务数据失败:', error);
             alert('获取任务数据失败: ' + error.message);
             return {
                 list: [],
@@ -175,39 +177,18 @@
             console.error('获取当前用户信息失败:', e);
         }
         
-        // 任务排序：负责人是当前用户的任务优先，然后是发布人是当前用户的任务
-        if (currentUser && (currentUser.name || currentUser.userId || currentUser.id)) {
+        // 任务排序：发布人是当前用户的任务优先
+        if (currentUser && (currentUser.userId || currentUser.id || currentUser.user_id)) {
             var currentUserId = currentUser.userId || currentUser.id || currentUser.user_id;
-            var currentUserName = currentUser.name;
             
-            console.log('当前用户:', { id: currentUserId, name: currentUserName });
+            console.log('当前用户ID:', currentUserId);
             
             list.sort(function(a, b) {
-                // 检查负责人
-                var aIsOwner = false;
-                var bIsOwner = false;
+                // 检查发布人（使用publisherId）
+                var aIsPublisher = a.publisherId && (a.publisherId === currentUserId || a.publisherId === Number(currentUserId));
+                var bIsPublisher = b.publisherId && (b.publisherId === currentUserId || b.publisherId === Number(currentUserId));
                 
-                if (a.owner === currentUserName || a.ownerId === currentUserId) {
-                    aIsOwner = true;
-                }
-                if (b.owner === currentUserName || b.ownerId === currentUserId) {
-                    aIsOwner = true;
-                }
-                
-                // 检查发布人
-                var aIsPublisher = false;
-                var bIsPublisher = false;
-                
-                if (a.publisher === currentUserName || a.creatorId === currentUserId || (a.creator && (a.creator.id === currentUserId || a.creator.name === currentUserName))) {
-                    aIsPublisher = true;
-                }
-                if (b.publisher === currentUserName || b.creatorId === currentUserId || (b.creator && (b.creator.id === currentUserId || b.creator.name === currentUserName))) {
-                    bIsPublisher = true;
-                }
-                
-                // 排序逻辑：负责人优先 > 发布人 > 其他
-                if (aIsOwner && !bIsOwner) return -1;
-                if (!aIsOwner && bIsOwner) return 1;
+                // 排序逻辑：发布人优先
                 if (aIsPublisher && !bIsPublisher) return -1;
                 if (!aIsPublisher && bIsPublisher) return 1;
                 
@@ -240,43 +221,31 @@
             grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">暂无任务数据</div>';
         } else {
             grid.innerHTML = list.map(function(t){
-            // 判断当前用户是否是负责人或发布人
-            var isOwner = false;
+            // 判断当前用户是否是发布人（用于优先级标识）
             var isPublisher = false;
             
             if (currentUser) {
                 var userId = currentUser.userId || currentUser.id || currentUser.user_id;
                 var userName = currentUser.name;
                 
-                // 检查是否是负责人
-                if (t.owner === userName || t.ownerId === userId) {
-                    isOwner = true;
-                }
-                
                 // 检查是否是发布人
-                if (t.publisher === userName || t.creatorId === userId || (t.creator && (t.creator.id === userId || t.creator.name === userName))) {
+                if (t.publisherId && (t.publisherId === userId || t.publisherId === Number(userId))) {
                     isPublisher = true;
                 }
             }
             
-            // 构建操作按钮HTML
+            // 构建操作按钮HTML - 所有任务都显示两个按钮
             var actionButtons = '<a class="btn-detail" href="task-detail.html?id=' + encodeURIComponent(t.id) + '">查看详情</a>';
             
-            // 如果是负责人，添加"更新任务进度"按钮
-            if (isOwner) {
-                actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #4682b4, #5a9fd4);" onclick="updateTaskProgress(\'' + escapeHtml(t.id) + '\')">📊 更新进度</button>';
-            }
+            // 所有任务都显示"更新任务进度"按钮（权限由后端检查）
+            actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #4682b4, #5a9fd4);" onclick="updateTaskProgress(\'' + escapeHtml(t.id) + '\')">📊 更新进度</button>';
             
-            // 如果是发布人，添加"更新任务信息"按钮
-            if (isPublisher) {
-                actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #32cd32, #90ee90);" onclick="updateTaskInfo(\'' + escapeHtml(t.id) + '\')">✏️ 更新信息</button>';
-            }
+            // 所有任务都显示"更新任务信息"按钮（权限由后端检查）
+            actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #32cd32, #90ee90);" onclick="updateTaskInfo(\'' + escapeHtml(t.id) + '\')">✏️ 更新信息</button>';
             
-            // 添加优先级标识
+            // 添加发布人标识
             var priorityBadge = '';
-            if (isOwner) {
-                priorityBadge = '<div style="position: absolute; right: 10px; top: 10px; background: linear-gradient(135deg, #ff8a00, #ffb06b); color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;">🎯 我负责</div>';
-            } else if (isPublisher) {
+            if (isPublisher) {
                 priorityBadge = '<div style="position: absolute; right: 10px; top: 10px; background: linear-gradient(135deg, #9370db, #b19cd9); color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;">📝 我发布</div>';
             }
             
@@ -299,7 +268,7 @@
         }).join('');
         }
 
-        console.log('✅ 渲染完成，显示第' + page + '页，共' + list.length + '个任务，总计' + total + '个任务');
+        console.log('渲染完成，显示第' + page + '页，共' + list.length + '个任务，总计' + total + '个任务');
     }
 
     // HTML转义函数
@@ -317,7 +286,7 @@
     window.TasksPage = {
         boot: async function(){
             try {
-                console.log('📄 TasksPage 启动...');
+                console.log('TasksPage 启动...');
                 
                 // 初始化页码
                 window.__currentPage = 1;
@@ -334,7 +303,7 @@
                 // 定义翻页函数
                 var loadPage = async function(page) {
                     var pageSize = parseInt(document.getElementById('pageSize')?.value || '12', 10);
-                    console.log('📄 加载第' + page + '页，每页' + pageSize + '条');
+                    console.log('加载第' + page + '页，每页' + pageSize + '条');
                     var data = await fetchTasks(page, pageSize);
                     render(data);
                 };
@@ -360,14 +329,14 @@
 
                 if (btnSearch) {
                     btnSearch.addEventListener('click', function(){ 
-                        console.log('🔍 执行搜索（前端筛选）');
+                        console.log('执行搜索（前端筛选）');
                         alert('搜索功能待实现');
                     });
                 }
 
                 if (btnReset) {
                     btnReset.addEventListener('click', function(){ 
-                        console.log('🔄 重置搜索');
+                        console.log('重置搜索');
                         loadPage(1);
                     });
                 }
@@ -388,7 +357,7 @@
                 // 页面大小变化时重新加载
                 if (pageSizeSelect) {
                     pageSizeSelect.addEventListener('change', function(){ 
-                        console.log('📊 页面大小变化为:', pageSizeSelect.value);
+                        console.log('页面大小变化为:', pageSizeSelect.value);
                         loadPage(1); // 重新加载第一页
                     });
                 }
@@ -404,10 +373,10 @@
                 if (prevPageBottom) prevPageBottom.addEventListener('click', goPrev);
                 if (nextPageBottom) nextPageBottom.addEventListener('click', goNext);
 
-                console.log('✅ TasksPage 启动完成');
+                console.log('TasksPage 启动完成');
                 
             } catch (error) {
-                console.error('❌ TasksPage 启动失败:', error);
+                console.error('TasksPage 启动失败:', error);
                 alert('页面启动失败: ' + error.message);
             }
         }
@@ -416,7 +385,7 @@
     // 全局函数：更新任务进度
     window.updateTaskProgress = async function(taskId) {
         try {
-            // 🔧 使用辅助函数获取完整用户信息
+
             var currentUser = null;
             if (window.API && typeof window.API.getCurrentUserWithId === 'function') {
                 currentUser = await window.API.getCurrentUserWithId();
@@ -435,7 +404,7 @@
             var userId = currentUser ? (currentUser.userId || currentUser.id || currentUser.user_id) : null;
             
             if (!userId) {
-                alert('❌ 无法获取当前用户信息，请重新登录');
+                alert('无法获取当前用户信息，请重新登录');
                 console.error('当前用户数据:', currentUser);
                 return;
             }
@@ -455,28 +424,36 @@
             
             // 验证输入
             if (isNaN(progressPct) || progressPct < 0 || progressPct > 100) {
-                alert('❌ 请输入0-100之间的整数');
+                alert('请输入0-100之间的整数');
                 return;
             }
             
             // 调用API更新进度
             if (window.API && typeof window.API.updateTaskProgress === 'function') {
-                console.log('🔄 更新任务进度:', { taskId: taskId, userId: userId, progressPct: progressPct });
+                console.log('更新任务进度:', { taskId: taskId, userId: userId, progressPct: progressPct });
                 
                 var result = await window.API.updateTaskProgress(taskId, userId, progressPct);
                 
-                console.log('✅ 任务进度更新成功:', result);
-                alert('✅ 任务进度更新成功！');
+                console.log('任务进度更新成功:', result);
+                alert('任务进度更新成功！');
                 
                 // 重新加载任务列表
                 location.reload();
             } else {
-                alert('❌ API不可用，无法更新任务进度');
+                alert('API不可用，无法更新任务进度');
             }
             
         } catch(error) {
-            console.error('❌ 更新任务进度失败:', error);
-            alert('❌ 更新失败：' + (error.message || '请稍后重试'));
+            console.error('更新任务进度失败:', error);
+            
+            // 根据错误类型显示友好提示
+            if (error.message && (error.message.includes('404') || error.message.includes('权限'))) {
+                alert('您没有权限更新该任务的进度\n只有被指派的负责人才能更新任务进度');
+            } else if (error.message && error.message.includes('400')) {
+                alert('进度数据格式错误，请输入0-100之间的整数');
+            } else {
+                alert('更新失败：' + (error.message || '请稍后重试'));
+            }
         }
     };
     
@@ -485,19 +462,19 @@
         try {
             // 获取任务详情
             if (!window.API || typeof window.API.getTask !== 'function') {
-                alert('❌ API不可用，无法更新任务信息');
+                alert('API不可用，无法更新任务信息');
                 return;
             }
             
-            console.log('🔄 获取任务详情:', taskId);
+            console.log('获取任务详情:', taskId);
             var task = await window.API.getTask(taskId);
             
             if (!task) {
-                alert('❌ 无法获取任务信息');
+                alert('无法获取任务信息');
                 return;
             }
             
-            console.log('✅ 获取到任务详情:', task);
+            console.log('获取到任务详情:', task);
             
             // 构建表单HTML
             var formHtml = '<div style="text-align: left; max-width: 600px; margin: 0 auto;">';
@@ -513,11 +490,11 @@
             var dialogDiv = document.createElement('div');
             dialogDiv.innerHTML = '<div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">\
                 <div style="background: white; padding: 30px; border-radius: 14px; max-width: 700px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">\
-                    <h3 style="margin: 0 0 20px 0; color: #a55b00; font-size: 22px;">✏️ 更新任务信息</h3>\
+                    <h3 style="margin: 0 0 20px 0; color: #a55b00; font-size: 22px;">更新任务信息</h3>\
                     ' + formHtml + '\
                     <div style="margin-top: 20px; text-align: center; display: flex; gap: 10px; justify-content: center;">\
-                        <button id="btn_save_task" style="padding: 10px 24px; background: linear-gradient(135deg, #ff8a00, #ffb06b); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px;">💾 保存</button>\
-                        <button id="btn_cancel_task" style="padding: 10px 24px; background: #ddd; color: #666; border: none; border-radius: 8px; cursor: pointer; font-size: 15px;">❌ 取消</button>\
+                        <button id="btn_save_task" style="padding: 10px 24px; background: linear-gradient(135deg, #ff8a00, #ffb06b); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 15px;">保存</button>\
+                        <button id="btn_cancel_task" style="padding: 10px 24px; background: #ddd; color: #666; border: none; border-radius: 8px; cursor: pointer; font-size: 15px;">取消</button>\
                     </div>\
                 </div>\
             </div>';
@@ -542,12 +519,12 @@
                         tags: task.tags || []
                     };
                     
-                    console.log('🔄 更新任务信息:', updatedTask);
+                    console.log('更新任务信息:', updatedTask);
                     
                     var result = await window.API.updateTaskInfo(taskId, updatedTask);
                     
-                    console.log('✅ 任务信息更新成功:', result);
-                    alert('✅ 任务信息更新成功！');
+                    console.log('任务信息更新成功:', result);
+                    alert('任务信息更新成功！');
                     
                     document.body.removeChild(dialogDiv);
                     
@@ -555,14 +532,26 @@
                     location.reload();
                     
                 } catch(error) {
-                    console.error('❌ 保存任务信息失败:', error);
-                    alert('❌ 保存失败：' + (error.message || '请稍后重试'));
+                    console.error('保存任务信息失败:', error);
+                    
+                    // 根据错误类型显示友好提示
+                    if (error.message && (error.message.includes('404') || error.message.includes('权限') || error.message.includes('失败'))) {
+                        alert('您没有权限更新该任务的信息\n只有任务发布人才能更新任务信息');
+                    } else {
+                        alert('保存失败：' + (error.message || '请稍后重试'));
+                    }
                 }
             });
             
         } catch(error) {
-            console.error('❌ 更新任务信息失败:', error);
-            alert('❌ 操作失败：' + (error.message || '请稍后重试'));
+            console.error('更新任务信息失败:', error);
+            
+            // 根据错误类型显示友好提示
+            if (error.message && (error.message.includes('404') || error.message.includes('权限'))) {
+                alert('您没有权限更新该任务\n只有任务发布人才能更新任务信息');
+            } else {
+                alert('操作失败：' + (error.message || '请稍后重试'));
+            }
         }
     };
     

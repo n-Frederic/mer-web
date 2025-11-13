@@ -312,7 +312,7 @@
         
         // 初始化
         document.addEventListener('DOMContentLoaded', async function() {
-            console.log('📅 日程表页面加载...');
+            console.log('日程表页面加载...');
             await loadAllData();
             initCharts();
             renderCalendar();
@@ -326,7 +326,7 @@
         // 加载所有数据
         async function loadAllData() {
             try {
-                console.log('🔄 开始加载所有数据...');
+                console.log('开始加载所有数据...');
                 
                 // 并行加载所有数据
                 const [tasksData, logsData, usersData] = await Promise.all([
@@ -339,7 +339,7 @@
                 allLogs = logsData;
                 allUsers = usersData;
                 
-                console.log('✅ 数据加载完成:', {
+                console.log('数据加载完成:', {
                     tasks: allTasks.length,
                     logs: allLogs.length,
                     users: allUsers.length
@@ -349,7 +349,7 @@
                 buildCalendarData();
                 
             } catch (error) {
-                console.error('❌ 加载数据失败:', error);
+                console.error('加载数据失败:', error);
             }
         }
         
@@ -361,7 +361,7 @@
             
             try {
                 while (true) {
-                    console.log(`📋 加载任务第${page}页...`);
+                    console.log(`加载任务第${page}页...`);
                     const response = await window.API.listTasks({ page, pageSize });
                     
                     if (!response || !response.list || response.list.length === 0) {
@@ -379,7 +379,7 @@
                     
                     // 防止无限循环
                     if (page > 100) {
-                        console.warn('⚠️ 任务页数超过100，停止加载');
+                        console.warn('⚠任务页数超过100，停止加载');
                         break;
                     }
                 }
@@ -393,7 +393,7 @@
         // 加载所有日志
         async function loadAllLogs() {
             try {
-                console.log('📖 加载所有日志...');
+                console.log('加载所有日志...');
                 const response = await window.API.getJournals({});
                 return response && response.list ? response.list : [];
             } catch (error) {
@@ -426,7 +426,7 @@
                     page++;
                     
                     if (page > 100) {
-                        console.warn('⚠️ 用户页数超过100，停止加载');
+                        console.warn('⚠用户页数超过100，停止加载');
                         break;
                     }
                 }
@@ -463,7 +463,7 @@
                 }
             });
             
-            console.log('📅 日历数据构建完成:', Object.keys(calendarData).length, '天有数据');
+            console.log('日历数据构建完成:', Object.keys(calendarData).length, '天有数据');
         }
         
         // 格式化日期为 YYYY-MM-DD
