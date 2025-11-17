@@ -1925,6 +1925,8 @@
           throw new Error('进度数据格式错误，无法修改');
         } else if (error.message && error.message.includes('404')) {
           throw new Error('用户没有权限更新该任务的进度');
+        } else if (error.message && error.message.includes('403')) {
+          throw new Error('您没有权限更新该任务的进度，权限不足');
         }
         throw error;
       });
@@ -1972,6 +1974,8 @@
 
         if (error.message && error.message.includes('404')) {
           throw new Error('更新任务信息失败');
+        } else if (error.message && error.message.includes('403')) {
+          throw new Error('您没有权限更新该任务的信息，权限不足');
         }
         throw error;
       });

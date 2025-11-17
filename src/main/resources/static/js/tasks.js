@@ -237,12 +237,7 @@
             // 构建操作按钮HTML - 所有任务都显示两个按钮
             var actionButtons = '<a class="btn-detail" href="task-detail.html?id=' + encodeURIComponent(t.id) + '">查看详情</a>';
             
-            // 所有任务都显示"更新任务进度"按钮（权限由后端检查）
-            actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #4682b4, #5a9fd4);" onclick="updateTaskProgress(\'' + escapeHtml(t.id) + '\')">📊 更新进度</button>';
-            
-            // 所有任务都显示"更新任务信息"按钮（权限由后端检查）
-            actionButtons += '<button class="btn-sm" style="margin-left: 8px; background: linear-gradient(135deg, #32cd32, #90ee90);" onclick="updateTaskInfo(\'' + escapeHtml(t.id) + '\')">✏️ 更新信息</button>';
-            
+
             // 添加发布人标识
             var priorityBadge = '';
             if (isPublisher) {
@@ -256,8 +251,6 @@
                 <div class="task-meta">\
                     <span>开始：' + escapeHtml(t.startDate) + '</span>\
                     <span>结束：' + escapeHtml(t.endDate) + '</span>\
-                    <span>发布人：' + escapeHtml(t.publisher) + '</span>\
-                    <span>负责人：' + escapeHtml(t.owner) + '</span>\
                 </div>\
                 <div class="task-summary">' + escapeHtml(t.summary) + '</div>\
                 <div class="task-details">' + escapeHtml(t.details) + '</div>\
@@ -451,6 +444,8 @@
                 alert('您没有权限更新该任务的进度\n只有被指派的负责人才能更新任务进度');
             } else if (error.message && error.message.includes('400')) {
                 alert('进度数据格式错误，请输入0-100之间的整数');
+            } else if (error.message && error.message.includes('403')) {
+                alert('您没有权限更新该任务的进度\n权限不足，请联系管理员');
             } else {
                 alert('更新失败：' + (error.message || '请稍后重试'));
             }
@@ -537,6 +532,8 @@
                     // 根据错误类型显示友好提示
                     if (error.message && (error.message.includes('404') || error.message.includes('权限') || error.message.includes('失败'))) {
                         alert('您没有权限更新该任务的信息\n只有任务发布人才能更新任务信息');
+                    } else if (error.message && error.message.includes('403')) {
+                        alert('您没有权限更新该任务的信息\n权限不足，请联系管理员');
                     } else {
                         alert('保存失败：' + (error.message || '请稍后重试'));
                     }
@@ -549,6 +546,8 @@
             // 根据错误类型显示友好提示
             if (error.message && (error.message.includes('404') || error.message.includes('权限'))) {
                 alert('您没有权限更新该任务\n只有任务发布人才能更新任务信息');
+            } else if (error.message && error.message.includes('403')) {
+                alert('您没有权限更新该任务的信息\n权限不足，请联系管理员');
             } else {
                 alert('操作失败：' + (error.message || '请稍后重试'));
             }

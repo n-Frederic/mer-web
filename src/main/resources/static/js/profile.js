@@ -53,7 +53,7 @@
         document.getElementById('pf_birth')&&(document.getElementById('pf_birth').value=birthDate);
         
         // 自动计算并填充年龄
-        var calculatedAge = calculateAge(pf.birthday || pf.birth_date || pf.birth);
+        var calculatedAge = calculateAge(birthDate);
         document.getElementById('pf_age')&&(document.getElementById('pf_age').value=calculatedAge !== null ? calculatedAge : '');
         
         // 填充所属团队字段（从缓存读取，如果有的话）
@@ -69,6 +69,21 @@
         }
         
         document.getElementById('pf_bio')&&(document.getElementById('pf_bio').value=pf.bio||'');
+        
+        // 确保年龄计算正确
+        setTimeout(function() {
+            if(birthDate) {
+                var ageField = document.getElementById('pf_age');
+                var chipAge = document.getElementById('chip_age');
+                var age = calculateAge(birthDate);
+                if(ageField && age !== null) {
+                    ageField.value = age;
+                }
+                if(chipAge && age !== null) {
+                    chipAge.textContent = age + '岁';
+                }
+            }
+        }, 100);
         
         syncChips();
     }

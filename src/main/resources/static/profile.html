@@ -387,13 +387,7 @@
                         var calculatedAge = null;
                         var birthDate = userData.birthday || userData.birth_date;
                         if(birthDate) {
-                            var birth = new Date(birthDate);
-                            var today = new Date();
-                            calculatedAge = today.getFullYear() - birth.getFullYear();
-                            var monthDiff = today.getMonth() - birth.getMonth();
-                            if(monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                                calculatedAge--;
-                            }
+                            calculatedAge = calculateAgeFromBirth(birthDate);
                             console.log('计算年龄: 出生日期=' + birthDate + ', 年龄=' + calculatedAge);
                         }
                         
@@ -525,7 +519,55 @@
                     console.warn('恢复头像失败:', e);
                 }
             }
+            
+            // 添加生日字段变化监听器，自动计算年龄
+            var birthField = document.getElementById('pf_birth');
+            if (birthField) {
+                birthField.addEventListener('change', updateAgeFromBirth);
+                // 页面加载时也计算一次年龄
+                if (birthField.value) {
+                    updateAgeFromBirth();
+                }
+            }
+            
+            // 添加生日字段实时监听，确保在数据加载后也能计算年龄
+            setTimeout(function() {
+                if (birthField && birthField.value) {
+                    updateAgeFromBirth();
+                }
+            }, 500);
         });
+    </script>
+    <script>
+        // 根据生日计算年龄的函数
+        function calculateAgeFromBirth(birthDateStr) {
+            if (!birthDateStr) return null;
+            try {
+                var birth = new Date(birthDateStr);
+                var today = new Date();
+                var age = today.getFullYear() - birth.getFullYear();
+                var monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                    age--;
+                }
+                return age >= 0 ? age : null;
+            } catch(e) {
+                console.error('计算年龄错误:', e);
+                return null;
+            }
+        }
+        
+        // 当生日字段变化时自动计算年龄
+        function updateAgeFromBirth() {
+            var birthDate = document.getElementById('pf_birth').value;
+            var calculatedAge = calculateAgeFromBirth(birthDate);
+            var ageField = document.getElementById('pf_age');
+            if (ageField && calculatedAge !== null && calculatedAge >= 0) {
+                ageField.value = calculatedAge;
+            } else if (ageField) {
+                ageField.value = '';
+            }
+        }
     </script>
 </body>
 </html>

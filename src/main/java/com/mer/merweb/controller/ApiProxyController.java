@@ -279,7 +279,7 @@ public class ApiProxyController {
         }
     }
 
-    @PostMapping("/forgot-password/reset/")
+    @PostMapping("/forgot-password/reset")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> requestData) {
         try {
             HttpHeaders headers = new HttpHeaders();

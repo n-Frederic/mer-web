@@ -430,28 +430,28 @@
                     <h3>个人工作日志</h3>
                     <form id="journalForm" class="journal-form">
                         <div class="form-item full">
-                            <label>📅 日志日期 <span style="color: red;">*</span></label>
+                            <label>日志日期 <span style="color: red;">*</span></label>
                             <input id="jl_logDate" type="date" required style="font-size: 15px;">
                         </div>
                         <div class="form-item full">
-                            <label>📝 今日总结 <span style="color: red;">*</span></label>
+                            <label>今日总结 <span style="color: red;">*</span></label>
                             <textarea id="jl_todaySummary" placeholder="记录今天完成的工作、遇到的问题和解决方案..." style="min-height: 150px; font-size: 14px;" required></textarea>
                         </div>
                         <div class="form-item full">
-                            <label>📋 明日计划 <span style="color: red;">*</span></label>
+                            <label>明日计划 <span style="color: red;">*</span></label>
                             <textarea id="jl_tomorrowPlan" placeholder="规划明天要完成的工作任务..." style="min-height: 120px; font-size: 14px;" required></textarea>
                         </div>
                         <div class="form-item full">
-                            <label>🆘 需要帮助（可选）</label>
+                            <label>需要帮助（可选）</label>
                             <textarea id="jl_helpNeeded" placeholder="遇到困难？需要什么支持？" style="min-height: 80px; font-size: 14px;"></textarea>
                         </div>
                         <div class="form-item full">
-                            <label>🔗 关联任务ID（多个用逗号分隔）</label>
+                            <label>关联任务ID（多个用逗号分隔）</label>
                             <input id="jl_taskIds" placeholder="例如：1,3,5" style="font-size: 14px;">
                         </div>
                         <div class="journal-actions full" style="justify-content:center;">
-                            <button type="button" class="btn-sm btn-wide" id="jl_save" style="padding: 14px 32px; font-size: 16px;">💾 保存日志</button>
-                            <button type="button" class="btn-secondary btn-wide" id="jl_clear" style="padding: 14px 32px; font-size: 16px;">🔄 清空表单</button>
+                            <button type="button" class="btn-sm btn-wide" id="jl_save" style="padding: 14px 32px; font-size: 16px;">保存日志</button>
+                            <button type="button" class="btn-secondary btn-wide" id="jl_clear" style="padding: 14px 32px; font-size: 16px;">清空表单</button>
                         </div>
                     </form>
                     
@@ -465,95 +465,95 @@
     </div>
 
     <!-- 编辑日志模态框 -->
-    <div id="editJournalModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>编辑工作日志</h3>
-                <span class="modal-close" onclick="closeEditModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form id="editJournalForm" class="journal-form">
-                    <input type="hidden" id="edit_jl_id">
-                    <div class="form-item full">
-                        <label>标题 <span style="color: red;">*</span></label>
-                        <input id="edit_jl_title" placeholder="请输入日志标题" required>
-                    </div>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
-                        <div class="form-item">
-                            <label>日期 <span style="color: red;">*</span></label>
-                            <input id="edit_jl_logDate" type="date" required>
-                        </div>
-                        <div class="form-item">
-                            <label>类型 <span style="color: red;">*</span></label>
-                            <select id="edit_jl_viewType" required>
-                                <option value="Day">日报</option>
-                                <option value="Week">周报</option>
-                                <option value="Month">月报</option>
-                            </select>
-                        </div>
-                        <div class="form-item">
-                            <label>心情</label>
-                            <select id="edit_jl_mood">
-                                <option value="">无</option>
-                                <option value="Happy">😊 开心</option>
-                                <option value="Productive">💪 高效</option>
-                                <option value="Focused">🎯 专注</option>
-                                <option value="Satisfied">✨ 满意</option>
-                                <option value="Accomplished">🏆 成就感</option>
-                                <option value="Neutral">😐 平静</option>
-                                <option value="Tired">😴 疲惫</option>
-                                <option value="Frustrated">😤 受挫</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-item full">
-                        <label>摘要</label>
-                        <input id="edit_jl_summary" placeholder="一句话概括本次日志内容（可选）">
-                    </div>
-                    <div class="form-item full">
-                        <label>内容 <span style="color: red;">*</span></label>
-                        <textarea id="edit_jl_content" placeholder="详细记录工作内容..." style="min-height: 150px;" required></textarea>
-                    </div>
-                    <div class="form-item full">
-                        <label>关联任务ID</label>
-                        <input id="edit_jl_taskId" type="number" placeholder="输入关联的任务ID（可选）" min="1">
-                    </div>
-                    <div class="journal-actions full" style="justify-content:center;">
-                        <button type="button" class="btn-sm btn-wide" id="edit_jl_save">💾 保存修改</button>
-                        <button type="button" class="btn-secondary btn-wide" onclick="closeEditModal()">❌ 取消</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+<!--    <div id="editJournalModal" class="modal" style="display: none;">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h3>编辑工作日志</h3>-->
+<!--                <span class="modal-close" onclick="closeEditModal()">&times;</span>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <form id="editJournalForm" class="journal-form">-->
+<!--                    <input type="hidden" id="edit_jl_id">-->
+<!--                    <div class="form-item full">-->
+<!--                        <label>标题 <span style="color: red;">*</span></label>-->
+<!--                        <input id="edit_jl_title" placeholder="请输入日志标题" required>-->
+<!--                    </div>-->
+<!--                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">-->
+<!--                        <div class="form-item">-->
+<!--                            <label>日期 <span style="color: red;">*</span></label>-->
+<!--                            <input id="edit_jl_logDate" type="date" required>-->
+<!--                        </div>-->
+<!--                        <div class="form-item">-->
+<!--                            <label>类型 <span style="color: red;">*</span></label>-->
+<!--                            <select id="edit_jl_viewType" required>-->
+<!--                                <option value="Day">日报</option>-->
+<!--                                <option value="Week">周报</option>-->
+<!--                                <option value="Month">月报</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                        <div class="form-item">-->
+<!--                            <label>心情</label>-->
+<!--                            <select id="edit_jl_mood">-->
+<!--                                <option value="">无</option>-->
+<!--                                <option value="Happy">😊 开心</option>-->
+<!--                                <option value="Productive">💪 高效</option>-->
+<!--                                <option value="Focused">🎯 专注</option>-->
+<!--                                <option value="Satisfied">✨ 满意</option>-->
+<!--                                <option value="Accomplished">🏆 成就感</option>-->
+<!--                                <option value="Neutral">😐 平静</option>-->
+<!--                                <option value="Tired">😴 疲惫</option>-->
+<!--                                <option value="Frustrated">😤 受挫</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="form-item full">-->
+<!--                        <label>摘要</label>-->
+<!--                        <input id="edit_jl_summary" placeholder="一句话概括本次日志内容（可选）">-->
+<!--                    </div>-->
+<!--                    <div class="form-item full">-->
+<!--                        <label>内容 <span style="color: red;">*</span></label>-->
+<!--                        <textarea id="edit_jl_content" placeholder="详细记录工作内容..." style="min-height: 150px;" required></textarea>-->
+<!--                    </div>-->
+<!--                    <div class="form-item full">-->
+<!--                        <label>关联任务ID</label>-->
+<!--                        <input id="edit_jl_taskId" type="number" placeholder="输入关联的任务ID（可选）" min="1">-->
+<!--                    </div>-->
+<!--                    <div class="journal-actions full" style="justify-content:center;">-->
+<!--                        <button type="button" class="btn-sm btn-wide" id="edit_jl_save">保存修改</button>-->
+<!--                        <button type="button" class="btn-secondary btn-wide" onclick="closeEditModal()">取消</button>-->
+<!--                    </div>-->
+<!--                </form>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
-    <!-- 修改历史模态框 -->
-    <div id="historyModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>修改历史</h3>
-                <span class="modal-close" onclick="closeHistoryModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="historyContent">
-                    <div class="loading">加载中...</div>
-                </div>
-            </div>
-        </div>
-    </div>
+<!--    &lt;!&ndash; 修改历史模态框 &ndash;&gt;-->
+<!--    <div id="historyModal" class="modal" style="display: none;">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h3>修改历史</h3>-->
+<!--                <span class="modal-close" onclick="closeHistoryModal()">&times;</span>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div id="historyContent">-->
+<!--                    <div class="loading">加载中...</div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
-    <!-- 评论模态框 -->
-    <div id="commentsModal" class="modal" style="display: none;">
-        <div class="modal-content" style="max-width: 800px;">
-            <div class="modal-header">
-                <h3>💬 评论</h3>
-                <span class="modal-close" onclick="closeCommentsModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="commentsContainer"></div>
-            </div>
-        </div>
-    </div>
+<!--    &lt;!&ndash; 评论模态框 &ndash;&gt;-->
+<!--    <div id="commentsModal" class="modal" style="display: none;">-->
+<!--        <div class="modal-content" style="max-width: 800px;">-->
+<!--            <div class="modal-header">-->
+<!--                <h3>评论</h3>-->
+<!--                <span class="modal-close" onclick="closeCommentsModal()">&times;</span>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <div id="commentsContainer"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <script id="mockTasks" type="application/json">
     [
@@ -614,16 +614,16 @@
         async function loadEntries(){
             try {
                 if (window.API && typeof window.API.getJournals === 'function') {
-                    console.log('🔄 使用真实API获取日志列表');
+                    console.log('使用真实API获取日志列表');
                     const resp = await window.API.getJournals({ page: 1, pageSize: 100 });
-                    console.log('✅ 获取日志成功:', resp);
+                    console.log('获取日志成功:', resp);
                     return resp.list || [];
                 }
                 // 回退到本地存储
-                console.log('⚠️ API不可用，使用本地存储');
+                console.log('⚠API不可用，使用本地存储');
                 return JSON.parse(localStorage.getItem('journalEntries')||'[]');
             } catch(e) { 
-                console.error('❌ 加载日志失败:', e);
+                console.error('加载日志失败:', e);
                 return JSON.parse(localStorage.getItem('journalEntries')||'[]');
             }
         }
@@ -737,17 +737,17 @@
                         \
                         <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; overflow-x: hidden; min-height: 0; padding-right: 4px;">\
                             '+ (todaySummary ? '<div class="entry-content-scrollable summary-scroll" style="background: #fff8dc; padding: 14px; border-radius: 8px; border-left: 3px solid #ffa500; max-height: 220px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #d2691e; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">📝 今日总结</strong>\
+                                <strong style="color: #d2691e; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">今日总结</strong>\
                                 <div style="line-height: 1.9; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 6px; font-size: 13px;">'+ escapeHtml(todaySummary) +'</div>\
                             </div>' : '') +'\
                             \
                             '+ (tomorrowPlan ? '<div class="entry-content-scrollable plan-scroll" style="background: #e6f3ff; padding: 14px; border-radius: 8px; border-left: 3px solid #4682b4; max-height: 220px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #4682b4; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">📋 明日计划</strong>\
+                                <strong style="color: #4682b4; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">明日计划</strong>\
                                 <div style="line-height: 1.9; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 6px; font-size: 13px;">'+ escapeHtml(tomorrowPlan) +'</div>\
                             </div>' : '') +'\
                             \
                             '+ (helpNeeded ? '<div class="entry-content-scrollable help-scroll" style="background: #ffe6e6; padding: 14px; border-radius: 8px; border-left: 3px solid #dc143c; max-height: 220px; overflow-y: auto; overflow-x: hidden; flex-shrink: 0;">\
-                                <strong style="color: #dc143c; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">🆘 需要帮助</strong>\
+                                <strong style="color: #dc143c; display: block; margin-bottom: 10px; font-size: 14px; font-weight: 600;">需要帮助</strong>\
                                 <div style="line-height: 1.9; color: #333; white-space: pre-wrap; word-wrap: break-word; word-break: break-word; padding-right: 6px; font-size: 13px;">'+ escapeHtml(helpNeeded) +'</div>\
                             </div>' : '') +'\
                             \
@@ -758,10 +758,7 @@
                         </div>\
                         \
                         <div class="entry-actions" style="flex-shrink: 0; margin-top: 12px; padding-top: 12px; border-top: 2px solid #ffe8cf; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap;">\
-                            <button class="btn-sm" onclick="showJournalComments(\''+ entryId +'\')" style="background: linear-gradient(135deg, #32cd32, #90ee90); padding: 8px 16px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(50,205,50,0.3); transition: all 0.2s;">💬 评论</button>\
-                            <button class="btn-sm" onclick="editJournalEntry(\''+ entryId +'\')" style="background: linear-gradient(135deg, #4682b4, #5a9fd4); padding: 8px 16px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(70,130,180,0.3); transition: all 0.2s;">✏️ 编辑</button>\
                             <button class="btn-outline" onclick="deleteJournalEntry(\''+ entryId +'\')" style="border: 2px solid #dc143c; color: #dc143c; background: white; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s;">🗑️ 删除</button>\
-                            '+ (hasHistory ? '<button class="btn-info" onclick="showModificationHistory(\''+ entryId +'\')" style="background: linear-gradient(135deg, #9370db, #b19cd9); padding: 8px 16px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(147,112,219,0.3); transition: all 0.2s;">📜 历史</button>' : '') +'\
                         </div>\
                     </div>';
                 }).join('');
@@ -812,23 +809,23 @@
                 taskId: taskIds
             };
             
-            console.log('📝 准备提交日志:', entry);
+            console.log('准备提交日志:', entry);
             
             try {
                 if (window.API && typeof window.API.createJournal === 'function') {
-                    console.log('🔄 使用真实API创建日志');
+                    console.log('使用真实API创建日志');
                     var result = await window.API.createJournal(entry);
-                    console.log('✅ 日志创建成功:', result);
+                    console.log('日志创建成功:', result);
                     
                     // 检查返回格式：{ "ok": true, "id": "J-001" }
                     if (result && result.ok && result.id) {
-                        alert('✅ 日志保存成功！\n日志ID: ' + result.id);
+                        alert('日志保存成功！\n日志ID: ' + result.id);
                     } else {
-                        alert('✅ 日志保存成功！');
+                        alert('日志保存成功！');
                     }
                 } else {
                     // 回退到本地存储
-                    console.log('⚠️ API不可用，使用本地存储');
+                    console.log('⚠API不可用，使用本地存储');
                     var list = await loadEntries();
                     list.unshift(Object.assign(entry, {
                         ts: Date.now(), 
@@ -837,7 +834,7 @@
                         updatedAt: new Date().toISOString()
                     }));
                     saveEntries(list);
-                    alert('✅ 日志保存成功（本地）！');
+                    alert('日志保存成功（本地）！');
                 }
                 
                 // 清空表单
@@ -851,8 +848,8 @@
                 await renderEntries();
                 
             } catch(error) {
-                console.error('❌ 保存日志失败:', error);
-                alert('❌ 保存失败：' + (error.message || '请检查网络连接后重试'));
+                console.error('保存日志失败:', error);
+                alert('保存失败：' + (error.message || '请检查网络连接后重试'));
             }
         });
         
@@ -959,49 +956,49 @@
         // 全局变量存储当前编辑的日志条目
         window.__currentEditingEntry = null;
         
-        // 编辑日志条目
-        window.editJournalEntry = async function(entryId) {
-            try {
-                const list = await loadEntries();
-                const entry = list.find(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
-                
-                if (!entry) {
-                    alert('未找到该日志条目');
-                    return;
-                }
-                
-                // 保存当前编辑的条目
-                window.__currentEditingEntry = entry;
-                
-                // 填充编辑表单 - 支持新字段
-                document.getElementById('edit_jl_id').value = entryId;
-                document.getElementById('edit_jl_title').value = entry.title || '';
-                document.getElementById('edit_jl_logDate').value = entry.logDate || entry.date || '';
-                document.getElementById('edit_jl_viewType').value = entry.viewType || 'Day';
-                document.getElementById('edit_jl_mood').value = entry.mood || '';
-                document.getElementById('edit_jl_summary').value = entry.summary || '';
-                document.getElementById('edit_jl_content').value = entry.content || '';
-                document.getElementById('edit_jl_taskId').value = entry.taskId || '';
-                
-                // 显示模态框
-                document.getElementById('editJournalModal').style.display = 'block';
-                
-                // 聚焦到标题输入框
-                setTimeout(() => {
-                    document.getElementById('edit_jl_title').focus();
-                }, 100);
-                
-            } catch(error) {
-                console.error('加载日志条目失败:', error);
-                alert('加载日志条目失败');
-            }
-        };
-        
-        // 关闭编辑模态框
-        window.closeEditModal = function() {
-            document.getElementById('editJournalModal').style.display = 'none';
-            window.__currentEditingEntry = null;
-        };
+        // // 编辑日志条目
+        // window.editJournalEntry = async function(entryId) {
+        //     try {
+        //         const list = await loadEntries();
+        //         const entry = list.find(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
+        //
+        //         if (!entry) {
+        //             alert('未找到该日志条目');
+        //             return;
+        //         }
+        //
+        //         // 保存当前编辑的条目
+        //         window.__currentEditingEntry = entry;
+        //
+        //         // 填充编辑表单 - 支持新字段
+        //         document.getElementById('edit_jl_id').value = entryId;
+        //         document.getElementById('edit_jl_title').value = entry.title || '';
+        //         document.getElementById('edit_jl_logDate').value = entry.logDate || entry.date || '';
+        //         document.getElementById('edit_jl_viewType').value = entry.viewType || 'Day';
+        //         document.getElementById('edit_jl_mood').value = entry.mood || '';
+        //         document.getElementById('edit_jl_summary').value = entry.summary || '';
+        //         document.getElementById('edit_jl_content').value = entry.content || '';
+        //         document.getElementById('edit_jl_taskId').value = entry.taskId || '';
+        //
+        //         // 显示模态框
+        //         document.getElementById('editJournalModal').style.display = 'block';
+        //
+        //         // 聚焦到标题输入框
+        //         setTimeout(() => {
+        //             document.getElementById('edit_jl_title').focus();
+        //         }, 100);
+        //
+        //     } catch(error) {
+        //         console.error('加载日志条目失败:', error);
+        //         alert('加载日志条目失败');
+        //     }
+        // };
+        //
+        // // 关闭编辑模态框
+        // window.closeEditModal = function() {
+        //     document.getElementById('editJournalModal').style.display = 'none';
+        //     window.__currentEditingEntry = null;
+        // };
         
         // 删除日志条目
         window.deleteJournalEntry = async function(entryId) {
@@ -1034,227 +1031,227 @@
             }
         };
         
-        // 保存编辑的日志
-        document.getElementById('edit_jl_save')?.addEventListener('click', async function() {
-            const entryId = document.getElementById('edit_jl_id').value;
-            
-            // 获取所有表单字段
-            const title = document.getElementById('edit_jl_title').value.trim();
-            const content = document.getElementById('edit_jl_content').value.trim();
-            const logDate = document.getElementById('edit_jl_logDate').value;
-            const viewType = document.getElementById('edit_jl_viewType').value;
-            const mood = document.getElementById('edit_jl_mood').value;
-            const summary = document.getElementById('edit_jl_summary').value.trim();
-            const taskId = document.getElementById('edit_jl_taskId').value;
-            
-            // 必填项校验
-            if (!title) {
-                alert('请填写日志标题');
-                return;
-            }
-            if (!content) {
-                alert('请填写日志内容');
-                return;
-            }
-            if (!logDate) {
-                alert('请选择日志日期');
-                return;
-            }
-            if (!viewType) {
-                alert('请选择日志类型');
-                return;
-            }
-            
-            // 按照后端接口格式构建更新数据
-            const updatedEntry = {
-                title: title,
-                content: content,
-                logDate: logDate,
-                viewType: viewType,
-                mood: mood || null,
-                summary: summary || null,
-                taskId: taskId ? parseInt(taskId) : null
-            };
-            
-            console.log('📝 准备更新日志:', updatedEntry);
-            
-            try {
-                if (window.API && typeof window.API.updateJournal === 'function') {
-                    console.log('🔄 使用真实API更新日志');
-                    await window.API.updateJournal(entryId, updatedEntry);
-                    console.log('✅ 日志更新成功');
-                } else {
-                    // 本地存储更新
-                    console.log('⚠️ API不可用，使用本地存储');
-                    const list = await loadEntries();
-                    const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
-                    if (index > -1) {
-                        // 保留原有的时间戳信息，只更新内容
-                        list[index] = Object.assign(list[index], updatedEntry, {
-                            updatedAt: new Date().toISOString()
-                        });
-                        saveEntries(list);
-                    }
-                }
-                
-                // 关闭模态框
-                closeEditModal();
-                
-                // 重新渲染日志列表
-                await renderEntries();
-                alert('✅ 修改成功！');
-                
-            } catch(error) {
-                console.error('❌ 保存修改失败:', error);
-                alert('❌ 保存失败：' + (error.message || '请稍后重试'));
-            }
-        });
+        // // 保存编辑的日志
+        // document.getElementById('edit_jl_save')?.addEventListener('click', async function() {
+        //     const entryId = document.getElementById('edit_jl_id').value;
+        //
+        //     // 获取所有表单字段
+        //     const title = document.getElementById('edit_jl_title').value.trim();
+        //     const content = document.getElementById('edit_jl_content').value.trim();
+        //     const logDate = document.getElementById('edit_jl_logDate').value;
+        //     const viewType = document.getElementById('edit_jl_viewType').value;
+        //     const mood = document.getElementById('edit_jl_mood').value;
+        //     const summary = document.getElementById('edit_jl_summary').value.trim();
+        //     const taskId = document.getElementById('edit_jl_taskId').value;
+        //
+        //     // 必填项校验
+        //     if (!title) {
+        //         alert('请填写日志标题');
+        //         return;
+        //     }
+        //     if (!content) {
+        //         alert('请填写日志内容');
+        //         return;
+        //     }
+        //     if (!logDate) {
+        //         alert('请选择日志日期');
+        //         return;
+        //     }
+        //     if (!viewType) {
+        //         alert('请选择日志类型');
+        //         return;
+        //     }
+        //
+        //     // 按照后端接口格式构建更新数据
+        //     const updatedEntry = {
+        //         title: title,
+        //         content: content,
+        //         logDate: logDate,
+        //         viewType: viewType,
+        //         mood: mood || null,
+        //         summary: summary || null,
+        //         taskId: taskId ? parseInt(taskId) : null
+        //     };
+        //
+        //     console.log('准备更新日志:', updatedEntry);
+        //
+        //     try {
+        //         if (window.API && typeof window.API.updateJournal === 'function') {
+        //             console.log('使用真实API更新日志');
+        //             await window.API.updateJournal(entryId, updatedEntry);
+        //             console.log('日志更新成功');
+        //         } else {
+        //             // 本地存储更新
+        //             console.log('⚠API不可用，使用本地存储');
+        //             const list = await loadEntries();
+        //             const index = list.findIndex(e => (e.id || ('entry-' + list.indexOf(e))) === entryId);
+        //             if (index > -1) {
+        //                 // 保留原有的时间戳信息，只更新内容
+        //                 list[index] = Object.assign(list[index], updatedEntry, {
+        //                     updatedAt: new Date().toISOString()
+        //                 });
+        //                 saveEntries(list);
+        //             }
+        //         }
+        //
+        //         // 关闭模态框
+        //         closeEditModal();
+        //
+        //         // 重新渲染日志列表
+        //         await renderEntries();
+        //         alert('修改成功！');
+        //
+        //     } catch(error) {
+        //         console.error('保存修改失败:', error);
+        //         alert('保存失败：' + (error.message || '请稍后重试'));
+        //     }
+        // });
+        //
+        // // 点击模态框外部关闭
+        // document.getElementById('editJournalModal')?.addEventListener('click', function(e) {
+        //     if (e.target === this) {
+        //         closeEditModal();
+        //     }
+        // });
+        //
+        // // 按ESC键关闭模态框
+        // document.addEventListener('keydown', function(e) {
+        //     if (e.key === 'Escape') {
+        //         if (document.getElementById('editJournalModal').style.display !== 'none') {
+        //             closeEditModal();
+        //         }
+        //         if (document.getElementById('historyModal').style.display !== 'none') {
+        //             closeHistoryModal();
+        //         }
+        //         if (document.getElementById('commentsModal').style.display !== 'none') {
+        //             closeCommentsModal();
+        //         }
+        //     }
+        // });
         
-        // 点击模态框外部关闭
-        document.getElementById('editJournalModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeEditModal();
-            }
-        });
-        
-        // 按ESC键关闭模态框
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                if (document.getElementById('editJournalModal').style.display !== 'none') {
-                    closeEditModal();
-                }
-                if (document.getElementById('historyModal').style.display !== 'none') {
-                    closeHistoryModal();
-                }
-                if (document.getElementById('commentsModal').style.display !== 'none') {
-                    closeCommentsModal();
-                }
-            }
-        });
-        
-        // 显示修改历史
-        window.showModificationHistory = async function(entryId) {
-            try {
-                document.getElementById('historyModal').style.display = 'block';
-                document.getElementById('historyContent').innerHTML = '<div class="loading">加载中...</div>';
-                
-                // 模拟获取修改历史记录
-                const historyRecords = await getJournalHistory(entryId);
-                
-                if (!historyRecords || historyRecords.length === 0) {
-                    document.getElementById('historyContent').innerHTML = '<div class="loading">暂无修改历史</div>';
-                    return;
-                }
-                
-                // 构建历史记录
-                var historyHtml = '<div class="history-timeline">';
-                
-                // 按时间倒序显示历史记录
-                historyRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                
-                historyRecords.forEach((record, index) => {
-                    historyHtml += '<div class="history-item">';
-                    historyHtml += '<div class="history-time">';
-                    historyHtml += '<i class="fas fa-clock"></i> ';
-                    historyHtml += formatFullTime(record.timestamp);
-                    if (record.author) {
-                        historyHtml += ' <span class="history-author">(' + escapeHtml(record.author) + ')</span>';
-                    }
-                    historyHtml += '</div>';
-                    
-                    // 显示修改后的完整日志内容
-                    historyHtml += '<div class="history-content">';
-                    
-                    if (record.snapshot) {
-                        // 显示完整的日志快照
-                        historyHtml += '<div class="journal-snapshot">';
-                        historyHtml += '<div class="snapshot-title">标题：' + escapeHtml(record.snapshot.title || '无标题') + '</div>';
-                        if (record.snapshot.summary) {
-                            historyHtml += '<div class="snapshot-summary">摘要：' + escapeHtml(record.snapshot.summary) + '</div>';
-                        }
-                        historyHtml += '<div class="snapshot-content">内容：<div class="content-text">' + escapeHtml(record.snapshot.content || '') + '</div></div>';
-                        historyHtml += '</div>';
-                    } else {
-                        // 兼容旧格式（如果没有snapshot字段）
-                        historyHtml += '<div class="journal-snapshot">';
-                        historyHtml += '<div class="snapshot-description">记录创建或修改</div>';
-                        historyHtml += '</div>';
-                    }
-                    
-                    historyHtml += '</div>';
-                    historyHtml += '</div>';
-                });
-                
-                // 结束历史记录
-                if (entry.history && Array.isArray(entry.history)) {
-                    entry.history.reverse().forEach(function(historyItem, index) {
-                        historyHtml += '<div class="history-item">';
-                        historyHtml += '<div class="history-time">修改 #' + (entry.history.length - index) + ' · ' + formatFullTime(historyItem.timestamp) + '</div>';
-                        historyHtml += '<div class="history-changes">';
-                        
-                        if (historyItem.changes) {
-                            Object.keys(historyItem.changes).forEach(function(field) {
-                                var change = historyItem.changes[field];
-                                historyHtml += '<div class="history-change-item">';
-                                historyHtml += '<div class="history-change-label">修改了' + getFieldDisplayName(field) + '：</div>';
-                                historyHtml += '<div style="margin-top: 4px;"><span style="color: #d32f2f;">- ' + escapeHtml(change.old || '') + '</span></div>';
-                                historyHtml += '<div><span style="color: #388e3c;">+ ' + escapeHtml(change.new || '') + '</span></div>';
-                                historyHtml += '</div>';
-                            });
-                        }
-                        
-                        historyHtml += '</div>';
-                        historyHtml += '</div>';
-                    });
-                }
-                
-                historyHtml += '</div>';
-                
-                // 如果没有修改历史，显示提示
-                if (!entry.updatedAt || entry.updatedAt === entry.createdAt) {
-                    historyHtml = '<div class="loading">该日志尚未被修改过</div>';
-                }
-                
-                document.getElementById('historyContent').innerHTML = historyHtml;
-                
-            } catch(error) {
-                console.error('加载修改历史失败:', error);
-                document.getElementById('historyContent').innerHTML = '<div class="loading">加载失败</div>';
-            }
-        };
-        
-        // 关闭历史模态框
-        window.closeHistoryModal = function() {
-            document.getElementById('historyModal').style.display = 'none';
-        };
+        // // 显示修改历史
+        // window.showModificationHistory = async function(entryId) {
+        //     try {
+        //         document.getElementById('historyModal').style.display = 'block';
+        //         document.getElementById('historyContent').innerHTML = '<div class="loading">加载中...</div>';
+        //
+        //         // 模拟获取修改历史记录
+        //         const historyRecords = await getJournalHistory(entryId);
+        //
+        //         if (!historyRecords || historyRecords.length === 0) {
+        //             document.getElementById('historyContent').innerHTML = '<div class="loading">暂无修改历史</div>';
+        //             return;
+        //         }
+        //
+        //         // 构建历史记录
+        //         var historyHtml = '<div class="history-timeline">';
+        //
+        //         // 按时间倒序显示历史记录
+        //         historyRecords.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        //
+        //         historyRecords.forEach((record, index) => {
+        //             historyHtml += '<div class="history-item">';
+        //             historyHtml += '<div class="history-time">';
+        //             historyHtml += '<i class="fas fa-clock"></i> ';
+        //             historyHtml += formatFullTime(record.timestamp);
+        //             if (record.author) {
+        //                 historyHtml += ' <span class="history-author">(' + escapeHtml(record.author) + ')</span>';
+        //             }
+        //             historyHtml += '</div>';
+        //
+        //             // 显示修改后的完整日志内容
+        //             historyHtml += '<div class="history-content">';
+        //
+        //             if (record.snapshot) {
+        //                 // 显示完整的日志快照
+        //                 historyHtml += '<div class="journal-snapshot">';
+        //                 historyHtml += '<div class="snapshot-title">标题：' + escapeHtml(record.snapshot.title || '无标题') + '</div>';
+        //                 if (record.snapshot.summary) {
+        //                     historyHtml += '<div class="snapshot-summary">摘要：' + escapeHtml(record.snapshot.summary) + '</div>';
+        //                 }
+        //                 historyHtml += '<div class="snapshot-content">内容：<div class="content-text">' + escapeHtml(record.snapshot.content || '') + '</div></div>';
+        //                 historyHtml += '</div>';
+        //             } else {
+        //                 // 兼容旧格式（如果没有snapshot字段）
+        //                 historyHtml += '<div class="journal-snapshot">';
+        //                 historyHtml += '<div class="snapshot-description">记录创建或修改</div>';
+        //                 historyHtml += '</div>';
+        //             }
+        //
+        //             historyHtml += '</div>';
+        //             historyHtml += '</div>';
+        //         });
+        //
+        //         // 结束历史记录
+        //         if (entry.history && Array.isArray(entry.history)) {
+        //             entry.history.reverse().forEach(function(historyItem, index) {
+        //                 historyHtml += '<div class="history-item">';
+        //                 historyHtml += '<div class="history-time">修改 #' + (entry.history.length - index) + ' · ' + formatFullTime(historyItem.timestamp) + '</div>';
+        //                 historyHtml += '<div class="history-changes">';
+        //
+        //                 if (historyItem.changes) {
+        //                     Object.keys(historyItem.changes).forEach(function(field) {
+        //                         var change = historyItem.changes[field];
+        //                         historyHtml += '<div class="history-change-item">';
+        //                         historyHtml += '<div class="history-change-label">修改了' + getFieldDisplayName(field) + '：</div>';
+        //                         historyHtml += '<div style="margin-top: 4px;"><span style="color: #d32f2f;">- ' + escapeHtml(change.old || '') + '</span></div>';
+        //                         historyHtml += '<div><span style="color: #388e3c;">+ ' + escapeHtml(change.new || '') + '</span></div>';
+        //                         historyHtml += '</div>';
+        //                     });
+        //                 }
+        //
+        //                 historyHtml += '</div>';
+        //                 historyHtml += '</div>';
+        //             });
+        //         }
+        //
+        //         historyHtml += '</div>';
+        //
+        //         // 如果没有修改历史，显示提示
+        //         if (!entry.updatedAt || entry.updatedAt === entry.createdAt) {
+        //             historyHtml = '<div class="loading">该日志尚未被修改过</div>';
+        //         }
+        //
+        //         document.getElementById('historyContent').innerHTML = historyHtml;
+        //
+        //     } catch(error) {
+        //         console.error('加载修改历史失败:', error);
+        //         document.getElementById('historyContent').innerHTML = '<div class="loading">加载失败</div>';
+        //     }
+        // };
+        //
+        // // 关闭历史模态框
+        // window.closeHistoryModal = function() {
+        //     document.getElementById('historyModal').style.display = 'none';
+        // };
         
         // 显示日志评论
-        window.showJournalComments = function(entryId) {
-            try {
-                var modal = document.getElementById('commentsModal');
-                if (!modal) {
-                    console.error('评论模态框不存在');
-                    return;
-                }
-                
-                modal.style.display = 'block';
-                
-                // 使用评论组件渲染评论
-                if (window.CommentsWidget && typeof window.CommentsWidget.renderComments === 'function') {
-                    window.CommentsWidget.renderComments('commentsContainer', 'log', entryId);
-                } else {
-                    document.getElementById('commentsContainer').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">评论组件加载失败</div>';
-                }
-            } catch(error) {
-                console.error('显示评论失败:', error);
-                alert('显示评论失败：' + (error.message || '请稍后重试'));
-            }
-        };
+        // window.showJournalComments = function(entryId) {
+        //     try {
+        //         var modal = document.getElementById('commentsModal');
+        //         if (!modal) {
+        //             console.error('评论模态框不存在');
+        //             return;
+        //         }
+        //
+        //         modal.style.display = 'block';
+        //
+        //         // 使用评论组件渲染评论
+        //         if (window.CommentsWidget && typeof window.CommentsWidget.renderComments === 'function') {
+        //             window.CommentsWidget.renderComments('commentsContainer', 'log', entryId);
+        //         } else {
+        //             document.getElementById('commentsContainer').innerHTML = '<div style="text-align: center; color: #999; padding: 20px;">评论组件加载失败</div>';
+        //         }
+        //     } catch(error) {
+        //         console.error('显示评论失败:', error);
+        //         alert('显示评论失败：' + (error.message || '请稍后重试'));
+        //     }
+        // };
         
         // 关闭评论模态框
-        window.closeCommentsModal = function() {
-            document.getElementById('commentsModal').style.display = 'none';
-        };
+        // window.closeCommentsModal = function() {
+        //     document.getElementById('commentsModal').style.display = 'none';
+        // };
         
         // 获取字段显示名称
         function getFieldDisplayName(field) {
@@ -1363,11 +1360,11 @@
         });
         
         // 点击评论模态框外部关闭
-        document.getElementById('commentsModal')?.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeCommentsModal();
-            }
-        });
+        // document.getElementById('commentsModal')?.addEventListener('click', function(e) {
+        //     if (e.target === this) {
+        //         closeCommentsModal();
+        //     }
+        // });
 
         // 虚拟任务
         async function loadTasks() {
