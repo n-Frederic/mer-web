@@ -99,8 +99,8 @@
         }
         .important-item:hover {
             border-color: #ff8a00;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 16px rgba(255,138,0,0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(255,138,0,0.1);
         }
         .important-item:hover::before {
             opacity: 1;
@@ -121,7 +121,7 @@
         @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
         .stat-card { background: linear-gradient(135deg, var(--color-cream) 0%, var(--color-peach) 100%); border-radius: 12px; padding: 20px; text-align: center; border: 2px solid #ffd3a1; transition: all 0.3s; }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 6px 16px rgba(255,138,0,0.3); }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(255,138,0,0.15); }
         .stat-number { font-size: 36px; font-weight: 700; color: var(--color-primary); margin-bottom: 8px; }
         .stat-label { font-size: 14px; color: #7a5a33; font-weight: 500; }
         .stat-icon { font-size: 24px; margin-bottom: 8px; }
@@ -177,8 +177,8 @@
         .calendar-header button:hover {
             background: #ffbe78;
             color: #fff;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(255,138,0,0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(255,138,0,0.1);
         }
         .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 12px; }
         .weekday {
@@ -292,12 +292,12 @@
         .day-modal-header { background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%); color: white; padding: 24px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
         .day-modal-header h2 { margin: 0; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 22px; }
         .day-modal-close { background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; padding: 0; width: 32px; height: 32px; line-height: 28px; border-radius: 50%; transition: all 0.3s; }
-        .day-modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
+        .day-modal-close:hover { background: rgba(255,255,255,0.2); transform: rotate(45deg); }
         .day-modal-body { padding: 24px; max-height: 70vh; overflow-y: auto; }
         .day-section { margin-bottom: 24px; }
         .day-section-title { color: #a55b00; font-size: 18px; font-weight: 600; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #ffd3a1; display: flex; align-items: center; gap: 8px; }
         .detail-card { background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%); border: 2px solid #ffd3a1; border-radius: 12px; padding: 16px; margin-bottom: 12px; transition: all 0.3s; }
-        .detail-card:hover { border-color: #ff8a00; box-shadow: 0 4px 12px rgba(255,138,0,0.2); transform: translateX(4px); }
+        .detail-card:hover { border-color: #ff8a00; box-shadow: 0 2px 6px rgba(255,138,0,0.1); transform: translateX(2px); }
         .detail-card-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
         .detail-title { font-size: 16px; font-weight: 600; color: #333; flex: 1; }
         .detail-badges { display: flex; gap: 8px; align-items: center; }
@@ -315,7 +315,7 @@
         .progress-bar-wrapper { height: 8px; background: #ffd3a1; border-radius: 4px; overflow: hidden; }
         .progress-bar-inner { height: 100%; background: linear-gradient(90deg, #ff8a00 0%, #ffbe78 100%); transition: width 0.3s; }
         .log-card { background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border: 2px solid #81c784; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-        .log-card:hover { border-color: #4caf50; box-shadow: 0 4px 12px rgba(76,175,80,0.2); }
+        .log-card:hover { border-color: #4caf50; box-shadow: 0 2px 6px rgba(76,175,80,0.1); }
         .log-title { font-size: 16px; font-weight: 600; color: #2e7d32; margin-bottom: 8px; }
         .log-meta { font-size: 13px; color: #558b2f; }
         .empty-state { text-align: center; padding: 40px; color: #999; }
@@ -1375,8 +1375,8 @@
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes slideInRight {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
             `;
             document.head.appendChild(style);
@@ -1420,8 +1420,8 @@
             const style = document.createElement('style');
             style.textContent = `
                 @keyframes slideInRight {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
+                    from { opacity: 0; }
+                    to { opacity: 1; }
                 }
             `;
             document.head.appendChild(style);

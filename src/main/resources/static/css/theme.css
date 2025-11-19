@@ -380,20 +380,20 @@ body::before {
     font-size: 18px;
     position: relative;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: gentle-bounce 3s ease-in-out infinite;
+    animation: gentle-float 3s ease-in-out infinite;
 }
 
 .logo:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 
-        0 12px 25px rgba(255, 138, 0, 0.4),
-        0 6px 15px rgba(255, 138, 0, 0.3),
+    transform: scale(1.05);
+    box-shadow:
+        0 8px 20px rgba(255, 138, 0, 0.3),
+        0 4px 10px rgba(255, 138, 0, 0.2),
         inset 0 2px 4px rgba(255, 255, 255, 0.4);
 }
 
-@keyframes gentle-bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
+@keyframes gentle-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-2px) scale(1.01); }
 }
 
 /* 可爱的小尺寸按钮样式 */
@@ -534,8 +534,8 @@ body::before {
 }
 
 .avatar:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 0 6px 20px rgba(255, 138, 0, 0.4);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(255, 138, 0, 0.3);
 }
 
 
@@ -789,7 +789,7 @@ th {
 /* 动画增强 */
 @keyframes float {
     0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-5px); }
+    50% { transform: translateY(-3px); }
 }
 
 @keyframes shimmer {
@@ -799,11 +799,11 @@ th {
 
 /* 仅在非登录页面添加浮动动画 */
 body:not(.login-page) .entry:nth-child(odd) {
-    animation: float 8s ease-in-out infinite;
+    animation: gentle-float 8s ease-in-out infinite;
 }
 
 body:not(.login-page) .entry:nth-child(even) {
-    animation: float 8s ease-in-out infinite reverse;
+    animation: gentle-float 8s ease-in-out infinite reverse;
 }
 
 /* 登录页面移除所有浮动动画 */
@@ -826,7 +826,7 @@ body.login-page .layout::after {
     border-radius: 50%;
     background: radial-gradient(circle, var(--color-primary-2), var(--color-primary));
     opacity: 0.1;
-    animation: float 4s ease-in-out infinite;
+    animation: gentle-float 4s ease-in-out infinite;
 }
 
 .cute-decoration:nth-child(2) {
@@ -884,8 +884,8 @@ body.login-page .layout::after {
 }
 
 .profile-avatar:hover {
-    transform: scale(1.15) rotate(10deg);
-    box-shadow: 0 12px 30px rgba(255, 138, 0, 0.4);
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(255, 138, 0, 0.3);
 }
 
 .profile-avatar::before {
@@ -898,8 +898,8 @@ body.login-page .layout::after {
 }
 
 @keyframes twinkle {
-    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
-    50% { transform: scale(1.2) rotate(180deg); opacity: 1; }
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.1); opacity: 1; }
 }
 
 /* 个人资料标题 */
@@ -1090,7 +1090,7 @@ body.login-page .layout::after {
     opacity: 0.05;
     pointer-events: none;
     z-index: -1;
-    animation: cute-float 8s ease-in-out infinite;
+    animation: gentle-float 8s ease-in-out infinite;
 }
 
 .layout::before {
@@ -1106,20 +1106,20 @@ body.login-page .layout::after {
 }
 
 @keyframes cute-float {
-    0%, 100% { 
-        transform: translate(0, 0) rotate(0deg) scale(1); 
+    0%, 100% {
+        transform: translate(0, 0) scale(1);
         opacity: 0.05;
     }
-    25% { 
-        transform: translate(8px, -12px) rotate(45deg) scale(1.05); 
+    25% {
+        transform: translate(2px, -3px) scale(1.01);
         opacity: 0.08;
     }
-    50% { 
-        transform: translate(-6px, -20px) rotate(90deg) scale(0.95); 
+    50% {
+        transform: translate(-1px, -5px) scale(1.02);
         opacity: 0.03;
     }
-    75% { 
-        transform: translate(-12px, -8px) rotate(135deg) scale(1.1); 
+    75% {
+        transform: translate(-3px, -2px) scale(1.01);
         opacity: 0.07;
     }
 }
@@ -1238,17 +1238,17 @@ body.login-page .layout::after {
 
 /* 可爱的加载动画 */
 @keyframes bounce-in {
-    0% { 
-        transform: scale(0.3) rotate(-10deg); 
-        opacity: 0; 
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
     }
-    50% { 
-        transform: scale(1.05) rotate(5deg); 
-        opacity: 0.8; 
+    50% {
+        transform: scale(1.02);
+        opacity: 0.8;
     }
-    100% { 
-        transform: scale(1) rotate(0deg); 
-        opacity: 1; 
+    100% {
+        transform: scale(1);
+        opacity: 1;
     }
 }
 

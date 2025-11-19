@@ -266,13 +266,13 @@
             var bgColor = type === 'success' ? 'linear-gradient(135deg, #4caf50, #66bb6a)' : 'linear-gradient(135deg, #f44336, #ef5350)';
             
             var toast = document.createElement('div');
-            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: ' + bgColor + '; color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; font-size: 14px; animation: slideIn 0.3s ease;';
+            toast.style.cssText = 'position: fixed; top: 20px; right: 20px; background: ' + bgColor + '; color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 10000; font-size: 14px; animation: fadeIn 0.3s ease;';
             toast.textContent = message;
             
             document.body.appendChild(toast);
             
             setTimeout(function() {
-                toast.style.animation = 'slideOut 0.3s ease';
+                toast.style.animation = 'fadeOut 0.3s ease';
                 setTimeout(function() {
                     document.body.removeChild(toast);
                 }, 300);
@@ -324,16 +324,16 @@
         var style = document.createElement('style');
         style.id = 'comments-widget-styles';
         style.textContent = '\
-            @keyframes slideIn {\
-                from { transform: translateX(100%); opacity: 0; }\
-                to { transform: translateX(0); opacity: 1; }\
+            @keyframes fadeIn {\
+                from { opacity: 0; }\
+                to { opacity: 1; }\
             }\
-            @keyframes slideOut {\
-                from { transform: translateX(0); opacity: 1; }\
-                to { transform: translateX(100%); opacity: 0; }\
+            @keyframes fadeOut {\
+                from { opacity: 1; }\
+                to { opacity: 0; }\
             }\
             .comment-item:hover {\
-                box-shadow: 0 4px 12px rgba(255, 138, 0, 0.15);\
+                box-shadow: 0 2px 8px rgba(255, 138, 0, 0.1);\
             }\
         ';
         document.head.appendChild(style);
