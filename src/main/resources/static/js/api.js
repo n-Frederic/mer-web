@@ -68,11 +68,11 @@
     var headers = Object.assign({}, authHeader());
     if(body !== undefined && body !== null) headers['Content-Type'] = 'application/json';
     
-    var res = await fetch(url, { 
-      method: method, 
-      headers: headers, 
-      body: body? JSON.stringify(body): undefined, 
-      cache: 'no-cache' 
+    var res = await fetch(url, {
+      method: method,
+      headers: headers,
+      body: body? JSON.stringify(body): undefined,
+      cache: 'no-cache'
     });
     
     // 处理认证失败
@@ -82,17 +82,17 @@
         var errorData = JSON.parse(errorText);
         
         // 清除无效的认证信息
-        try{ 
-          localStorage.removeItem('authToken'); 
-          localStorage.removeItem('currentUser'); 
+        try{
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('currentUser');
         }catch(e){}
         
         throw new Error(errorData.message || ('HTTP ' + res.status));
       } catch(parseError) {
         // 清除认证信息
-        try{ 
-          localStorage.removeItem('authToken'); 
-          localStorage.removeItem('currentUser'); 
+        try{
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('currentUser');
         }catch(e){}
         
         throw new Error('HTTP ' + res.status + ' - 认证失败');
@@ -120,14 +120,27 @@
     
     var ct = res.headers.get('content-type') || '';
     if(ct.indexOf('application/json') >= 0){
-      return await res.json();
+      try {
+        return await res.json();
+      } catch (jsonError) {
+        console.error('JSON解析错误:', jsonError);
+        // 如果JSON解析失败，尝试获取原始文本
+        try {
+          var text = await res.text();
+          console.error('原始响应文本:', text);
+          throw new Error('服务器响应格式错误: ' + jsonError.message);
+        } catch (textError) {
+          throw new Error('服务器响应格式错误: 无法解析响应');
+        }
+      }
     }
     
     var text = await res.text();
-    try{ 
-      return JSON.parse(text); 
-    }catch(e){ 
-      return text; 
+    try{
+      return JSON.parse(text);
+    }catch(e){
+      console.error('JSON解析失败，原始文本:', text);
+      return text;
     }
   }
 
@@ -954,6 +967,39 @@
       }).catch(function(error) {
         console.error('获取公司重要事项失败:', error);
         return [];
+      });
+    },
+
+    // 更新公司十大重要事项
+    updateImportantTasks: function(tasks) {
+      console.log('更新公司十大重要事项:', tasks);
+      
+      // 数据验证
+      if (!Array.isArray(tasks)) {
+        return Promise.reject(new Error('任务列表必须是数组'));
+      }
+      
+      if (tasks.length !== 10) {
+        return Promise.reject(new Error('必须提供10个重要事项'));
+      }
+      
+      // 验证每个任务都不为空
+      for (var i = 0; i < tasks.length; i++) {
+        if (!tasks[i] || typeof tasks[i] !== 'string' || tasks[i].trim() === '') {
+          return Promise.reject(new Error('第' + (i + 1) + '个事项不能为空'));
+        }
+      }
+      
+      // 确保使用正确的API路径
+      var url = base + '/api/company-tasks';
+      console.log('发送PUT请求到:', url);
+      
+      return http('PUT', url, { tasks: tasks }).then(function(res) {
+        console.log('公司重要事项更新成功:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('更新公司重要事项失败:', error);
+        throw error;
       });
     },
 

@@ -24,13 +24,96 @@
         .panel h3 { margin: 0 0 20px 0; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 24px; border-bottom: 3px solid #ffd3a1; padding-bottom: 12px; }
         
         /* 公司重要事项 */
-        .important-tasks { background: linear-gradient(135deg, #fff7ef 0%, #ffe8cf 100%); border: 2px solid #ffbe78; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-        .important-tasks h4 { color: #ff8a00; margin: 0 0 16px 0; font-size: 18px; display: flex; align-items: center; gap: 8px; }
-        .important-tasks h4 i { font-size: 20px; }
-        .important-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
-        .important-item { background: #fff; border: 1px solid #ffd3a1; border-radius: 8px; padding: 12px; font-size: 14px; color: #7a5a33; display: flex; align-items: center; gap: 8px; transition: all 0.3s; }
-        .important-item:hover { border-color: #ff8a00; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(255,138,0,0.2); }
-        .important-item i { color: #ff8a00; }
+        .important-tasks {
+            background: linear-gradient(135deg, #fff7ef 0%, #ffe8cf 100%);
+            border: 2px solid #ffbe78;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(255,138,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .important-tasks::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff8a00 0%, #ffbe78 50%, #ff8a00 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .important-tasks h4 {
+            color: #ff8a00;
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(255,138,0,0.1);
+        }
+        .important-tasks h4 i {
+            font-size: 22px;
+            background: linear-gradient(135deg, #ff8a00 0%, #ffbe78 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .important-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+        }
+        .important-item {
+            background: #fff;
+            border: 1px solid #ffd3a1;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 14px;
+            color: #7a5a33;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(255,138,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .important-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #ff8a00 0%, #ffbe78 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .important-item:hover {
+            border-color: #ff8a00;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(255,138,0,0.2);
+        }
+        .important-item:hover::before {
+            opacity: 1;
+        }
+        .important-item i {
+            color: #ff8a00;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .important-item span {
+            line-height: 1.4;
+            word-break: break-word;
+        }
         
         /* 统计卡片 */
         .stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px; }
@@ -46,22 +129,125 @@
         /* 日历样式 */
         .calendar-section { display: grid; grid-template-columns: 1fr 350px; gap: 24px; }
         @media (max-width: 1100px) { .calendar-section { grid-template-columns: 1fr; } }
-        .calendar { background: #fff; border-radius: 14px; padding: 20px; border: 2px solid #ffd3a1; }
-        .calendar-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-        .calendar-header h4 { color: #a55b00; margin: 0; font-size: 18px; }
-        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 8px; }
-        .weekday { text-align: center; padding: 8px; font-weight: 600; color: #ff8a00; font-size: 13px; }
-        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .day-cell { background: #fff7ef; border: 1px solid #ffd3a1; min-height: 80px; border-radius: 8px; padding: 6px; font-size: 13px; color: #7a5a33; position: relative; cursor: pointer; transition: all 0.2s; }
-        .day-cell:hover { background: #ffe9d2; border-color: #ff8a00; transform: scale(1.05); }
-        .day-cell.today { background: linear-gradient(135deg, #ffe8cf 0%, #ffd3a1 100%); border: 2px solid #ff8a00; font-weight: 700; }
-        .day-cell.other-month { background: #f5f5f5; color: #ccc; }
-        .day-number { font-weight: 600; margin-bottom: 4px; }
-        .day-indicators { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-        .indicator { width: 6px; height: 6px; border-radius: 50%; }
-        .indicator.task { background: #ff8a00; }
-        .indicator.log { background: #4CAF50; }
-        .indicator.deadline { background: #F44336; }
+        .calendar {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid #ffd3a1;
+            box-shadow: 0 4px 12px rgba(255,138,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .calendar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff8a00 0%, #ffbe78 50%, #ff8a00 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite;
+        }
+        .calendar-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ffd3a1;
+        }
+        .calendar-header h4 {
+            color: #a55b00;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(165,91,0,0.1);
+        }
+        .calendar-header button {
+            background: #fff;
+            border: 1px solid #ffd3a1;
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #a55b00;
+            font-weight: 500;
+        }
+        .calendar-header button:hover {
+            background: #ffbe78;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255,138,0,0.2);
+        }
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-bottom: 12px; }
+        .weekday {
+            text-align: center;
+            padding: 12px 8px;
+            font-weight: 600;
+            color: #ff8a00;
+            font-size: 14px;
+            background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%);
+            border-radius: 8px;
+            border: 1px solid #ffd3a1;
+        }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .day-cell {
+            background: #fff7ef;
+            border: 1px solid #ffd3a1;
+            min-height: 90px;
+            border-radius: 10px;
+            padding: 8px;
+            font-size: 13px;
+            color: #7a5a33;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(255,138,0,0.05);
+        }
+        .day-cell:hover {
+            background: #ffe9d2;
+            border-color: #ff8a00;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(255,138,0,0.15);
+        }
+        .day-cell.today {
+            background: linear-gradient(135deg, #ffe8cf 0%, #ffd3a1 100%);
+            border: 2px solid #ff8a00;
+            font-weight: 700;
+            box-shadow: 0 4px 8px rgba(255,138,0,0.2);
+        }
+        .day-cell.other-month {
+            background: #f5f5f5;
+            color: #ccc;
+            opacity: 0.6;
+        }
+        .day-number {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+        .day-indicators {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        .indicator.task {
+            background: linear-gradient(135deg, #ff8a00 0%, #ffbe78 100%);
+        }
+        .indicator.log {
+            background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+        }
+        .indicator.deadline {
+            background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+        }
         
         /* 侧边栏 */
         .sidebar-section { background: #fff; border-radius: 14px; padding: 20px; border: 2px solid #ffd3a1; }
@@ -163,7 +349,14 @@
         <!-- 公司重要事项 -->
         <div class="panel">
             <div class="important-tasks">
-                <h4><i class="fas fa-star"></i> 公司重要事项</h4>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h4 style="margin: 0;"><i class="fas fa-star"></i> 公司重要事项</h4>
+                    <button id="editImportantTasksBtn" class="btn-edit" style="padding: 8px 16px; background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s; display: flex; align-items: center; gap: 6px;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(255,138,0,0.3)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fas fa-edit"></i> 编辑
+                    </button>
+                </div>
                 <div id="importantTasksList" class="important-list">
                     <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
                 </div>
@@ -294,6 +487,37 @@
         </div>
     </div>
 
+    <!-- 编辑公司重要事项模态框 -->
+    <div id="editImportantTasksModal" class="day-modal">
+        <div class="day-modal-content" style="max-width: 700px;">
+            <div class="day-modal-header">
+                <h2><i class="fas fa-edit"></i> 编辑公司十大重要事项</h2>
+                <button class="day-modal-close" onclick="closeEditImportantTasksModal()">&times;</button>
+            </div>
+            <div class="day-modal-body">
+                <div style="margin-bottom: 24px; padding: 16px; background: linear-gradient(135deg, #fff7ef 0%, #ffe9d2 100%); border-radius: 12px; border: 1px solid #ffd3a1; color: #7a5a33; font-size: 14px; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-info-circle" style="color: #ff8a00; font-size: 16px;"></i>
+                    <span>请编辑以下十大重要事项，编号固定使用1到10：</span>
+                </div>
+                <div id="editTasksContainer">
+                    <!-- 任务编辑项将通过JavaScript动态生成 -->
+                </div>
+                <div style="margin-top: 32px; display: flex; justify-content: flex-end; gap: 16px; padding-top: 20px; border-top: 1px dashed #ffd3a1;">
+                    <button onclick="closeEditImportantTasksModal()" style="padding: 12px 24px; border: 2px solid #ffd3a1; background: #fff; color: #a55b00; border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.3s; display: flex; align-items: center; gap: 8px;"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(255,138,0,0.15)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                        <i class="fas fa-times"></i> 取消
+                    </button>
+                    <button onclick="saveImportantTasks()" style="padding: 12px 24px; background: linear-gradient(135deg, #ff8a00 0%, #ff6b00 100%); color: white; border: none; border-radius: 10px; cursor: pointer; font-weight: 500; transition: all 0.3s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(255,138,0,0.2);"
+                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 16px rgba(255,138,0,0.3)'"
+                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(255,138,0,0.2)'">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/common.js"></script>
     <script src="js/api.js"></script>
     <script>
@@ -321,6 +545,9 @@
             renderRecentTasks();
             updateCharts();
             loadImportantTasks();
+            
+            // 添加编辑按钮事件监听
+            document.getElementById('editImportantTasksBtn').addEventListener('click', openEditImportantTasksModal);
         });
         
         // 加载所有数据
@@ -711,9 +938,15 @@
         
         // 点击模态框外部关闭
         window.onclick = function(event) {
-            const modal = document.getElementById('dayModal');
-            if (event.target === modal) {
+            const dayModal = document.getElementById('dayModal');
+            const editModal = document.getElementById('editImportantTasksModal');
+            
+            if (event.target === dayModal) {
                 closeDayModal();
+            }
+            
+            if (event.target === editModal) {
+                closeEditImportantTasksModal();
             }
         }
         
@@ -1000,6 +1233,209 @@
                 document.getElementById('importantTasksList').innerHTML = 
                     '<div style="text-align: center; color: #999; padding: 20px;">加载失败</div>';
             }
+        }
+        
+        // 打开编辑公司重要事项模态框
+        async function openEditImportantTasksModal() {
+            try {
+                // 获取当前的重要事项
+                const currentTasks = await window.API.getImportantTasks();
+                const modal = document.getElementById('editImportantTasksModal');
+                const container = document.getElementById('editTasksContainer');
+                
+                // 确保有10个事项，不足则补充空字符串
+                const tasks = [];
+                for (let i = 0; i < 10; i++) {
+                    tasks.push(currentTasks[i] || '');
+                }
+                
+                // 生成编辑表单
+                container.innerHTML = tasks.map((task, index) => `
+                    <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 16px; padding: 16px; background: #fff; border-radius: 12px; border: 1px solid #ffd3a1; box-shadow: 0 2px 6px rgba(255,138,0,0.05); transition: all 0.3s;"
+                         onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 12px rgba(255,138,0,0.15)'"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(255,138,0,0.05)'">
+                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #ff8a00 0%, #ffbe78 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; flex-shrink: 0; box-shadow: 0 2px 6px rgba(255,138,0,0.2);">
+                            ${index + 1}
+                        </div>
+                        <input type="text"
+                               id="taskInput${index}"
+                               value="${task}"
+                               placeholder="请输入第${index + 1}个重要事项"
+                               style="flex: 1; padding: 14px 16px; border: 2px solid #ffd3a1; border-radius: 10px; font-size: 14px; transition: all 0.3s; outline: none; background: #fff7ef;"
+                               onfocus="this.style.borderColor='#ff8a00'; this.style.boxShadow='0 0 0 4px rgba(255,138,0,0.15)'; this.style.background='#fff'"
+                               onblur="this.style.borderColor='#ffd3a1'; this.style.boxShadow='none'; this.style.background='#fff7ef'">
+                    </div>
+                `).join('');
+                
+                // 显示模态框
+                modal.style.display = 'block';
+                
+            } catch (error) {
+                console.error('打开编辑模态框失败:', error);
+                alert('加载重要事项失败，请稍后重试');
+            }
+        }
+        
+        // 关闭编辑公司重要事项模态框
+        function closeEditImportantTasksModal() {
+            document.getElementById('editImportantTasksModal').style.display = 'none';
+        }
+        
+        // 保存公司重要事项
+        async function saveImportantTasks() {
+            try {
+                // 收集所有输入的值
+                const tasks = [];
+                for (let i = 0; i < 10; i++) {
+                    const input = document.getElementById(`taskInput${i}`);
+                    const value = input.value.trim();
+                    
+                    if (!value) {
+                        alert(`第${i + 1}个重要事项不能为空`);
+                        input.focus();
+                        return;
+                    }
+                    
+                    tasks.push(value);
+                }
+                
+                // 显示保存中状态
+                const saveButton = event.target;
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+                saveButton.disabled = true;
+                
+                console.log('准备发送到API的任务列表:', tasks);
+                
+                // 调用API保存
+                const response = await window.API.updateImportantTasks(tasks);
+                console.log('API响应:', response);
+                
+                // 恢复按钮状态
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+                
+                // 检查响应是否表示成功
+                if (response && !response.error) {
+                    // 成功情况
+                    closeEditImportantTasksModal();
+                    showSuccessMessage('公司重要事项已更新');
+                    
+                    // 重新加载重要事项
+                    setTimeout(async () => {
+                        await loadImportantTasks();
+                    }, 500);
+                } else {
+                    // 失败情况
+                    const errorMsg = response && response.message ? response.message : '保存失败';
+                    showErrorMessage(errorMsg);
+                    
+                    // 即使失败也重新加载重要事项，以防部分更新成功
+                    setTimeout(async () => {
+                        await loadImportantTasks();
+                    }, 500);
+                }
+                
+            } catch (error) {
+                console.error('保存重要事项失败:', error);
+                
+                // 恢复按钮状态
+                const saveButton = event.target;
+                saveButton.innerHTML = '<i class="fas fa-save"></i> 保存';
+                saveButton.disabled = false;
+                
+                // 显示更友好的错误提示
+                showErrorMessage('保存失败：' + (error.message || '未知错误'));
+            }
+        }
+        
+        // 显示成功消息
+        function showSuccessMessage(message) {
+            // 创建成功提示元素
+            const successDiv = document.createElement('div');
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #4CAF50 0%, #66BB6A 100%);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease-out;
+            `;
+            successDiv.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 添加到页面
+            document.body.appendChild(successDiv);
+            
+            // 3秒后自动移除
+            setTimeout(() => {
+                successDiv.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => {
+                    document.body.removeChild(successDiv);
+                }, 300);
+            }, 3000);
+        }
+        
+        // 显示错误消息
+        function showErrorMessage(message) {
+            // 创建错误提示元素
+            const errorDiv = document.createElement('div');
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #F44336 0%, #EF5350 100%);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(244,67,54,0.3);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: 500;
+                animation: slideInRight 0.3s ease-out;
+                max-width: 400px;
+            `;
+            errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 添加到页面
+            document.body.appendChild(errorDiv);
+            
+            // 5秒后自动移除
+            setTimeout(() => {
+                errorDiv.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => {
+                    document.body.removeChild(errorDiv);
+                }, 300);
+            }, 5000);
         }
     </script>
 </body>

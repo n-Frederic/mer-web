@@ -780,6 +780,65 @@ public class ApiProxyController {
         }
     }
 
+    /**
+     * 更新公司十大重要事项
+     * PUT /api/company-tasks
+     */
+    @PutMapping("/company-tasks")
+    public ResponseEntity<?> updateImportantTasks(
+            @RequestBody Map<String, Object> taskData,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            if (authorization != null && !authorization.isEmpty()) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(taskData, headers);
+            
+            // 转发到后端
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    backendUrl + "/company-tasks",
+                    HttpMethod.PUT,
+                    request,
+                    Map.class
+            );
+            
+            // 直接返回后端的响应，不进行额外处理
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            // 处理4xx错误
+            try {
+                // 尝试解析后端返回的错误信息
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                // 如果无法解析错误信息，返回通用错误
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("error", true, "message", "更新公司重要事项失败: " + e.getMessage()));
+            }
+        } catch (org.springframework.web.client.HttpServerErrorException e) {
+            // 处理5xx服务器错误
+            try {
+                // 尝试解析后端返回的错误信息
+                Map<String, Object> errorBody = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readValue(e.getResponseBodyAsString(), Map.class);
+                return ResponseEntity.status(e.getStatusCode()).body(errorBody);
+            } catch (Exception parseError) {
+                // 如果无法解析错误信息，返回通用错误
+                return ResponseEntity.status(e.getStatusCode())
+                        .body(Map.of("error", true, "message", "服务器错误: " + e.getMessage()));
+            }
+        } catch (Exception e) {
+            // 处理其他异常（如网络连接失败等）
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", true, "message", "连接后端失败: " + e.getMessage()));
+        }
+    }
+
     // ==================== 评论相关API ====================
     
     /**
