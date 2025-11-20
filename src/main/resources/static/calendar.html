@@ -400,6 +400,44 @@
                 </div>
             </div>
             
+            <!-- 用户信息统计模块 -->
+            <div class="panel">
+                <h3><i class="fas fa-users-cog"></i> 用户信息统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-tie"></i></div>
+                        <div class="stat-number" id="activeUsers">0</div>
+                        <div class="stat-label">活跃用户</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+                        <div class="stat-number" id="adminUsers">0</div>
+                        <div class="stat-label">管理员</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-cog"></i></div>
+                        <div class="stat-number" id="managerUsers">0</div>
+                        <div class="stat-label">项目经理</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-friends"></i></div>
+                        <div class="stat-number" id="teamLeaderUsers">0</div>
+                        <div class="stat-label">团队领导</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user"></i></div>
+                        <div class="stat-number" id="memberUsers">0</div>
+                        <div class="stat-label">普通成员</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-user-slash"></i></div>
+                        <div class="stat-number" id="inactiveUsers">0</div>
+                        <div class="stat-label">非活跃用户</div>
+                    </div>
+                </div>
+                
+            </div>
+            
         <!-- 日历和侧边栏 -->
         <div class="calendar-section">
             <div class="calendar">
@@ -447,25 +485,25 @@
 
         <!-- 图表统计 -->
         <div class="panel charts-section">
-            <h3><i class="fas fa-chart-pie"></i> 数据可视化分析</h3>
+            <h3><i class="fas fa-chart-pie"></i> 用户数据可视化分析</h3>
                 <div class="charts-grid">
                     <div class="chart-container">
-                    <div class="chart-title">任务状态分布</div>
+                    <div class="chart-title">用户角色分布</div>
                         <div class="chart-canvas">
-                            <canvas id="pieChart"></canvas>
+                            <canvas id="userRoleChart"></canvas>
                         </div>
                     </div>
                     <div class="chart-container">
-                    <div class="chart-title">任务优先级分布</div>
+                    <div class="chart-title">用户性别分布</div>
                         <div class="chart-canvas">
-                        <canvas id="priorityChart"></canvas>
+                        <canvas id="userGenderChart"></canvas>
                         </div>
                     </div>
                 </div>
                 <div class="chart-container">
-                <div class="chart-title">每月任务与日志趋势</div>
+                <div class="chart-title">用户状态分布</div>
                 <div class="chart-canvas" style="height: 300px;">
-                    <canvas id="trendChart"></canvas>
+                    <canvas id="userStatusChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -532,7 +570,7 @@
         let calendarData = {}; // 日期 -> {tasks, logs}
         
         // 图表实例
-        let pieChart, priorityChart, trendChart;
+        let userRoleChart, userGenderChart, userStatusChart;
         
         // 初始化
         document.addEventListener('DOMContentLoaded', async function() {
@@ -545,6 +583,9 @@
             renderRecentTasks();
             updateCharts();
             loadImportantTasks();
+            
+            // 加载用户统计数据
+            await loadUserStats();
             
             // 添加编辑按钮事件监听
             document.getElementById('editImportantTasksBtn').addEventListener('click', openEditImportantTasksModal);
@@ -629,39 +670,17 @@
             }
         }
         
-        // 加载所有用户（分页循环获取）
+        // 加载所有用户
         async function loadAllUsers() {
-            const users = [];
-            let page = 1;
-            const pageSize = 10000;
-            
             try {
-                while (true) {
-                    console.log(`👥 加载用户第${page}页...`);
-                    const response = await window.API.listUsers({ page, pageSize });
-                    
-                    if (!response || !response.list || response.list.length === 0) {
-                        break;
-                    }
-                    
-                    users.push(...response.list);
-                    
-                    if (response.list.length < pageSize) {
-                        break;
-                    }
-                    
-                    page++;
-                    
-                    if (page > 100) {
-                        console.warn('⚠用户页数超过100，停止加载');
-                        break;
-                    }
-                }
+                console.log('加载所有用户...');
+                // 直接使用API获取用户列表，根据任务描述，返回格式已经是用户数组
+                const response = await window.API.listUsers({});
+                return response || [];
             } catch (error) {
                 console.error('加载用户失败:', error);
+                return [];
             }
-            
-            return users;
         }
         
         // 构建日历数据
@@ -993,6 +1012,52 @@
             document.getElementById('totalUsers').textContent = allUsers.length;
         }
         
+        // 加载用户统计数据
+        async function loadUserStats() {
+            try {
+                console.log('加载用户统计数据...');
+                
+                // 如果用户数据还没有加载，先加载用户数据
+                if (!allUsers || allUsers.length === 0) {
+                    await loadAllUsers();
+                }
+                
+                // 计算用户统计数据
+                const activeUsers = allUsers.filter(u => u.status === 'active').length;
+                const inactiveUsers = allUsers.filter(u => u.status !== 'active').length;
+                
+                // 按角色统计
+                const adminUsers = allUsers.filter(u => u.role_id == 5).length;
+                const managerUsers = allUsers.filter(u => u.role_id == 2).length;
+                const teamLeaderUsers = allUsers.filter(u => u.role_id == 3).length;
+                const memberUsers = allUsers.filter(u => u.role_id == 4).length;
+                const ceoUsers = allUsers.filter(u => u.role_id == 1).length;
+                
+                // 更新统计数据
+                document.getElementById('activeUsers').textContent = activeUsers;
+                document.getElementById('inactiveUsers').textContent = inactiveUsers;
+                document.getElementById('adminUsers').textContent = adminUsers;
+                document.getElementById('managerUsers').textContent = managerUsers;
+                document.getElementById('teamLeaderUsers').textContent = teamLeaderUsers;
+                document.getElementById('memberUsers').textContent = memberUsers;
+                
+                console.log('用户统计数据加载完成:', {
+                    total: allUsers.length,
+                    active: activeUsers,
+                    inactive: inactiveUsers,
+                    admin: adminUsers,
+                    manager: managerUsers,
+                    teamLeader: teamLeaderUsers,
+                    member: memberUsers,
+                    ceo: ceoUsers
+                });
+                
+            } catch (error) {
+                console.error('加载用户统计数据失败:', error);
+            }
+        }
+        
+        
         // 渲染今日概览
         function renderTodaySummary() {
             const today = new Date().toISOString().split('T')[0];
@@ -1065,15 +1130,43 @@
         
         // 初始化图表
         function initCharts() {
-            // 任务状态分布饼图
-            const pieCtx = document.getElementById('pieChart').getContext('2d');
-            pieChart = new Chart(pieCtx, {
+            // 用户角色分布饼图
+            const userRoleCtx = document.getElementById('userRoleChart').getContext('2d');
+            userRoleChart = new Chart(userRoleCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['已完成', '进行中', '待开始'],
+                    labels: ['CEO', 'Manager', 'Team Leader', 'Member', 'Admin'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: ['#F44336', '#FF9800', '#2196F3', '#4CAF50', '#9C27B0'],
+                        borderColor: ['#fff', '#fff', '#fff', '#fff', '#fff'],
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: { size: 13 }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // 用户性别分布饼图
+            const userGenderCtx = document.getElementById('userGenderChart').getContext('2d');
+            userGenderChart = new Chart(userGenderCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['男性', '女性', '未知'],
                     datasets: [{
                         data: [0, 0, 0],
-                        backgroundColor: ['#4CAF50', '#FF9800', '#F44336'],
+                        backgroundColor: ['#2196F3', '#E91E63', '#9E9E9E'],
                         borderColor: ['#fff', '#fff', '#fff'],
                         borderWidth: 3
                     }]
@@ -1093,65 +1186,22 @@
                 }
             });
 
-            // 优先级分布饼图
-            const priorityCtx = document.getElementById('priorityChart').getContext('2d');
-            priorityChart = new Chart(priorityCtx, {
+            // 用户状态分布饼图
+            const userStatusCtx = document.getElementById('userStatusChart').getContext('2d');
+            userStatusChart = new Chart(userStatusCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['高优先级', '中优先级', '低优先级'],
+                    labels: ['活跃', '非活跃'],
                     datasets: [{
-                        data: [0, 0, 0],
-                        backgroundColor: ['#F44336', '#FF9800', '#4CAF50'],
-                        borderColor: ['#fff', '#fff', '#fff'],
+                        data: [0, 0],
+                        backgroundColor: ['#4CAF50', '#F44336'],
+                        borderColor: ['#fff', '#fff'],
                         borderWidth: 3
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 15,
-                                font: { size: 13 }
-                            }
-                        }
-                    }
-                }
-            });
-
-            // 趋势折线图
-            const trendCtx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(trendCtx, {
-                type: 'line',
-                data: {
-                    labels: [],
-                    datasets: [{
-                        label: '任务数',
-                        data: [],
-                        borderColor: '#FF8A00',
-                        backgroundColor: 'rgba(255, 138, 0, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }, {
-                        label: '日志数',
-                        data: [],
-                        borderColor: '#4CAF50',
-                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 }
-                        }
-                    },
                     plugins: {
                         legend: {
                             position: 'bottom',
@@ -1167,47 +1217,30 @@
 
         // 更新图表数据
         function updateCharts() {
-            // 更新状态分布饼图
-            const completed = allTasks.filter(t => (t.progress || 0) >= 100).length;
-            const inProgress = allTasks.filter(t => {
-                const p = t.progress || 0;
-                return p > 0 && p < 100;
-            }).length;
-            const pending = allTasks.filter(t => (t.progress || 0) === 0).length;
+            // 更新用户角色分布饼图
+            const ceoUsers = allUsers.filter(u => u.role_id == 1).length;
+            const managerUsers = allUsers.filter(u => u.role_id == 2).length;
+            const teamLeaderUsers = allUsers.filter(u => u.role_id == 3).length;
+            const memberUsers = allUsers.filter(u => u.role_id == 4).length;
+            const adminUsers = allUsers.filter(u => u.role_id == 5).length;
             
-            pieChart.data.datasets[0].data = [completed, inProgress, pending];
-            pieChart.update();
+            userRoleChart.data.datasets[0].data = [ceoUsers, managerUsers, teamLeaderUsers, memberUsers, adminUsers];
+            userRoleChart.update();
 
-            // 更新优先级分布饼图
-            const highPriority = allTasks.filter(t => t.priority === 'high').length;
-            const mediumPriority = allTasks.filter(t => t.priority === 'medium').length;
-            const lowPriority = allTasks.filter(t => !t.priority || t.priority === 'low').length;
+            // 更新用户性别分布饼图
+            const maleUsers = allUsers.filter(u => u.gender === 'M' || u.gender === 'Male' || u.gender === '男').length;
+            const femaleUsers = allUsers.filter(u => u.gender === 'F' || u.gender === 'Female' || u.gender === '女').length;
+            const unknownGenderUsers = allUsers.length - maleUsers - femaleUsers;
             
-            priorityChart.data.datasets[0].data = [highPriority, mediumPriority, lowPriority];
-            priorityChart.update();
+            userGenderChart.data.datasets[0].data = [maleUsers, femaleUsers, unknownGenderUsers];
+            userGenderChart.update();
             
-            // 更新趋势图（最近30天）
-            const now = new Date();
-            const labels = [];
-            const taskData = [];
-            const logData = [];
+            // 更新用户状态分布饼图
+            const activeUsers = allUsers.filter(u => u.status === 'active').length;
+            const inactiveUsers = allUsers.filter(u => u.status !== 'active').length;
             
-            for (let i = 29; i >= 0; i--) {
-                const date = new Date(now);
-                date.setDate(date.getDate() - i);
-                const dateStr = date.toISOString().split('T')[0];
-                
-                labels.push(`${date.getMonth() + 1}/${date.getDate()}`);
-                
-                const dayData = calendarData[dateStr] || { tasks: [], logs: [] };
-                taskData.push(dayData.tasks.length);
-                logData.push(dayData.logs.length);
-            }
-            
-            trendChart.data.labels = labels;
-            trendChart.data.datasets[0].data = taskData;
-            trendChart.data.datasets[1].data = logData;
-            trendChart.update();
+            userStatusChart.data.datasets[0].data = [activeUsers, inactiveUsers];
+            userStatusChart.update();
         }
         
         // 加载公司重要事项
