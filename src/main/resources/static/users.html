@@ -85,20 +85,25 @@
         }
         
         /* 工具栏 */
-        .toolbar { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 16px; 
-            margin-bottom: 24px; 
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
             padding: 20px;
             background: linear-gradient(135deg, #fff7ef, #ffe9d2);
             border-radius: 14px;
         }
-        .toolbar-left { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
         
         .search-box {
@@ -143,6 +148,10 @@
             gap: 8px;
             height: 44px;
             white-space: nowrap;
+        }
+        .btn-wide {
+            padding: 11px 32px;
+            min-width: 120px;
         }
         .btn-primary {
             background: linear-gradient(135deg, #ff8a00, #ffb06b);
@@ -273,6 +282,10 @@
         .tag-status {
             background: #e8f5e9;
             color: #388e3c;
+        }
+        .tag-status.inactive {
+            background: #ffebee;
+            color: #c62828;
         }
         
         .user-actions {
@@ -454,9 +467,30 @@
                 <div class="toolbar-left">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="搜索用户名称、邮箱..." />
+                        <input type="text" id="searchInput" placeholder="搜索用户名称、邮箱、ID..." />
                     </div>
-                    <button class="btn btn-primary" onclick="showCreateUserModal()">
+                    <select id="departmentFilter" class="filter-select" style="padding: 11px 16px; border: 2px solid #ffd3a1; border-radius: 12px; background: white; min-width: 150px;">
+                        <option value="">所有部门</option>
+                    </select>
+                    <select id="roleFilter" class="filter-select" style="padding: 11px 16px; border: 2px solid #ffd3a1; border-radius: 12px; background: white; min-width: 150px;">
+                        <option value="">所有身份</option>
+                        <option value="1">CEO</option>
+                        <option value="2">Manager</option>
+                        <option value="3">Team Leader</option>
+                        <option value="4">Member</option>
+                        <option value="5">Admin</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="searchUsers()">
+                        <i class="fas fa-search"></i>
+                        搜索
+                    </button>
+                    <button class="btn btn-secondary" onclick="resetFilters()">
+                        <i class="fas fa-times"></i>
+                        重置
+                    </button>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary btn-wide" onclick="showCreateUserModal()">
                         <i class="fas fa-user-plus"></i>
                         创建用户
                     </button>
@@ -627,6 +661,8 @@
         let totalPages = 1;
         let allUsers = [];
         let allTeams = []; // 存储所有团队列表
+        let allDepartments = []; // 存储所有部门列表
+        let filteredUsers = []; // 过滤后的用户列表
         
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
@@ -651,8 +687,19 @@
             // 搜索框事件
             document.getElementById('searchInput')?.addEventListener('input', debounce(function() {
                 currentPage = 1;
-                loadUsers();
+                applyFilters();
             }, 500));
+            
+            // 部门和身份过滤事件
+            document.getElementById('departmentFilter')?.addEventListener('change', function() {
+                currentPage = 1;
+                applyFilters();
+            });
+            
+            document.getElementById('roleFilter')?.addEventListener('change', function() {
+                currentPage = 1;
+                applyFilters();
+            });
         });
         
         // 加载用户列表
@@ -668,19 +715,24 @@
                 return;
             }
             
-                const keyword = document.getElementById('searchInput')?.value.trim() || '';
+                console.log('加载用户列表，页码:', currentPage);
                 
-                console.log('加载用户列表，页码:', currentPage, '关键词:', keyword);
-                
+                // 获取所有用户数据
                 const result = await window.API.listUsers({
-                    page: currentPage,
-                    pageSize: pageSize,
-                    keyword: keyword
+                    page: 1,
+                    pageSize: 1000 // 获取大量数据确保包含所有用户
                 });
                 
                 console.log('用户列表加载成功:', result);
                 
-                allUsers = result || [];
+                // 处理不同的返回格式
+                if (Array.isArray(result)) {
+                    allUsers = result;
+                } else if (result && Array.isArray(result.list)) {
+                    allUsers = result.list;
+                } else {
+                    allUsers = result || [];
+                }
                 
                 if (!allUsers || allUsers.length === 0) {
                     container.innerHTML = '<div class="empty-state"><i class="fas fa-user-slash"></i><h4>暂无用户数据</h4><p>没有找到符合条件的用户</p></div>';
@@ -688,18 +740,150 @@
                     return;
                 }
                 
-                // 渲染用户卡片
-                renderUsers(allUsers);
+                // 加载部门选项
+                await loadDepartmentOptions();
                 
-                // 更新分页（简化版，因为后端返回的是完整列表）
-                totalPages = Math.ceil(allUsers.length / pageSize);
-                updatePagination();
+                // 应用过滤条件
+                applyFilters();
                 
             } catch(error) {
                 console.error('加载用户失败:', error);
                 const container = document.getElementById('usersContainer');
                 container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h4>加载失败</h4><p>' + (error.message || '请稍后重试') + '</p></div>';
             }
+        }
+        
+        // 加载部门选项
+        async function loadDepartmentOptions() {
+            try {
+                // 从用户数据中提取所有唯一的部门
+                const departmentSet = new Set();
+                const teamToDeptMap = new Map(); // 团队ID到部门名称的映射
+                
+                for (const user of allUsers) {
+                    const teamId = user.teamId || user.team_id;
+                    if (teamId && !teamToDeptMap.has(teamId)) {
+                        try {
+                            const deptName = await window.API.getDepartmentNameCached(teamId);
+                            teamToDeptMap.set(teamId, deptName);
+                            departmentSet.add(deptName);
+                        } catch(e) {
+                            console.warn('获取部门名称失败:', teamId, e);
+                        }
+                    }
+                }
+                
+                allDepartments = Array.from(departmentSet).filter(dept => dept && dept !== '未知部门');
+                
+                // 更新部门下拉框
+                const departmentSelect = document.getElementById('departmentFilter');
+                if (departmentSelect) {
+                    // 保留第一个"所有部门"选项
+                    departmentSelect.innerHTML = '<option value="">所有部门</option>';
+                    
+                    // 添加部门选项
+                    allDepartments.sort().forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept;
+                        option.textContent = dept;
+                        departmentSelect.appendChild(option);
+                    });
+                }
+                
+                console.log('部门选项加载完成:', allDepartments);
+            } catch(error) {
+                console.error('加载部门选项失败:', error);
+            }
+        }
+        
+        // 应用过滤条件
+        async function applyFilters() {
+            try {
+                const keyword = document.getElementById('searchInput')?.value.trim() || '';
+                const departmentFilter = document.getElementById('departmentFilter')?.value || '';
+                const roleFilter = document.getElementById('roleFilter')?.value || '';
+                
+                console.log('应用过滤条件:', { keyword, departmentFilter, roleFilter });
+                
+                // 开始过滤
+                filteredUsers = allUsers.slice(); // 复制所有用户
+                
+                // 关键词过滤
+                if (keyword) {
+                    const lowerKeyword = keyword.toLowerCase();
+                    filteredUsers = filteredUsers.filter(user => {
+                        const userId = String(user.user_id || user.userId || user.id || '').toLowerCase();
+                        const userName = (user.name || '').toLowerCase();
+                        const userEmail = (user.email || '').toLowerCase();
+                        
+                        return userId.includes(lowerKeyword) ||
+                               userName.includes(lowerKeyword) ||
+                               userEmail.includes(lowerKeyword);
+                    });
+                }
+                
+                // 部门过滤
+                if (departmentFilter) {
+                    filteredUsers = await filterByDepartment(filteredUsers, departmentFilter);
+                }
+                
+                // 身份过滤
+                if (roleFilter) {
+                    filteredUsers = filteredUsers.filter(user => {
+                        const roleId = String(user.role_id || user.roleId || '');
+                        return roleId === roleFilter;
+                    });
+                }
+                
+                console.log('过滤后用户数量:', filteredUsers.length);
+                
+                // 渲染用户卡片
+                renderUsers(filteredUsers);
+                
+                // 更新分页
+                totalPages = Math.ceil(filteredUsers.length / pageSize);
+                updatePagination();
+                
+            } catch(error) {
+                console.error('应用过滤条件失败:', error);
+            }
+        }
+        
+        // 根据部门过滤用户
+        async function filterByDepartment(users, departmentName) {
+            const filtered = [];
+            
+            for (const user of users) {
+                const teamId = user.teamId || user.team_id;
+                if (teamId) {
+                    try {
+                        const deptName = await window.API.getDepartmentNameCached(teamId);
+                        if (deptName === departmentName) {
+                            filtered.push(user);
+                        }
+                    } catch(e) {
+                        console.warn('获取部门名称失败:', teamId, e);
+                    }
+                }
+            }
+            
+            return filtered;
+        }
+        
+        // 搜索用户
+        async function searchUsers() {
+            currentPage = 1;
+            await applyFilters();
+        }
+        
+        // 重置过滤条件
+        async function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('departmentFilter').value = '';
+            document.getElementById('roleFilter').value = '';
+            
+            currentPage = 1;
+            await applyFilters();
         }
         
         // 五级身份映射
@@ -797,7 +981,7 @@
                     <div class="user-tags">\
                         <span class="tag tag-role">' + escapeHtml(roleName) + '</span>\
                         <span class="tag tag-team">' + escapeHtml(teamName) + '</span>\
-                        <span class="tag tag-status">正常</span>\
+                        <span class="tag tag-status' + (user.status === 'inactive' ? ' inactive' : '') + '">' + (user.status === 'inactive' ? '停用' : '正常') + '</span>\
                     </div>\
                     <div class="user-actions">\
                         <button class="btn-icon" onclick="viewUser(\'' + escapeHtml(userId) + '\')">\
@@ -836,7 +1020,7 @@
         function prevPage() {
             if (currentPage > 1) {
                 currentPage--;
-                renderUsers(allUsers);
+                renderUsers(filteredUsers);
                 updatePagination();
             }
         }
@@ -845,20 +1029,13 @@
         function nextPage() {
             if (currentPage < totalPages) {
                 currentPage++;
-                renderUsers(allUsers);
+                renderUsers(filteredUsers);
                 updatePagination();
             }
         }
         
         // 刷新用户列表
         function refreshUsers() {
-            currentPage = 1;
-            loadUsers();
-        }
-        
-        // 重置搜索
-        function resetSearch() {
-            document.getElementById('searchInput').value = '';
             currentPage = 1;
             loadUsers();
         }

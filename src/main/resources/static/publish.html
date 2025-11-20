@@ -51,6 +51,45 @@
         .user-tag { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; background:#ffe9d2; color:#a55b00; border-radius:8px; font-size:13px; margin:4px 4px 4px 0; }
         .user-tag-remove { cursor:pointer; font-weight:bold; opacity:0.7; }
         .user-tag-remove:hover { opacity:1; }
+        
+        /* 分页控件样式 */
+        .user-pagination {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .btn-pagination {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid #ffd3a1;
+            background: white;
+            color: #ff8a00;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-pagination:hover:not(:disabled) {
+            background: #fff7ef;
+            border-color: #ff8a00;
+            transform: scale(1.05);
+        }
+        .btn-pagination:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .page-info {
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0 8px;
+        }
     </style>
 </head>
 <body>
@@ -136,11 +175,38 @@
                 <h3><i class="fas fa-user-check"></i> 选择指派成员（点击用户名进行选择）</h3>
                 <span class="user-modal-close" onclick="closeUserSelector()">&times;</span>
             </div>
+            
+            <!-- 搜索框 -->
+            <div style="margin:12px 0; padding:0 12px; border-bottom:1px solid #ffd3a1;">
+                <div class="user-search-box" style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <i class="fas fa-search" style="color:#ff8a00;"></i>
+                    <input type="text" id="userSearchInput" placeholder="搜索员工ID或邮箱..." style="flex:1; padding:8px 12px; border:1px solid #ffd3a1; border-radius:8px; font-size:14px; outline:none;">
+                    <button type="button" id="userSearchBtn" class="btn-search" onclick="searchUsers()" style="padding:8px 16px; background:#ff8a00; color:white; border:none; border-radius:8px; cursor:pointer; font-size:14px;">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                    <button type="button" id="userClearBtn" class="btn-clear" onclick="clearSearch()" style="padding:8px 16px; background:#ddd; color:#666; border:none; border-radius:8px; cursor:pointer; font-size:14px; margin-left:8px;">
+                        <i class="fas fa-times"></i> 清除
+                    </button>
+                </div>
+            </div>
+            
             <div id="userList" class="user-list" style="margin-top:12px;">
                 <div style="text-align:center; padding:20px; color:#999;">
                     <i class="fas fa-spinner fa-spin"></i> 加载中...
                 </div>
             </div>
+            
+            <!-- 分页控件 -->
+            <div id="userPagination" class="user-pagination" style="display: none; margin-top:16px; padding-top:16px; border-top:1px solid #ffd3a1; display:flex; justify-content:center; align-items:center; gap:12px;">
+                <button id="userPrevPage" class="btn-pagination" onclick="userPrevPage()" disabled>
+                    <i class="fas fa-chevron-left"></i> 上一页
+                </button>
+                <span id="userPageInfo" class="page-info">第 1 / 1 页</span>
+                <button id="userNextPage" class="btn-pagination" onclick="userNextPage()" disabled>
+                    下一页 <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
             <div style="margin-top:16px; padding-top:16px; border-top:1px solid #ffd3a1; display:flex; justify-content:space-between; align-items:center;">
                 <span id="selectedCount" style="color:#666; font-size:14px;">已选择 <strong style="color:#ff8a00;">0</strong> 人</span>
                 <button type="button" class="btn-sm" onclick="confirmUserSelection()" style="padding:10px 24px;">
