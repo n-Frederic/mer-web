@@ -708,16 +708,106 @@
       if(!featureUseApi.tasksList){
         var data = await loadTasksFromStatic();
         data = mergeLocalTasks(data);
-        // stable sort by createdAt desc then id desc
-        try{
-          data.sort(function(a,b){
-            var ad = new Date(a.createdAt||a.createTime||0).getTime();
-            var bd = new Date(b.createdAt||b.createTime||0).getTime();
-            if(ad !== bd) return bd - ad;
-            return String(b.id).localeCompare(String(a.id));
-          });
-        }catch(e){}
-        return { total: data.length, list: data };
+        
+        // 应用前端搜索和排序
+        if (params) {
+          // 搜索过滤
+          if (params.searchField && params.searchValue) {
+            data = data.filter(function(task) {
+              var fieldValue = '';
+              
+              switch (params.searchField) {
+                case 'id':
+                  fieldValue = String(task.id || '');
+                  break;
+                case 'name':
+                  fieldValue = String(task.name || '');
+                  break;
+                case 'owner':
+                  fieldValue = String(task.owner || '');
+                  break;
+                case 'publisher':
+                  fieldValue = String(task.publisher || '');
+                  break;
+                default:
+                  fieldValue = String(task[params.searchField] || '');
+              }
+              
+              return fieldValue.toLowerCase().includes(params.searchValue.toLowerCase());
+            });
+          }
+          
+          // 日期范围搜索
+          if (params.startDate || params.endDate) {
+            data = data.filter(function(task) {
+              var taskDate = task.startDate || task.endDate;
+              if (!taskDate) return false;
+              
+              var d = new Date(taskDate).getTime();
+              if (params.startDate) {
+                var s = new Date(params.startDate).getTime();
+                if (isFinite(s) && d < s) return false;
+              }
+              if (params.endDate) {
+                var e = new Date(params.endDate).getTime();
+                if (isFinite(e) && d > e) return false;
+              }
+              return true;
+            });
+          }
+          
+          // 排序
+          if (params.sortField) {
+            data.sort(function(a, b) {
+              var valueA, valueB;
+              
+              switch (params.sortField) {
+                case 'startDate':
+                  valueA = new Date(a.startDate || '1970-01-01').getTime();
+                  valueB = new Date(b.startDate || '1970-01-01').getTime();
+                  break;
+                case 'endDate':
+                  valueA = new Date(a.endDate || '1970-01-01').getTime();
+                  valueB = new Date(b.endDate || '1970-01-01').getTime();
+                  break;
+                case 'progress':
+                  valueA = a.progress || 0;
+                  valueB = b.progress || 0;
+                  break;
+                case 'name':
+                  valueA = String(a.name || '').toLowerCase();
+                  valueB = String(b.name || '').toLowerCase();
+                  break;
+                case 'id':
+                  valueA = String(a.id || '');
+                  valueB = String(b.id || '');
+                  break;
+                default:
+                  valueA = String(a[params.sortField] || '').toLowerCase();
+                  valueB = String(b[params.sortField] || '').toLowerCase();
+              }
+              
+              if (valueA < valueB) return params.sortOrder === 'desc' ? 1 : -1;
+              if (valueA > valueB) return params.sortOrder === 'desc' ? -1 : 1;
+              return 0;
+            });
+          }
+        }
+        
+        // 前端分页处理
+        var page = (params && params.page) || 1;
+        var pageSize = (params && params.pageSize) || 10;
+        var startIndex = (page - 1) * pageSize;
+        var endIndex = startIndex + pageSize;
+        var paginatedData = data.slice(startIndex, endIndex);
+        
+        return {
+          total: data.length,
+          list: paginatedData,
+          page: page,
+          pageSize: pageSize,
+          totalPages: Math.ceil(data.length / pageSize)
+        };
       }
       
       // 使用真实后端API - 单页请求（真正的后端分页）
@@ -731,6 +821,26 @@
         priority: params && params.priority
       };
       
+      // 添加搜索参数
+      if (params && params.searchField && params.searchValue) {
+        queryParams.searchField = params.searchField;
+        queryParams.searchValue = params.searchValue;
+      }
+      
+      // 添加日期范围参数
+      if (params && params.startDate) {
+        queryParams.startDate = params.startDate;
+      }
+      if (params && params.endDate) {
+        queryParams.endDate = params.endDate;
+      }
+      
+      // 添加排序参数
+      if (params && params.sortField) {
+        queryParams.sortField = params.sortField;
+        queryParams.sortOrder = params.sortOrder || 'asc';
+      }
+      
         var usp = new URLSearchParams();
       Object.keys(queryParams).forEach(function(k){
         var v = queryParams[k];
@@ -738,7 +848,7 @@
         usp.append(k, v);
       });
       
-      console.log('listTasks - 请求第' + page + '页，每页' + pageSize + '条');
+      console.log('listTasks - 请求第' + page + '页，每页' + pageSize + '条，参数:', queryParams);
       var res = await http('GET', base + '/api/tasks/all?' + usp.toString());
       
       if (!res || !res.list) {
@@ -785,8 +895,8 @@
       
       console.log('获取到第' + page + '页' + normalizedList.length + '条任务，总共' + (res.total || 0) + '条');
       
-      return { 
-        total: res.total || 0, 
+      return {
+        total: res.total || 0,
         list: normalizedList,
         page: res.page || page,
         pageSize: res.pageSize || pageSize,
@@ -2025,7 +2135,8 @@
         }
         throw error;
       });
-    }
+    },
+    
   };
 })();
 

@@ -64,7 +64,7 @@
                     <a href="publish.html">发布任务</a>
                     <a href="dashboard.html">工作日志</a>
                     <a href="users.html">用户管理</a>
-                    <a href="calendar.html">日程表</a>
+                    <a href="calendar.html">统计周报</a>
                     <a href="profile.html">个人信息</a>
                 </nav>
                 <div class="profile" onclick="location.href='profile.html'" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
@@ -77,13 +77,7 @@
         <div class="panel"><h3>任务展示</h3></div>
         <div class="task-toolbar" id="task-toolbar-top">
             <div class="toolbar-left">
-                <select id="f_field">
-                    <option value="id">按编号</option>
-                    <option value="name">按任务名称</option>
-                    <option value="owner">按负责人</option>
-                    <option value="publisher">按发布人</option>
-                    <option value="date">按日期</option>
-                </select>
+                <span>按关键词搜索:</span>
                 <input id="f_value" placeholder="请输入搜索关键词">
                 <input id="f_start" type="date" title="开始日期" style="display:none;">
                 <input id="f_end" type="date" title="结束日期" style="display:none;">
@@ -92,18 +86,6 @@
             </div>
             <div class="toolbar-right">
                 <div class="sorts">
-                    <span>排序:</span>
-                    <select id="sortField">
-                        <option value="startDate">开始日期</option>
-                        <option value="endDate">结束日期</option>
-                        <option value="progress">完成进度</option>
-                        <option value="name">任务名称</option>
-                        <option value="id">任务编号</option>
-                    </select>
-                    <select id="sortOrder">
-                        <option value="asc">升序</option>
-                        <option value="desc">降序</option>
-                    </select>
                     <span>每页:</span>
                     <select id="pageSize" class="page-size">
                         <option>6</option>

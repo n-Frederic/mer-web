@@ -30,15 +30,38 @@
     }
 
     // 获取任务数据（真正的后端分页）
-    async function fetchTasks(page, pageSize) {
+    async function fetchTasks(page, pageSize, searchParams, sortParams) {
         try {
             if (window.API && typeof window.API.listTasks === 'function'){
                 console.log('正在从后端获取任务数据，第' + page + '页，每页' + pageSize + '条');
                 
-                var resp = await window.API.listTasks({
+                // 构建请求参数
+                var requestParams = {
                     page: page,
                     pageSize: pageSize
-                });
+                };
+                
+                // 添加搜索参数
+                if (searchParams) {
+                    if (searchParams.field && searchParams.value) {
+                        requestParams.searchField = searchParams.field;
+                        requestParams.searchValue = searchParams.value;
+                    }
+                    if (searchParams.startDate) {
+                        requestParams.startDate = searchParams.startDate;
+                    }
+                    if (searchParams.endDate) {
+                        requestParams.endDate = searchParams.endDate;
+                    }
+                }
+                
+                // 添加排序参数
+                if (sortParams && sortParams.field) {
+                    requestParams.sortField = sortParams.field;
+                    requestParams.sortOrder = sortParams.order || 'asc';
+                }
+                
+                var resp = await window.API.listTasks(requestParams);
                 
                 console.log('后端返回数据:', resp);
                 
@@ -76,12 +99,21 @@
             } else {
                 console.log('API不可用，尝试加载静态数据...');
                 var staticData = await loadStaticTasks();
+                
+                // 前端搜索和排序处理
+                var filteredData = applyFrontendSearchAndSort(staticData, searchParams, sortParams);
+                
+                // 前端分页处理
+                var startIndex = (page - 1) * pageSize;
+                var endIndex = startIndex + pageSize;
+                var paginatedData = filteredData.slice(startIndex, endIndex);
+                
                 return {
-                    list: staticData,
-                    total: staticData.length,
-                    page: 1,
+                    list: paginatedData,
+                    total: filteredData.length,
+                    page: page,
                     pageSize: pageSize,
-                    totalPages: 1
+                    totalPages: Math.ceil(filteredData.length / pageSize)
                 };
             }
         } catch (error) {
@@ -95,6 +127,81 @@
                 totalPages: 0
             };
         }
+    }
+    
+    // 前端搜索和排序处理（用于API不可用时的降级方案）
+    function applyFrontendSearchAndSort(data, searchParams, sortParams) {
+        var filteredData = data.slice(); // 创建副本
+        
+        // 应用搜索过滤
+        if (searchParams) {
+            if (searchParams.field && searchParams.value) {
+                filteredData = filteredData.filter(function(task) {
+                    var fieldValue = '';
+                    
+                    // 确保只搜索标题字段
+                    if (searchParams.field === 'name') {
+                        fieldValue = String(task.name || '');
+                    } else {
+                        // 如果不是搜索标题字段，则不进行搜索过滤
+                        // 这样可以确保即使前端代码被修改，也只会搜索标题
+                        return true;
+                    }
+                    
+                    return fieldValue.toLowerCase().includes(searchParams.value.toLowerCase());
+                });
+            }
+            
+            // 日期范围搜索
+            if (searchParams.startDate || searchParams.endDate) {
+                filteredData = filteredData.filter(function(task) {
+                    // 使用开始日期作为搜索依据
+                    var taskDate = task.startDate || task.endDate;
+                    if (!taskDate) return false;
+                    
+                    return withinRange(taskDate, searchParams.startDate, searchParams.endDate);
+                });
+            }
+        }
+        
+        // 应用排序
+        if (sortParams && sortParams.field) {
+            filteredData.sort(function(a, b) {
+                var valueA, valueB;
+                
+                switch (sortParams.field) {
+                    case 'startDate':
+                        valueA = new Date(a.startDate || '1970-01-01').getTime();
+                        valueB = new Date(b.startDate || '1970-01-01').getTime();
+                        break;
+                    case 'endDate':
+                        valueA = new Date(a.endDate || '1970-01-01').getTime();
+                        valueB = new Date(b.endDate || '1970-01-01').getTime();
+                        break;
+                    case 'progress':
+                        valueA = a.progress || 0;
+                        valueB = b.progress || 0;
+                        break;
+                    case 'name':
+                        valueA = String(a.name || '').toLowerCase();
+                        valueB = String(b.name || '').toLowerCase();
+                        break;
+                    case 'id':
+                        valueA = String(a.id || '');
+                        valueB = String(b.id || '');
+                        break;
+                    default:
+                        valueA = String(a[sortParams.field] || '').toLowerCase();
+                        valueB = String(b[sortParams.field] || '').toLowerCase();
+                }
+                
+                if (valueA < valueB) return sortParams.order === 'desc' ? 1 : -1;
+                if (valueA > valueB) return sortParams.order === 'desc' ? -1 : 1;
+                return 0;
+            });
+        }
+        
+        return filteredData;
     }
 
     // 格式化日期
@@ -150,7 +257,7 @@
     }
 
     // 渲染任务列表（不再需要前端分页）
-    function render(data) {
+    function render(data, searchKeyword) {
         var grid = document.getElementById('taskGrid');
         var pageInfoTop = document.getElementById('pageInfo');
         var pageInfoBottom = document.getElementById('pageInfoBottom');
@@ -199,7 +306,13 @@
         // 更新页面信息
         if (pageInfoTop) pageInfoTop.textContent = page + ' / ' + totalPages;
         if (pageInfoBottom) pageInfoBottom.textContent = page + ' / ' + totalPages;
-        if (infoBottom) infoBottom.textContent = '共 ' + total + ' 条记录，当前第 ' + page + '/' + totalPages + ' 页';
+        
+        // 添加搜索结果信息
+        var resultText = '共 ' + total + ' 条记录，当前第 ' + page + '/' + totalPages + ' 页';
+        if (searchKeyword) {
+            resultText = '搜索 "' + searchKeyword + '"：' + resultText;
+        }
+        if (infoBottom) infoBottom.textContent = resultText;
         
         // 更新按钮状态
         var prevTop = document.getElementById('prevPage');
@@ -218,7 +331,10 @@
 
         // 渲染任务卡片
         if (list.length === 0) {
-            grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">暂无任务数据</div>';
+            var emptyMessage = searchKeyword ?
+                '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">未找到匹配的任务</div>' :
+                '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">暂无任务数据</div>';
+            grid.innerHTML = emptyMessage;
         } else {
             grid.innerHTML = list.map(function(t){
             // 判断当前用户是否是发布人（用于优先级标识）
@@ -244,16 +360,28 @@
                 priorityBadge = '<div style="position: absolute; right: 10px; top: 10px; background: linear-gradient(135deg, #9370db, #b19cd9); color: white; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold;">📝 我发布</div>';
             }
             
+            // 如果有搜索关键词，使用高亮版本的内容
+            var displayName = searchKeyword ? t.name : escapeHtml(t.name);
+            var displaySummary = searchKeyword ? t.summary : escapeHtml(t.summary);
+            var displayDetails = searchKeyword ? t.details : escapeHtml(t.details);
+            
+            // 如果没有搜索关键词，确保HTML转义
+            if (!searchKeyword) {
+                displayName = escapeHtml(t.name);
+                displaySummary = escapeHtml(t.summary);
+                displayDetails = escapeHtml(t.details);
+            }
+            
             return '<div class="task-card">\
                 <div class="task-id">' + escapeHtml(t.id) + '</div>\
                 ' + priorityBadge + '\
-                <div class="task-title">' + escapeHtml(t.name) + '</div>\
+                <div class="task-title">' + displayName + '</div>\
                 <div class="task-meta">\
                     <span>开始：' + escapeHtml(t.startDate) + '</span>\
                     <span>结束：' + escapeHtml(t.endDate) + '</span>\
                 </div>\
-                <div class="task-summary">' + escapeHtml(t.summary) + '</div>\
-                <div class="task-details">' + escapeHtml(t.details) + '</div>\
+                <div class="task-summary">' + displaySummary + '</div>\
+                <div class="task-details">' + displayDetails + '</div>\
                 <div class="progress"><div class="progress-inner" style="width:' + Math.max(0,Math.min(100,t.progress)) + '%;"></div></div>\
                 <div class="progress-text">完成度：' + Math.max(0,Math.min(100,t.progress)) + '%</div>\
                 <div class="card-actions">' + actionButtons + '</div>\
@@ -267,10 +395,10 @@
     // HTML转义函数
     function escapeHtml(text) {
         var map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
             "'": '&#039;'
         };
         return String(text || '').replace(/[&<>"']/g, function(m) { return map[m]; });
@@ -289,25 +417,93 @@
                 var pageSizeSelect = document.getElementById('pageSize');
                 var pageSize = parseInt(pageSizeSelect?.value || '12', 10);
                 
+                // 显示加载状态的函数
+                var showLoading = function() {
+                    var grid = document.getElementById('taskGrid');
+                    if (grid) {
+                        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #999;">加载中...</div>';
+                    }
+                };
+                
+                // 获取搜索参数
+                var getSearchParams = function() {
+                    var fValue = document.getElementById('f_value');
+                    var fStart = document.getElementById('f_start');
+                    var fEnd = document.getElementById('f_end');
+                    
+                    var searchParams = {};
+                    
+                    // 只搜索标题字段
+                    if (fValue && fValue.value.trim()) {
+                        searchParams.value = fValue.value.trim();
+                        searchParams.field = 'name'; // 固定搜索标题字段
+                    }
+                    
+                    // 日期搜索
+                    if (fStart && fStart.value) searchParams.startDate = fStart.value;
+                    if (fEnd && fEnd.value) searchParams.endDate = fEnd.value;
+                    
+                    return searchParams;
+                };
+                
+                // 高亮搜索关键词的函数
+                var highlightKeyword = function(text, keyword) {
+                    if (!keyword || !text) return text;
+                    
+                    var regex = new RegExp('(' + escapeRegExp(keyword) + ')', 'gi');
+                    return text.replace(regex, '<mark style="background-color: rgba(151,160,255,0.62); padding: 1px 2px; border-radius: 2px;">$1</mark>');
+                };
+                
+                // 转义正则表达式特殊字符
+                var escapeRegExp = function(string) {
+                    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                };
+                
+                // 加载数据的函数
+                var loadData = async function(page) {
+                    showLoading(); // 显示加载状态
+                    
+                    var pageSize = parseInt(document.getElementById('pageSize')?.value || '12', 10);
+                    var searchParams = getSearchParams();
+                    
+                    console.log('加载数据:', {
+                        page: page,
+                        pageSize: pageSize,
+                        searchParams: searchParams
+                    });
+                    
+                    var data = await fetchTasks(page, pageSize, searchParams);
+                    
+                    // 如果有搜索关键词，只对标题字段进行高亮处理
+                    if (searchParams.value) {
+                        data.list = data.list.map(function(task) {
+                            var highlightedTask = Object.assign({}, task);
+                            highlightedTask.name = highlightKeyword(task.name, searchParams.value);
+                            // 不对摘要和详情字段进行高亮处理，因为搜索只针对标题
+                            // highlightedTask.summary = highlightKeyword(task.summary, searchParams.value);
+                            // highlightedTask.details = highlightKeyword(task.details, searchParams.value);
+                            return highlightedTask;
+                        });
+                    }
+                    
+                    render(data, searchParams.value);
+                };
+                
                 // 加载第一页数据
-                var data = await fetchTasks(1, pageSize);
-                render(data);
+                await loadData(1);
                 
                 // 定义翻页函数
                 var loadPage = async function(page) {
-                    var pageSize = parseInt(document.getElementById('pageSize')?.value || '12', 10);
-                    console.log('加载第' + page + '页，每页' + pageSize + '条');
-                    var data = await fetchTasks(page, pageSize);
-                    render(data);
+                    await loadData(page);
                 };
                 
-                var goPrev = function(){ 
+                var goPrev = function(){
                     if (window.__currentPage > 1) {
                         loadPage(window.__currentPage - 1);
-                    } 
+                    }
                 };
                 
-                var goNext = function(){ 
+                var goNext = function(){
                     if (window.__currentPage < window.__totalPages) {
                         loadPage(window.__currentPage + 1);
                     }
@@ -316,40 +512,55 @@
                 // 绑定事件
                 var btnSearch = document.getElementById('btnSearch');
                 var btnReset = document.getElementById('btnReset');
-                var fField = document.getElementById('f_field');
-                var sortField = document.getElementById('sortField');
-                var sortOrder = document.getElementById('sortOrder');
+                var fValue = document.getElementById('f_value');
 
+                // 搜索按钮事件
                 if (btnSearch) {
-                    btnSearch.addEventListener('click', function(){ 
-                        console.log('执行搜索（前端筛选）');
-                        alert('搜索功能待实现');
+                    btnSearch.addEventListener('click', function(){
+                        console.log('执行搜索');
+                        loadPage(1); // 搜索时回到第一页
                     });
                 }
 
+                // 搜索输入框回车事件
+                if (fValue) {
+                    fValue.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') {
+                            console.log('回车执行搜索');
+                            loadPage(1); // 搜索时回到第一页
+                        }
+                    });
+                }
+
+                // 重置按钮事件
                 if (btnReset) {
-                    btnReset.addEventListener('click', function(){ 
+                    btnReset.addEventListener('click', function(){
                         console.log('重置搜索');
+                        
+                        // 重置搜索字段
+                        var fStart = document.getElementById('f_start');
+                        var fEnd = document.getElementById('f_end');
+                        
+                        if (fValue) fValue.value = '';
+                        if (fStart) fStart.value = '';
+                        if (fEnd) fEnd.value = '';
+                        
+                        // 重新加载第一页
                         loadPage(1);
                     });
                 }
 
-                if (fField) {
-                    fField.addEventListener('change', function(){
-                        var isDate = fField.value === 'date';
-                        var fValue = document.getElementById('f_value');
-                        var fStart = document.getElementById('f_start');
-                        var fEnd = document.getElementById('f_end');
-                        
-                        if (fValue) fValue.style.display = isDate ? 'none' : '';
-                        if (fStart) fStart.style.display = isDate ? '' : 'none';
-                        if (fEnd) fEnd.style.display = isDate ? '' : 'none';
-                    });
-                }
+                // 搜索字段变化事件
+                var fStart = document.getElementById('f_start');
+                var fEnd = document.getElementById('f_end');
+                
+                // 初始设置日期输入框为隐藏
+                if (fStart) fStart.style.display = 'none';
+                if (fEnd) fEnd.style.display = 'none';
 
                 // 页面大小变化时重新加载
                 if (pageSizeSelect) {
-                    pageSizeSelect.addEventListener('change', function(){ 
+                    pageSizeSelect.addEventListener('change', function(){
                         console.log('页面大小变化为:', pageSizeSelect.value);
                         loadPage(1); // 重新加载第一页
                     });
@@ -574,10 +785,10 @@
     function escapeHtml(text) {
         if (!text) return '';
         var map = {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
+            '&': '&',
+            '<': '<',
+            '>': '>',
+            '"': '"',
             "'": '&#039;'
         };
         return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
