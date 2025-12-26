@@ -624,6 +624,17 @@
                         <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
                     </div>
                 </div>
+
+                <!-- 密码重置统计 -->
+                <div style="margin-top: 24px;">
+                    <h3 style="margin: 0 0 20px 0; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 24px; border-bottom: 3px solid #ffd3a1; padding-bottom: 12px;">
+                        <i class="fas fa-key"></i> 密码重置统计
+                    </h3>
+                    
+                    <div id="resetPasswordContainer">
+                        <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -708,41 +719,176 @@
             // 添加编辑按钮事件监听
             document.getElementById('editImportantTasksBtn').addEventListener('click', openEditImportantTasksModal);
             
-            // 测试密码重置统计接口
-            await testResetPasswordStatistic();
+            // 加载密码重置统计
+            await loadResetPasswordStatistic();
+            
+            // 加载登录趋势统计（默认查询）
+            await queryLoginTrend();
+            
+            // 检测任务统计接口是否有效
+            await checkTaskStatisticApi();
         });
         
-        // 测试密码重置统计接口
-        async function testResetPasswordStatistic() {
+        // 检测任务统计接口是否有效
+        async function checkTaskStatisticApi() {
             console.log('========================================');
-            console.log('开始测试密码重置统计接口...');
+            console.log('开始检测任务统计接口是否有效...');
             console.log('========================================');
+            
+            try {
+                // 使用默认日期范围：最近7天
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - 6); // 7天前
+                
+                const startDateStr = startDate.toISOString().split('T')[0];
+                const endDateStr = endDate.toISOString().split('T')[0];
+                
+                console.log('使用日期范围:', { startDate: startDateStr, endDate: endDateStr });
+                
+                // 调用任务统计接口
+                const result = await window.API.getTaskStatistic(startDateStr, endDateStr);
+                
+                console.log('========================================');
+                console.log('✅ 任务统计接口检测成功！');
+                console.log('========================================');
+                console.log('接口返回结果:', result);
+                console.log('========================================');
+                
+                // 验证返回数据结构
+                if (result && result.startDate && result.endDate && Array.isArray(result.daily)) {
+                    console.log('✅ 数据结构验证通过');
+                    console.log('- 统计开始日期:', result.startDate);
+                    console.log('- 统计结束日期:', result.endDate);
+                    console.log('- 每日数据条数:', result.daily.length);
+                    
+                    if (result.daily.length > 0) {
+                        console.log('- 第一条数据示例:', result.daily[0]);
+                    }
+                } else {
+                    console.warn('⚠ 数据结构验证失败，返回数据不符合预期格式');
+                }
+                
+                console.log('========================================');
+                console.log('任务统计接口检测完成，接口正常工作');
+                console.log('========================================');
+                
+            } catch (error) {
+                console.log('========================================');
+                console.log('❌ 任务统计接口检测失败！');
+                console.log('========================================');
+                console.error('错误信息:', error.message);
+                console.error('错误详情:', error);
+                console.log('========================================');
+                console.log('可能的原因:');
+                console.log('1. 后端服务未启动或端口不正确');
+                console.log('2. 接口路径不正确: /api/tasks/statistic');
+                console.log('3. 认证token无效或已过期');
+                console.log('4. 网络连接问题');
+                console.log('5. 后端接口实现有问题');
+                console.log('========================================');
+            }
+        }
+        
+        // 加载密码重置统计
+        async function loadResetPasswordStatistic() {
+            console.log('========================================');
+            console.log('开始加载密码重置统计...');
+            console.log('========================================');
+            
+            const container = document.getElementById('resetPasswordContainer');
             
             try {
                 const result = await window.API.getResetPasswordStatistic();
                 
                 console.log('========================================');
-                console.log('✅ 密码重置统计接口测试完成！');
+                console.log('✅ 密码重置统计加载成功！');
                 console.log('========================================');
                 console.log('接口返回结果:', result);
                 
-                if (result && result.totalUsers > 0) {
-                    console.log('⚠ 发现异常用户！');
-                    console.log('异常用户数量:', result.totalUsers);
-                    console.log('异常用户详情:', result.users);
-                } else {
-                    console.log('✅ 今日无异常用户');
-                }
+                // 渲染数据
+                renderResetPasswordStatistic(result);
                 
                 console.log('========================================');
                 
             } catch (error) {
                 console.log('========================================');
-                console.log('❌ 密码重置统计接口测试失败！');
+                console.log('❌ 密码重置统计加载失败！');
                 console.log('========================================');
                 console.error('错误信息:', error.message);
                 console.log('========================================');
+                
+                // 显示错误信息
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>加载失败: ${error.message}</p>
+                    </div>
+                `;
             }
+        }
+        
+        // 渲染密码重置统计
+        function renderResetPasswordStatistic(data) {
+            const container = document.getElementById('resetPasswordContainer');
+            
+            if (!data || data.totalUsers === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-check-circle" style="color: #4CAF50;"></i>
+                        <p>今日无异常用户</p>
+                        <p style="font-size: 14px; color: #7a5a33; margin-top: 8px;">
+                            统计日期: ${data.date || '未知'}<br>
+                            阈值: ${data.threshold || 5} 次
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 有异常用户，渲染列表
+            let html = `
+                <div class="trend-info" style="margin-bottom: 20px;">
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计日期</div>
+                        <div class="trend-info-value">${data.date || '未知'}</div>
+                    </div>
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">阈值</div>
+                        <div class="trend-info-value">${data.threshold || 5} 次</div>
+                    </div>
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">异常用户数</div>
+                        <div class="trend-info-value" style="color: #F44336;">${data.totalUsers}</div>
+                    </div>
+                </div>
+                
+                <div class="trend-points">
+            `;
+            
+            data.users.forEach((user, index) => {
+                html += `
+                    <div class="trend-point-card" style="border-color: #F44336;">
+                        <div class="trend-point-header">
+                            <div class="trend-point-title">${user.userName || '未知用户'}</div>
+                            <div class="trend-point-icon" style="color: #F44336;"><i class="fas fa-exclamation-triangle"></i></div>
+                        </div>
+                        <div class="trend-point-stats">
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #F44336;">${user.resetCount || 0}</div>
+                                <div class="trend-stat-label">重置次数</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value">${user.userId || '未知'}</div>
+                                <div class="trend-stat-label">用户ID</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
         }
         
         // 查询登录趋势统计数据
