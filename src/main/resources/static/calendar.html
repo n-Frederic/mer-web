@@ -635,6 +635,34 @@
                         <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
                     </div>
                 </div>
+
+                <!-- 任务统计 -->
+                <div style="margin-top: 24px;">
+                    <h3 style="margin: 0 0 20px 0; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 24px; border-bottom: 3px solid #ffd3a1; padding-bottom: 12px;">
+                        <i class="fas fa-chart-bar"></i> 任务统计
+                    </h3>
+                    
+                    <!-- 查询表单 -->
+                    <div class="trend-query-form">
+                        <div class="trend-query-row">
+                            <div class="trend-query-item">
+                                <label class="trend-query-label">开始日期</label>
+                                <input type="date" id="taskStartDate" class="trend-query-input">
+                            </div>
+                            <div class="trend-query-item">
+                                <label class="trend-query-label">结束日期</label>
+                                <input type="date" id="taskEndDate" class="trend-query-input">
+                            </div>
+                            <button id="taskQueryBtn" class="trend-query-btn" onclick="queryTaskStatistic()">
+                                <i class="fas fa-search"></i> 查询
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="taskStatisticContainer">
+                        <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -727,7 +755,183 @@
             
             // 检测任务统计接口是否有效
             await checkTaskStatisticApi();
+            
+            // 初始化任务统计日期范围（最近7天）
+            initTaskStatisticDates();
+            
+            // 加载任务统计（默认查询）
+            await queryTaskStatistic();
         });
+        
+        // 初始化任务统计日期范围
+        function initTaskStatisticDates() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 6); // 7天前
+            
+            const startDateStr = startDate.toISOString().split('T')[0];
+            const endDateStr = endDate.toISOString().split('T')[0];
+            
+            document.getElementById('taskStartDate').value = startDateStr;
+            document.getElementById('taskEndDate').value = endDateStr;
+        }
+        
+        // 查询任务统计数据
+        async function queryTaskStatistic() {
+            console.log('========================================');
+            console.log('开始查询任务统计数据...');
+            console.log('========================================');
+            
+            const container = document.getElementById('taskStatisticContainer');
+            const queryBtn = document.getElementById('taskQueryBtn');
+            
+            // 获取查询参数
+            const startDate = document.getElementById('taskStartDate').value;
+            const endDate = document.getElementById('taskEndDate').value;
+            
+            // 验证参数
+            if (!startDate || !endDate) {
+                alert('请选择开始日期和结束日期');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('开始日期不能晚于结束日期');
+                return;
+            }
+            
+            // 显示加载状态
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>';
+            
+            // 禁用查询按钮
+            if (queryBtn) {
+                queryBtn.disabled = true;
+                queryBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 查询中...';
+            }
+            
+            try {
+                console.log('请求参数:', { startDate, endDate });
+                console.log('请求URL:', window.APP.apiBase + '/api/tasks/statistic?startDate=' + startDate + '&endDate=' + endDate);
+                
+                const response = await window.API.getTaskStatistic(startDate, endDate);
+                
+                console.log('========================================');
+                console.log('✅ 任务统计接口调用成功！');
+                console.log('========================================');
+                console.log('响应数据:', response);
+                
+                // 渲染数据到页面
+                renderTaskStatistic(response);
+                
+                console.log('========================================');
+                console.log('任务统计数据查询完成');
+                console.log('========================================');
+                
+            } catch (error) {
+                console.log('========================================');
+                console.log('❌ 任务统计接口调用失败！');
+                console.log('========================================');
+                console.error('错误信息:', error.message);
+                console.error('错误详情:', error);
+                console.log('========================================');
+                console.log('可能的原因:');
+                console.log('1. 后端服务未启动或端口不正确');
+                console.log('2. 接口路径不正确');
+                console.log('3. 认证token无效或已过期');
+                console.log('4. 网络连接问题');
+                console.log('========================================');
+                
+                // 显示错误信息
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>查询失败: ${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                // 恢复查询按钮
+                if (queryBtn) {
+                    queryBtn.disabled = false;
+                    queryBtn.innerHTML = '<i class="fas fa-search"></i> 查询';
+                }
+            }
+        }
+        
+        // 渲染任务统计
+        function renderTaskStatistic(data) {
+            const container = document.getElementById('taskStatisticContainer');
+            
+            if (!data || !data.daily || data.daily.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-bar"></i>
+                        <p>暂无任务统计数据</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 渲染数据点
+            let html = `
+                <div class="trend-info" style="margin-bottom: 20px;">
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计开始日期</div>
+                        <div class="trend-info-value">${data.startDate || '未知'}</div>
+                    </div>
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计结束日期</div>
+                        <div class="trend-info-value">${data.endDate || '未知'}</div>
+                    </div>
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计天数</div>
+                        <div class="trend-info-value">${data.daily.length} 天</div>
+                    </div>
+                </div>
+                
+                <div class="trend-points">
+            `;
+            
+            // 渲染每一天的数据
+            data.daily.forEach((dayData, index) => {
+                html += `
+                    <div class="trend-point-card">
+                        <div class="trend-point-header">
+                            <div class="trend-point-title">${dayData.date || '未知日期'}</div>
+                            <div class="trend-point-icon"><i class="fas fa-calendar-alt"></i></div>
+                        </div>
+                        <div class="trend-point-stats">
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value">${dayData.taskCreateCount || 0}</div>
+                                <div class="trend-stat-label">创建任务数</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value">${dayData.taskCreateUserCount || 0}</div>
+                                <div class="trend-stat-label">创建任务用户</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value">${dayData.reportCreateCount || 0}</div>
+                                <div class="trend-stat-label">创建报告数</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value">${dayData.reportCreateUserCount || 0}</div>
+                                <div class="trend-stat-label">创建报告用户</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #ff8a00;">${dayData.progressOver50Count || 0}</div>
+                                <div class="trend-stat-label">进度>50%</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #4CAF50;">${dayData.progressOver100Count || 0}</div>
+                                <div class="trend-stat-label">进度>100%</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
         
         // 检测任务统计接口是否有效
         async function checkTaskStatisticApi() {
