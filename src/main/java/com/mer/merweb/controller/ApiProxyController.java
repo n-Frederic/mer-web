@@ -977,4 +977,43 @@ public class ApiProxyController {
                     .body(Map.of("code", 500, "message", "删除评论失败: " + e.getMessage()));
         }
     }
+
+    // ==================== 登录统计相关API ====================
+    
+    /**
+     * 获取登录趋势统计
+     * GET /api/login/statistic
+     */
+    @GetMapping("/login/statistic")
+    public ResponseEntity<?> getLoginTrend(
+            @RequestParam String timeUnit,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            String url = backendUrl + "/login/statistic?timeUnit=" + timeUnit +
+                          "&startDate=" + startDate + "&endDate=" + endDate;
+            
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null && !authorization.isEmpty()) {
+                headers.set("Authorization", authorization);
+            }
+            
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+            
+            ResponseEntity<Map> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                request,
+                Map.class
+            );
+            
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", true, "message", "获取登录趋势统计失败: " + e.getMessage()));
+        }
+    }
 }

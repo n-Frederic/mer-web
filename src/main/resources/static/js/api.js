@@ -2136,6 +2136,28 @@
         throw error;
       });
     },
+
+    // ==================== 登录统计相关API ====================
+    
+    // 获取登录趋势统计
+    getLoginTrend: function(timeUnit, startDate, endDate) {
+      console.log('获取登录趋势统计:', { timeUnit: timeUnit, startDate: startDate, endDate: endDate });
+      
+      // 构建查询参数
+      var url = base + '/api/login/statistic?timeUnit=' + encodeURIComponent(timeUnit) +
+                '&startDate=' + encodeURIComponent(startDate) +
+                '&endDate=' + encodeURIComponent(endDate);
+      
+      console.log('请求URL:', url);
+      
+      return http('GET', url).then(function(res) {
+        console.log('登录趋势统计响应:', res);
+        return res;
+      }).catch(function(error) {
+        console.error('获取登录趋势统计失败:', error);
+        throw error;
+      });
+    },
     
   };
 })();
