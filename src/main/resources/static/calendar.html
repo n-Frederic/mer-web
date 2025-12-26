@@ -802,13 +802,9 @@
         
         // 初始化任务统计日期范围
         function initTaskStatisticDates() {
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 6); // 7天前
-            
-            const startDateStr = startDate.toISOString().split('T')[0];
-            const endDateStr = endDate.toISOString().split('T')[0];
-            
+            const startDateStr = "2024-10-25";
+            const endDateStr = "2024-10-31";
+
             document.getElementById('taskStartDate').value = startDateStr;
             document.getElementById('taskEndDate').value = endDateStr;
         }
@@ -1033,13 +1029,9 @@
         
         // 初始化日志和评论统计日期范围
         function initLogCommentStatisticDates() {
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() - 6); // 7天前
-            
-            const startDateStr = startDate.toISOString().split('T')[0];
-            const endDateStr = endDate.toISOString().split('T')[0];
-            
+            const startDateStr = "2024-10-25";
+            const endDateStr = "2024-10-31";
+
             document.getElementById('logCommentStartDate').value = startDateStr;
             document.getElementById('logCommentEndDate').value = endDateStr;
         }
