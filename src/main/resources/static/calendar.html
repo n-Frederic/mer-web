@@ -663,6 +663,34 @@
                         <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
                     </div>
                 </div>
+
+                <!-- 日志和评论统计 -->
+                <div style="margin-top: 24px;">
+                    <h3 style="margin: 0 0 20px 0; color: #a55b00; font-family: 'ZCOOL KuaiLe', 'Noto Sans SC', sans-serif; font-size: 24px; border-bottom: 3px solid #ffd3a1; padding-bottom: 12px;">
+                        <i class="fas fa-chart-bar"></i> 日志和评论统计
+                    </h3>
+                    
+                    <!-- 查询表单 -->
+                    <div class="trend-query-form">
+                        <div class="trend-query-row">
+                            <div class="trend-query-item">
+                                <label class="trend-query-label">开始日期</label>
+                                <input type="date" id="logCommentStartDate" class="trend-query-input">
+                            </div>
+                            <div class="trend-query-item">
+                                <label class="trend-query-label">结束日期</label>
+                                <input type="date" id="logCommentEndDate" class="trend-query-input">
+                            </div>
+                            <button id="logCommentQueryBtn" class="trend-query-btn" onclick="queryLogCommentStatistic()">
+                                <i class="fas fa-search"></i> 查询
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div id="logCommentStatisticContainer">
+                        <div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -761,6 +789,15 @@
             
             // 加载任务统计（默认查询）
             await queryTaskStatistic();
+            
+            // 初始化日志和评论统计日期范围（最近7天）
+            initLogCommentStatisticDates();
+            
+            // 检测日志和评论统计接口是否有效
+            await checkLogCommentStatisticApi();
+            
+            // 加载日志和评论统计（默认查询）
+            await queryLogCommentStatistic();
         });
         
         // 初始化任务统计日期范围
@@ -987,6 +1024,229 @@
                 console.log('可能的原因:');
                 console.log('1. 后端服务未启动或端口不正确');
                 console.log('2. 接口路径不正确: /api/tasks/statistic');
+                console.log('3. 认证token无效或已过期');
+                console.log('4. 网络连接问题');
+                console.log('5. 后端接口实现有问题');
+                console.log('========================================');
+            }
+        }
+        
+        // 初始化日志和评论统计日期范围
+        function initLogCommentStatisticDates() {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - 6); // 7天前
+            
+            const startDateStr = startDate.toISOString().split('T')[0];
+            const endDateStr = endDate.toISOString().split('T')[0];
+            
+            document.getElementById('logCommentStartDate').value = startDateStr;
+            document.getElementById('logCommentEndDate').value = endDateStr;
+        }
+        
+        // 查询日志和评论统计数据
+        async function queryLogCommentStatistic() {
+            console.log('========================================');
+            console.log('开始查询日志和评论统计数据...');
+            console.log('========================================');
+            
+            const container = document.getElementById('logCommentStatisticContainer');
+            const queryBtn = document.getElementById('logCommentQueryBtn');
+            
+            // 获取查询参数
+            const startDate = document.getElementById('logCommentStartDate').value;
+            const endDate = document.getElementById('logCommentEndDate').value;
+            
+            // 验证参数
+            if (!startDate || !endDate) {
+                alert('请选择开始日期和结束日期');
+                return;
+            }
+            
+            if (new Date(startDate) > new Date(endDate)) {
+                alert('开始日期不能晚于结束日期');
+                return;
+            }
+            
+            // 显示加载状态
+            container.innerHTML = '<div class="loading"><i class="fas fa-spinner"></i> 加载中...</div>';
+            
+            // 禁用查询按钮
+            if (queryBtn) {
+                queryBtn.disabled = true;
+                queryBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 查询中...';
+            }
+            
+            try {
+                console.log('请求参数:', { startDate, endDate });
+                console.log('请求URL:', window.APP.apiBase + '/api/journals/statistic?startDate=' + startDate + '&endDate=' + endDate);
+                
+                const response = await window.API.getLogCommentStatistic(startDate, endDate);
+                
+                console.log('========================================');
+                console.log('✅ 日志和评论统计接口调用成功！');
+                console.log('========================================');
+                console.log('响应数据:', response);
+                
+                // 渲染数据到页面
+                renderLogCommentStatistic(response);
+                
+                console.log('========================================');
+                console.log('日志和评论统计数据查询完成');
+                console.log('========================================');
+                
+            } catch (error) {
+                console.log('========================================');
+                console.log('❌ 日志和评论统计接口调用失败！');
+                console.log('========================================');
+                console.error('错误信息:', error.message);
+                console.error('错误详情:', error);
+                console.log('========================================');
+                console.log('可能的原因:');
+                console.log('1. 后端服务未启动或端口不正确');
+                console.log('2. 接口路径不正确');
+                console.log('3. 认证token无效或已过期');
+                console.log('4. 网络连接问题');
+                console.log('========================================');
+                
+                // 显示错误信息
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>查询失败: ${error.message}</p>
+                    </div>
+                `;
+            } finally {
+                // 恢复查询按钮
+                if (queryBtn) {
+                    queryBtn.disabled = false;
+                    queryBtn.innerHTML = '<i class="fas fa-search"></i> 查询';
+                }
+            }
+        }
+        
+        // 渲染日志和评论统计
+        function renderLogCommentStatistic(data) {
+            const container = document.getElementById('logCommentStatisticContainer');
+            
+            if (!data || !data.daily || data.daily.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-chart-bar"></i>
+                        <p>暂无日志和评论统计数据</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // 渲染数据点
+            let html = `
+                <div class="trend-info" style="margin-bottom: 20px;">
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计开始日期</div>
+                        <div class="trend-info-value">${data.startDate || '未知'}</div>
+                    </div>
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计结束日期</div>
+                        <div class="trend-info-value">${data.endDate || '未知'}</div>
+                    </div>
+                    <div class="trend-info-item">
+                        <div class="trend-info-label">统计天数</div>
+                        <div class="trend-info-value">${data.daily.length} 天</div>
+                    </div>
+                </div>
+                
+                <div class="trend-points">
+            `;
+            
+            // 渲染每一天的数据
+            data.daily.forEach((dayData, index) => {
+                html += `
+                    <div class="trend-point-card">
+                        <div class="trend-point-header">
+                            <div class="trend-point-title">${dayData.date || '未知日期'}</div>
+                            <div class="trend-point-icon"><i class="fas fa-calendar-alt"></i></div>
+                        </div>
+                        <div class="trend-point-stats">
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #4CAF50;">${dayData.logCreateCount || 0}</div>
+                                <div class="trend-stat-label">创建日志数</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #2196F3;">${dayData.logCreateUserCount || 0}</div>
+                                <div class="trend-stat-label">创建日志用户</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #FF9800;">${dayData.commentCreateCount || 0}</div>
+                                <div class="trend-stat-label">创建评论数</div>
+                            </div>
+                            <div class="trend-stat-item">
+                                <div class="trend-stat-value" style="color: #9C27B0;">${dayData.commentCreateUserCount || 0}</div>
+                                <div class="trend-stat-label">创建评论用户</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        
+        // 检测日志和评论统计接口是否有效
+        async function checkLogCommentStatisticApi() {
+            console.log('========================================');
+            console.log('开始检测日志和评论统计接口是否有效...');
+            console.log('========================================');
+            
+            try {
+                // 使用默认日期范围：最近7天
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - 6); // 7天前
+                
+                const startDateStr = startDate.toISOString().split('T')[0];
+                const endDateStr = endDate.toISOString().split('T')[0];
+                
+                console.log('使用日期范围:', { startDate: startDateStr, endDate: endDateStr });
+                
+                // 调用日志和评论统计接口
+                const result = await window.API.getLogCommentStatistic(startDateStr, endDateStr);
+                
+                console.log('========================================');
+                console.log('✅ 日志和评论统计接口检测成功！');
+                console.log('========================================');
+                console.log('接口返回结果:', result);
+                console.log('========================================');
+                
+                // 验证返回数据结构
+                if (result && result.startDate && result.endDate && Array.isArray(result.daily)) {
+                    console.log('✅ 数据结构验证通过');
+                    console.log('- 统计开始日期:', result.startDate);
+                    console.log('- 统计结束日期:', result.endDate);
+                    console.log('- 每日数据条数:', result.daily.length);
+                    
+                    if (result.daily.length > 0) {
+                        console.log('- 第一条数据示例:', result.daily[0]);
+                    }
+                } else {
+                    console.warn('⚠ 数据结构验证失败，返回数据不符合预期格式');
+                }
+                
+                console.log('========================================');
+                console.log('日志和评论统计接口检测完成，接口正常工作');
+                console.log('========================================');
+                
+            } catch (error) {
+                console.log('========================================');
+                console.log('❌ 日志和评论统计接口检测失败！');
+                console.log('========================================');
+                console.error('错误信息:', error.message);
+                console.error('错误详情:', error);
+                console.log('========================================');
+                console.log('可能的原因:');
+                console.log('1. 后端服务未启动或端口不正确');
+                console.log('2. 接口路径不正确: /api/journals/statistic');
                 console.log('3. 认证token无效或已过期');
                 console.log('4. 网络连接问题');
                 console.log('5. 后端接口实现有问题');

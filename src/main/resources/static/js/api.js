@@ -2254,8 +2254,60 @@
         throw error;
       });
     },
+
+    // ==================== 日志和评论统计相关API ====================
+    
+    // 获取日志和评论每日统计数据
+    getLogCommentStatistic: function(startDate, endDate) {
+      console.log('========================================');
+      console.log('开始调用日志和评论统计接口...');
+      console.log('========================================');
+      console.log('请求参数:', { startDate: startDate, endDate: endDate });
+      
+      var url = base + '/api/journals/statistic?startDate=' + encodeURIComponent(startDate) +
+                '&endDate=' + encodeURIComponent(endDate);
+      console.log('请求URL:', url);
+      console.log('说明：此请求将通过前端代理转发到 http://127.0.0.1:8080/api/journals/statistic');
+      
+      return http('GET', url).then(function(res) {
+        console.log('========================================');
+        console.log('✅ 日志和评论统计接口调用成功！');
+        console.log('========================================');
+        console.log('响应数据:', res);
+        console.log('========================================');
+        
+        // 验证返回数据格式
+        if (res && res.startDate && res.endDate && Array.isArray(res.daily)) {
+          console.log('✅ 数据格式验证通过');
+          console.log('统计开始日期:', res.startDate);
+          console.log('统计结束日期:', res.endDate);
+          console.log('每日数据条数:', res.daily.length);
+          
+          if (res.daily.length > 0) {
+            console.log('- 第一条数据示例:', res.daily[0]);
+          }
+        } else {
+          console.warn('⚠ 数据格式可能不符合预期');
+        }
+        
+        return res;
+      }).catch(function(error) {
+        console.log('========================================');
+        console.log('❌ 日志和评论统计接口调用失败！');
+        console.log('========================================');
+        console.error('错误信息:', error.message);
+        console.error('错误详情:', error);
+        console.log('========================================');
+        console.log('可能的原因:');
+        console.log('1. 后端服务未启动或端口不正确');
+        console.log('2. 接口路径不正确: /api/journals/statistic');
+        console.log('3. 认证token无效或已过期');
+        console.log('4. 网络连接问题');
+        console.log('========================================');
+        throw error;
+      });
+    },
     
   };
 })();
-
 
