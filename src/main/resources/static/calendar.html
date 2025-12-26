@@ -707,7 +707,43 @@
              
             // 添加编辑按钮事件监听
             document.getElementById('editImportantTasksBtn').addEventListener('click', openEditImportantTasksModal);
+            
+            // 测试密码重置统计接口
+            await testResetPasswordStatistic();
         });
+        
+        // 测试密码重置统计接口
+        async function testResetPasswordStatistic() {
+            console.log('========================================');
+            console.log('开始测试密码重置统计接口...');
+            console.log('========================================');
+            
+            try {
+                const result = await window.API.getResetPasswordStatistic();
+                
+                console.log('========================================');
+                console.log('✅ 密码重置统计接口测试完成！');
+                console.log('========================================');
+                console.log('接口返回结果:', result);
+                
+                if (result && result.totalUsers > 0) {
+                    console.log('⚠ 发现异常用户！');
+                    console.log('异常用户数量:', result.totalUsers);
+                    console.log('异常用户详情:', result.users);
+                } else {
+                    console.log('✅ 今日无异常用户');
+                }
+                
+                console.log('========================================');
+                
+            } catch (error) {
+                console.log('========================================');
+                console.log('❌ 密码重置统计接口测试失败！');
+                console.log('========================================');
+                console.error('错误信息:', error.message);
+                console.log('========================================');
+            }
+        }
         
         // 查询登录趋势统计数据
         async function queryLoginTrend() {

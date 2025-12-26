@@ -1016,4 +1016,34 @@ public class ApiProxyController {
                     .body(Map.of("error", true, "message", "获取登录趋势统计失败: " + e.getMessage()));
         }
     }
+
+    /**
+     * 获取密码重置统计
+     * GET /api/user/statistic
+     */
+    @GetMapping("/user/statistic")
+    public ResponseEntity<?> getResetPasswordStatistic(
+            @RequestHeader(value = "Authorization", required = false) String authorization) {
+        try {
+            // 创建请求头并添加 Authorization
+            HttpHeaders headers = new HttpHeaders();
+            if (authorization != null && !authorization.isEmpty()) {
+                headers.set("Authorization", authorization);
+            }
+
+            HttpEntity<Void> request = new HttpEntity<>(headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(
+                    backendUrl + "/user/statistic",
+                    HttpMethod.GET,
+                    request,
+                    Map.class
+            );
+
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", true, "message", "获取密码重置统计失败: " + e.getMessage()));
+        }
+    }
 }
